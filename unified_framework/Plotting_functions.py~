@@ -10,7 +10,7 @@ from matplotlib.collections import PatchCollection
 import mpl_toolkits.mplot3d.art3d as art3d
 import colorsys
 
-Dir = '/home/omari/Python/language/Simultaneous_learning_and_ground/images2/'
+Dir = '/home/omari/Desktop/Python/language/Simultaneous_learning_and_ground/images2/'
 #-------------------------------------------------------------------------------------#
 def Plotting_dis_hypotheses(hyp,ax_SPA):
 

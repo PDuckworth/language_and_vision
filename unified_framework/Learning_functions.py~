@@ -293,7 +293,7 @@ def Update_SPA_points(o_qsr,POINTS):
 	A = o_qsr['obj_number']
 	for p in range(A-1):
 		for k in range(p+1,A):
-			d = o_qsr[str(p)+'-'+str(k)+'-dis']/700
+			d = o_qsr[str(p)+'-'+str(k)+'-dis']/700.0
 			a = o_qsr[str(p)+'-'+str(k)+'-ang']*180/np.pi
 			xs,ys,zs = HSV_to_XYZ(a, d, 0.5)		# in this case Z is always to zero
 			x = int(xs[0]*100+100)
