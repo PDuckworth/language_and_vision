@@ -12,6 +12,8 @@ from QSR_functions import *
 from Learning_functions import *
 from Plotting_functions import *
 
+import pickle
+
 Dir = '/home/omari/Desktop/Python/language/Simultaneous_learning_and_ground/images/'
 
 #============================== Constants ======================================#
@@ -127,6 +129,8 @@ if __name__ == "__main__":
 			cv2.imwrite(Dir+'Scene'+'-'+str(i+1)+'.png',img)
 			cv2.imshow('Table',img)
 			k = cv2.waitKey(time) & 0xFF
+
+
 
 
 

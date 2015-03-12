@@ -12,6 +12,8 @@ from QSR_functions import *
 from Learning_functions import *
 from Plotting_functions import *
 
+import pickle
+
 Dir = '/home/omari/Desktop/Python/language/Simultaneous_learning_and_ground/images/'
 
 #============================== Constants ======================================#
@@ -124,9 +126,21 @@ if __name__ == "__main__":
 				Plotting_dir_hypotheses(hyp,ax_DIR)
 				Plotting(POINTS_SPA,ax_DIR,90,6,85,'Direction',i)
 
+
+				data1 = {}
+				data1['HSV'] = POINTS_HSV
+				data1['SPA'] = POINTS_SPA
+				data1['hyp'] = hyp
+				output = open('/home/omari/data1.pkl', 'wb')
+				print ' - saving data..'
+				pickle.dump(data1, output)
+				print ' - data saved..'
+
 			cv2.imwrite(Dir+'Scene'+'-'+str(i+1)+'.png',img)
 			cv2.imshow('Table',img)
 			k = cv2.waitKey(time) & 0xFF
+
+
 
 
 
