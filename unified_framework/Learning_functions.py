@@ -356,6 +356,9 @@ def Update_HSV_histogram(hyp,o_color,POINTS):
 			z = int(zs[0]*100)
 			if (x,y,z) in hyp['hyp'][j]['hist_HSV']:
 				hyp['hyp'][j]['hist_HSV'][(x,y,z)] += 1
+				hyp['hyp'][j]['hist_HSV_x'].append(x)
+				hyp['hyp'][j]['hist_HSV_y'].append(y)
+				hyp['hyp'][j]['hist_HSV_z'].append(z)
 			else:
 				hyp['hyp'][j]['hist_HSV'][(x,y,z)] = 1
 				hyp['hyp'][j]['hist_HSV_x'].append(x)
@@ -365,6 +368,26 @@ def Update_HSV_histogram(hyp,o_color,POINTS):
 			R,G,B = HSV_to_RGB(H,S,V)
 			POINTS.append([xs,ys,zs,R,G,B])
 	return hyp,POINTS
+
+#-------------------------------------------------------------------------------------#
+def Update_HSV_Points(hyp,o_color,i):
+	for j in hyp['words']:
+		hyp['hyp'][j]['point_HSV_x'][i] = []
+		hyp['hyp'][j]['point_HSV_y'][i] = []
+		hyp['hyp'][j]['point_HSV_z'][i] = []
+		for p in range(len(o_color['H'])):
+			H = o_color['H'][p]
+			S = o_color['S'][p]
+			V = o_color['V'][p]
+			xs,ys,zs = HSV_to_XYZ(H, S, V)
+			x = int(xs[0]*100+100)
+			y = int(ys[0]*100+100)
+			z = int(zs[0]*100)
+			hyp['hyp'][j]['point_HSV_x'][i].append(x)
+			hyp['hyp'][j]['point_HSV_y'][i].append(y)
+			hyp['hyp'][j]['point_HSV_z'][i].append(z)
+	return hyp
+
 
 #-------------------------------------------------------------------------------------#
 def Compute_HSV_hypotheses(hyp):
@@ -448,6 +471,9 @@ def sentence_parsing(hyp,sentence):
 			hyp['hyp'][j]['hist_HSV_x'] = []
 			hyp['hyp'][j]['hist_HSV_y'] = []
 			hyp['hyp'][j]['hist_HSV_z'] = []
+			hyp['hyp'][j]['point_HSV_x'] = {}
+			hyp['hyp'][j]['point_HSV_y'] = {}
+			hyp['hyp'][j]['point_HSV_z'] = {}
 			hyp['hyp'][j]['score_HSV'] = {}
 			hyp['hyp'][j]['score_HSV_x'] = []
 			hyp['hyp'][j]['score_HSV_y'] = []

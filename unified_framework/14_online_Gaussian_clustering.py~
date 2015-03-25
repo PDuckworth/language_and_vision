@@ -20,7 +20,7 @@ Dir = '/home/omari/Python/language/Simultaneous_learning_and_ground/images/'
 
 
 tests = 1			# for monte carlo test
-n_examples = 1000		# number of examples in each test
+n_examples = 1500		# number of examples in each test
 plotting = 1			# choose to plot graphs or not
 time = 1			# time to view each example
 object_number_max = 4		# maximum number of objects allowed in one scene
@@ -90,13 +90,14 @@ if __name__ == "__main__":
 			# Learning start here:
 			hyp = sentence_parsing(hyp,sentence)					# create a ser of words and increament the counter
 			hyp,POINTS_HSV = Update_HSV_histogram(hyp,o_color,POINTS_HSV)		# update the histogram of HSV
-			Update_world_graph(o_color,o_qsr,f_world)				# update the world features graph
+			hyp = Update_HSV_Points(hyp,o_color,i)		# update the histogram of HSV
+			#Update_world_graph(o_color,o_qsr,f_world)				# update the world features graph
 
-			hyp = Test_HSV_Hypotheses(hyp,o_color,sentence)				# check to see if objects match any of the hypotheses
+			#hyp = Test_HSV_Hypotheses(hyp,o_color,sentence)				# check to see if objects match any of the hypotheses
 
-			if hyp['objects_hyp'][0] != []:
+			#if hyp['objects_hyp'][0] != []:
 				#print '========================'
-				POINTS_SPA = Update_SPA_points(o_qsr,POINTS_SPA)		# update the histogram of SPA
+				#POINTS_SPA = Update_SPA_points(o_qsr,POINTS_SPA)		# update the histogram of SPA
 
 #===========##============##===========$$============##===========##==============#	WITHOUT CK
 				#hyp = Update_dis_histogram(hyp,o_qsr)		# update the histogram of distance WITHOUT CK
@@ -104,26 +105,26 @@ if __name__ == "__main__":
 
 
 #===========##============##===========$$============##===========##==============#	WITH CK
-				hyp = Update_dis_histogram_use_CK(hyp,o_qsr,sentence)		# update the histogram of distance
-				hyp = Update_dir_histogram_use_CK(hyp,o_qsr,sentence)		# update the histogram of angle
+				#hyp = Update_dis_histogram_use_CK(hyp,o_qsr,sentence)		# update the histogram of distance
+				#hyp = Update_dir_histogram_use_CK(hyp,o_qsr,sentence)		# update the histogram of angle
 
 				#print '========================'
 			
-			if (i+1)%display_frame == 0:
-				hyp = Compute_HSV_hypotheses(hyp)		# Compute HSV hypotheses
+			#if (i+1)%display_frame == 0:
+				#hyp = Compute_HSV_hypotheses(hyp)		# Compute HSV hypotheses
 				#hyp = Compute_SPA_hypotheses(hyp)		# Compute SPA hypotheses
 
-				hyp = Compute_dis_hypotheses(hyp)		# Compute dis hypotheses 
-				hyp = Compute_dir_hypotheses(hyp)		# Compute ang hypotheses
+				#hyp = Compute_dis_hypotheses(hyp)		# Compute dis hypotheses 
+				#hyp = Compute_dir_hypotheses(hyp)		# Compute ang hypotheses
 
-				Plotting_HSV_hypotheses(hyp,ax_HSV)
-				#Plotting(POINTS_HSV,ax_HSV,90,4,25,'HSV',i)
+				#Plotting_HSV_hypotheses(hyp,ax_HSV)
+				#Plotting(POINTS_HSV,ax_HSV,180,4,25,'HSV',i)
 
 				#Plotting_SPA_hypotheses(hyp,ax_SPA)
-				Plotting_dis_hypotheses(hyp,ax_DIS)
+				#Plotting_dis_hypotheses(hyp,ax_DIS)
 				#Plotting(POINTS_SPA,ax_DIS,90,5,85,'Distance',i)
 
-				Plotting_dir_hypotheses(hyp,ax_DIR)
+				#Plotting_dir_hypotheses(hyp,ax_DIR)
 				#Plotting(POINTS_SPA,ax_DIR,90,6,85,'Direction',i)
 
 
@@ -137,7 +138,7 @@ if __name__ == "__main__":
 		data1['HSV'] = POINTS_HSV
 		data1['SPA'] = POINTS_SPA
 		data1['hyp'] = hyp
-		output = open('/home/omari/data1.pkl', 'wb')
+		output = open('/home/omari/'+str(n_examples)+'.pkl', 'wb')
 		print ' - saving data..'
 		pickle.dump(data1, output)
 		print ' - data saved..'

@@ -14,13 +14,13 @@ from Plotting_functions import *
 
 import pickle
 
-Dir = '/home/omari/Desktop/Python/language/Simultaneous_learning_and_ground/images/'
+Dir = '/home/omari/Python/language/Simultaneous_learning_and_ground/images/'
 
 #============================== Constants ======================================#
 
 
 tests = 1			# for monte carlo test
-n_examples = 2000			# number of examples in each test
+n_examples = 1000		# number of examples in each test
 plotting = 1			# choose to plot graphs or not
 time = 1			# time to view each example
 object_number_max = 4		# maximum number of objects allowed in one scene
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 			o_qsr = object_qsr(o_loc)
 			sentence = scene_descreption(o_loc,o_color,o_qsr)
 			print sentence
-			print '-----------------------------------'
+			print '----------------------------------- ',i
 
 			cv2.imshow('Table',img)
 			k = cv2.waitKey(1) & 0xFF
@@ -116,19 +116,31 @@ if __name__ == "__main__":
 				hyp = Compute_dis_hypotheses(hyp)		# Compute dis hypotheses 
 				hyp = Compute_dir_hypotheses(hyp)		# Compute ang hypotheses
 
-				Plotting_HSV_hypotheses(hyp,ax_HSV)
-				Plotting(POINTS_HSV,ax_HSV,90,4,25,'HSV',i)
+				#Plotting_HSV_hypotheses(hyp,ax_HSV)
+				#Plotting(POINTS_HSV,ax_HSV,90,4,25,'HSV',i)
 
 				#Plotting_SPA_hypotheses(hyp,ax_SPA)
-				Plotting_dis_hypotheses(hyp,ax_DIS)
-				Plotting(POINTS_SPA,ax_DIS,90,5,85,'Distance',i)
+				#Plotting_dis_hypotheses(hyp,ax_DIS)
+				#Plotting(POINTS_SPA,ax_DIS,90,5,85,'Distance',i)
 
-				Plotting_dir_hypotheses(hyp,ax_DIR)
-				Plotting(POINTS_SPA,ax_DIR,90,6,85,'Direction',i)
+				#Plotting_dir_hypotheses(hyp,ax_DIR)
+				#Plotting(POINTS_SPA,ax_DIR,90,6,85,'Direction',i)
+
+
+
 
 			cv2.imwrite(Dir+'Scene'+'-'+str(i+1)+'.png',img)
 			cv2.imshow('Table',img)
 			k = cv2.waitKey(time) & 0xFF
+
+		data1 = {}
+		data1['HSV'] = POINTS_HSV
+		data1['SPA'] = POINTS_SPA
+		data1['hyp'] = hyp
+		output = open('/home/omari/data1.pkl', 'wb')
+		print ' - saving data..'
+		pickle.dump(data1, output)
+		print ' - data saved..'
 
 
 
