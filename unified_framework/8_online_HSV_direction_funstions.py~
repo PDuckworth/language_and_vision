@@ -14,18 +14,18 @@ from Plotting_functions import *
 
 import pickle
 
-Dir = '/home/omari/Python/language/Simultaneous_learning_and_ground/images/'
+Dir = '/home/omari/Python/Python_images/language_and_vision/images/'
 
 #============================== Constants ======================================#
 
 
 tests = 1			# for monte carlo test
-n_examples = 1000		# number of examples in each test
+n_examples = 251		# number of examples in each test
 plotting = 1			# choose to plot graphs or not
 time = 1			# time to view each example
 object_number_max = 4		# maximum number of objects allowed in one scene
 
-display_frame = 30		# number of examples to update the robot brain
+display_frame = 5		# number of examples to update the robot brain
 rotation_inc = 30		# rotation increament for the robot brain view
 
 
@@ -72,7 +72,6 @@ if __name__ == "__main__":
 	hyp = {}		# the robot hypotheses
 	hyp['hyp'] = {}
 	hyp['valid_HSV_hyp'] = []
-
 	for test in range(tests):
 
 	#========================== MAIN LOOP ====================================#
@@ -116,15 +115,15 @@ if __name__ == "__main__":
 				hyp = Compute_dis_hypotheses(hyp)		# Compute dis hypotheses 
 				hyp = Compute_dir_hypotheses(hyp)		# Compute ang hypotheses
 
-				#Plotting_HSV_hypotheses(hyp,ax_HSV)
-				#Plotting(POINTS_HSV,ax_HSV,90,4,25,'HSV',i)
+				Plotting_HSV_hypotheses(hyp,ax_HSV,i)
+				Plotting(POINTS_HSV,ax_HSV,-45,4,35,'HSV',i)
 
 				#Plotting_SPA_hypotheses(hyp,ax_SPA)
-				#Plotting_dis_hypotheses(hyp,ax_DIS)
-				#Plotting(POINTS_SPA,ax_DIS,90,5,85,'Distance',i)
+				Plotting_dis_hypotheses(hyp,ax_DIS,i)
+				Plotting(POINTS_SPA,ax_DIS,135,5,65,'Distance',i)
 
-				#Plotting_dir_hypotheses(hyp,ax_DIR)
-				#Plotting(POINTS_SPA,ax_DIR,90,6,85,'Direction',i)
+				Plotting_dir_hypotheses(hyp,ax_DIR,i)
+				Plotting(POINTS_SPA,ax_DIR,135,6,65,'Direction',i)
 
 
 
@@ -132,6 +131,9 @@ if __name__ == "__main__":
 			cv2.imwrite(Dir+'Scene'+'-'+str(i+1)+'.png',img)
 			cv2.imshow('Table',img)
 			k = cv2.waitKey(time) & 0xFF
+			if 'valid_dis_hyp' in hyp:
+			    for hh in hyp['valid_dis_hyp']:
+				    print hh,hyp['hyp'][hh]['counter_dis']
 
 		data1 = {}
 		data1['HSV'] = POINTS_HSV

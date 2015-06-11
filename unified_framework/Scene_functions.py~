@@ -82,7 +82,6 @@ def scene_gnerator(object_number_max):
 	for j in range(1,obj_number):
 		while 1:
 			num = int(np.random.rand(1)*color_number_max)
-			print 'this is num',num
 			HSV,color1,name1 = colourr(num)
 			if name1 not in object_colors_names:
 				break
