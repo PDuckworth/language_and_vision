@@ -44,7 +44,7 @@ class qsr():
         self.world = World_Trace()
         ob_states = {}
         # adding robot states
-        t = 1
+        t = 1.0
         for frame in robot:
             if frame%1==0:
                 # Right arm
@@ -92,18 +92,19 @@ class qsr():
                 t+=1
 
         # for obj in ob_states:
-        #     self.world.add_object_state_series(ob_states[obj])
+        self.world.add_object_state_series(ob_states['obj_0'])
         self.world.add_object_state_series(ob_states['Right_Gripper'])
         ob_states = {}
 
 
 
-    def test(self):
+    def motion_qsr(self):
         # ****************************************************************************************************
         # dynammic_args = {'argd': {"qsr_relations_and_values" : {"Touch": 0.5, "Near": 6, "Far": 10}}}
         # make a QSRlib request message
-        # dynammic_args = {"qtcbs": {"no_collapse": True, "quantisation_factor":.001, "validate":False, "qsrs_for":[("Right_Gripper","obj_0")] }}
-        dynammic_args = {"mos": {"quantisation_factor":.0005}}
+        dynammic_args = {"qtcbs": {"no_collapse": True, "quantisation_factor":.0001, "validate":False, "qsrs_for":[("Right_Gripper","obj_0")] }}
+        dynammic_args["mos"] = {"quantisation_factor":.00005}
+        dynammic_args['filters'] = {"median_filter": {"window": 3}}
 
         #dynammic_args={"tpcc":{"qsrs_for":[("o1","o2","o3")] }}
 

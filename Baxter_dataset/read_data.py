@@ -2,6 +2,9 @@ import numpy as np
 import cv2
 import getpass
 import os, os.path
+import scipy as sp
+import matplotlib.pyplot as plt
+from scipy import signal
 
 class read_data():
     """docstring for read_data"""
@@ -52,6 +55,8 @@ class read_data():
         self.r_data[self.frame] = {}
         self.r_data[self.frame]['Left_Gripper'] = {}
         self.r_data[self.frame]['Right_Gripper'] = {}
+        self.r_data[self.frame]['command'] = 0
+        self.r_data[self.frame]['gripper'] = 100
         self.o_data[self.frame] = {}
         for i in range(self.obj_max):
             self.o_data[self.frame][i] = {}
@@ -68,7 +73,7 @@ class read_data():
                 self.r_data[self.frame]['Right_Gripper'][data.split(',')[0]]=float(data.split(',')[1])
 
             ##########################################################################################
-            # FITERING
+            # FILTERING
 
             # if arm is not in control assume its static
             if frame != 1 and  i == 41:
@@ -76,24 +81,40 @@ class read_data():
                     self.r_data[self.frame]['Right_Gripper'] = self.r_data[self.frame-1]['Right_Gripper']
                 if data.split(',')[1] != 'left':
                     self.r_data[self.frame]['Left_Gripper'] = self.r_data[self.frame-1]['Left_Gripper']
+                # getting gripper information
+                if data.split(',')[1] == 'right':
+                    if self.r_data[self.frame]['Right_Gripper']['R_gripper']>70:
+                        self.r_data[self.frame]['gripper'] = 'open'
+                    else:
+                        self.r_data[self.frame]['gripper'] = 'close'
+                elif data.split(',')[1] == 'left':
+                    if self.r_data[self.frame]['Left_Gripper']['L_gripper']>70:
+                        self.r_data[self.frame]['gripper'] = 'open'
+                    else:
+                        self.r_data[self.frame]['gripper'] = 'close'
 
             if i == 45:
                 Command = float(data.split(',')[1].split('[')[1])
-                print frame,Command
 
                 # this means the arm shouldn't move as no command was given
                 if frame != 1 and Command == 0:
                     self.r_data[self.frame] = self.r_data[self.frame-1]
 
+                self.r_data[self.frame]['command'] = Command
+                # print frame,Command,Command==0
+
+
         # reading the object tracks data
         for obj in range(self.obj_max):
             f = open(self.dir_track+'obj'+str(obj)+'_'+self.f_str+'.txt', 'r')
-            for i in range(3):
-                data = f.readline().split('\n')[0]
-                self.o_data[self.frame][obj][data.split(':')[0]]=float(data.split(':')[1])
-        #
-        # if frame != 1:
-
+            if frame != 1 and self.r_data[frame]['command']==0:
+                self.o_data[self.frame][obj] = self.o_data[self.frame-1][obj]
+            elif frame != 1 and self.r_data[self.frame]['gripper']=='open':
+                self.o_data[self.frame][obj] = self.o_data[self.frame-1][obj]
+            else:
+                for i in range(3):
+                    data = f.readline().split('\n')[0]
+                    self.o_data[self.frame][obj][data.split(':')[0]]=float(data.split(':')[1])
 
 
     def read_all_frames(self):
@@ -107,3 +128,99 @@ class read_data():
         # read data
         for frame in range(1,self.f_max+1):
             self.read_single_frame(frame)
+
+        # for frame in range(1,self.f_max+1):
+        #     print frame,self.r_data[frame]['command'],self.r_data[frame]['command']==0
+        # print toto
+
+
+    def apply_filter(self, window_length=3):
+        """Once obtained the joint x,y,z coords.
+        Apply a median filter over a temporal window to smooth the joint positions.
+        Whilst doing this, create a world Trace object"""
+        ################################################
+        #right gripper
+        X,Y,Z = [],[],[]
+        for frame in self.r_data:
+            X.append(self.r_data[frame]['Right_Gripper']['R_x'])
+            Y.append(self.r_data[frame]['Right_Gripper']['R_y'])
+            Z.append(self.r_data[frame]['Right_Gripper']['R_z'])
+
+        t = np.linspace(0,1,len(X)) # create a time signal
+        x1 = sp.signal.medfilt(X,21) # filter the signal
+        y1 = sp.signal.medfilt(Y,21) # add noise to the signal
+        z1 = sp.signal.medfilt(Z,21) # add noise to the signal
+
+        for frame in self.r_data:
+            self.r_data[frame]['Right_Gripper']['R_x'] = x1[frame-1]
+            self.r_data[frame]['Right_Gripper']['R_y'] = y1[frame-1]
+            self.r_data[frame]['Right_Gripper']['R_z'] = z1[frame-1]
+
+        # plot the results
+        plt.subplot(3,1,1)
+        plt.plot(t,X,'yo-')
+        plt.title('X')
+        plt.xlabel('time')
+        plt.subplot(3,1,1)
+        plt.plot(t,x1,'bo-')
+        plt.xlabel('time')
+
+        # plot the results
+        plt.subplot(3,1,2)
+        plt.plot(t,Y,'yo-')
+        plt.title('Y')
+        plt.xlabel('time')
+        plt.subplot(3,1,2)
+        plt.plot(t,y1,'bo-')
+        plt.xlabel('time')
+
+        # plot the results
+        plt.subplot(3,1,3)
+        plt.plot(t,Z,'yo-')
+        plt.title('Z')
+        plt.xlabel('time')
+        plt.subplot(3,1,3)
+        plt.plot(t,z1,'bo-')
+        plt.xlabel('time')
+
+        plt.show()
+
+        ################################################
+        #left gripper
+        X,Y,Z = [],[],[]
+        for frame in self.r_data:
+            X.append(self.r_data[frame]['Left_Gripper']['L_x'])
+            Y.append(self.r_data[frame]['Left_Gripper']['L_y'])
+            Z.append(self.r_data[frame]['Left_Gripper']['L_z'])
+
+        x1 = sp.signal.medfilt(X,21) # add noise to the signal
+        y1 = sp.signal.medfilt(Y,21) # add noise to the signal
+        z1 = sp.signal.medfilt(Z,21) # add noise to the signal
+
+        for frame in self.r_data:
+            self.r_data[frame]['Left_Gripper']['L_x'] = x1[frame-1]
+            self.r_data[frame]['Left_Gripper']['L_y'] = y1[frame-1]
+            self.r_data[frame]['Left_Gripper']['L_z'] = z1[frame-1]
+
+        ################################################
+        # objects
+        X,Y,Z = {},{},{}
+        for frame in self.o_data:
+            for obj in self.o_data[frame]:
+                if obj not in X:
+                    X[obj],Y[obj],Z[obj] = [],[],[]
+                X[obj].append(self.o_data[frame][obj]['X'])
+                Y[obj].append(self.o_data[frame][obj]['Y'])
+                Z[obj].append(self.o_data[frame][obj]['Z'])
+
+        x1,y1,z1 = {},{},{}
+        for obj in self.o_data[frame]:
+            x1[obj] = sp.signal.medfilt(X[obj],21) # add noise to the signal
+            y1[obj] = sp.signal.medfilt(Y[obj],21) # add noise to the signal
+            z1[obj] = sp.signal.medfilt(Z[obj],21) # add noise to the signal
+
+        for frame in self.r_data:
+            for obj in self.o_data[frame]:
+                self.o_data[frame][obj]['X'] = x1[obj][frame-1]
+                self.o_data[frame][obj]['Y'] = y1[obj][frame-1]
+                self.o_data[frame][obj]['Z'] = z1[obj][frame-1]
