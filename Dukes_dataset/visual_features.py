@@ -95,10 +95,13 @@ def _get_distances(positions):
     return distances
 
 def cart2sph(x,y,z):
+    num = 30
     XsqPlusYsq = x**2 + y**2
     r = m.sqrt(XsqPlusYsq + z**2)               # r
     elev = m.atan2(z,m.sqrt(XsqPlusYsq))*180/np.pi     # theta
+    elev = int(elev/num)*num
     az = m.atan2(y,x)*180/np.pi                           # phi
+    az = int(az/num)*num
     return int(elev), int(az)
 
 def _get_directions(positions):

@@ -4,10 +4,11 @@ from xml_functions import *
 from nltk.tree import *
 from nltk.tree import ParentedTree
 import pickle
+import getpass
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_pickle(scene):
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
@@ -35,9 +36,14 @@ def _get_n_grams(sentences):
 
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_linguistic_features.p'
     LF = {}
     sentences = _read_pickle(scene)
     LF['n_grams'] = _get_n_grams(sentences)
     # print LF['n_grams']
     pickle.dump(LF, open(pkl_file, 'wb'))
+    file1 = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_linguistic_feature.txt'
+    F = open(file1, 'w')
+    for n in LF['n_grams']:
+        F.write(n+'\n')
+    F.close()
