@@ -132,7 +132,7 @@ def _get_directions(positions):
 
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     VF = {}
     positions = _read_pickle(scene)
     VF['actions'] = _get_actions(positions)

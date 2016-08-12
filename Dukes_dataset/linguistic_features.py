@@ -7,6 +7,12 @@ import pickle
 import getpass
 #--------------------------------------------------------------------------------------------------------#
 
+def _read_stop_wrods():
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
+    data = open(pkl_file, 'rb')
+    stop = pickle.load(data)
+    return stop
+
 def _read_pickle(scene):
     pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
@@ -15,7 +21,7 @@ def _read_pickle(scene):
 
 
 def _find_n_grams(sentence):
-    n_word = 3 ## length of n_grams
+    n_word = 1 ## length of n_grams
     w = sentence.split(' ')
     n_grams = []
     for i in range(len(w)):
@@ -24,25 +30,30 @@ def _find_n_grams(sentence):
             n_grams.append(' '.join(w[i:j]))
     return n_grams
 
-def _get_n_grams(sentences):
+def _get_n_grams(sentences,stop):
     all_n_grams = []
     for id in sentences:
         n = _find_n_grams(sentences[id]['text'])
         for i in n:
-            if i not in all_n_grams:
-                all_n_grams.append(i)
+            ok = 1
+            for stop_word in stop:
+                if stop_word == i or ' '+stop_word in i or stop_word+' ' in i:
+                    ok = 0
+            if ok:
+                if i not in all_n_grams:
+                    all_n_grams.append(i)
     return all_n_grams
 
-
+stop = _read_stop_wrods()
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_linguistic_features.p'
     LF = {}
     sentences = _read_pickle(scene)
-    LF['n_grams'] = _get_n_grams(sentences)
+    LF['n_grams'] = _get_n_grams(sentences,stop)
     # print LF['n_grams']
     pickle.dump(LF, open(pkl_file, 'wb'))
-    file1 = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_linguistic_feature.txt'
+    file1 = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_linguistic_feature.txt'
     F = open(file1, 'w')
     for n in LF['n_grams']:
         F.write(n+'\n')
