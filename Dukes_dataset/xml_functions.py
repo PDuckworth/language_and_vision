@@ -80,14 +80,27 @@ def read_data():
         F_match = []
         for i in I.keys():
             for f in F.keys():
+                # if Id == 761:
+                #     print '>>>>>>',i,f,I[i]['F_SHAPE'] == F[f]['F_SHAPE'],I[i]['F_HSV'] == F[f]['F_HSV'],I[i]['position'] == F[f]['position']
                 if I[i]['F_SHAPE'] == F[f]['F_SHAPE'] and I[i]['F_HSV'] == F[f]['F_HSV'] and I[i]['position'] == F[f]['position']:
                     I_match.append(i)
                     F_match.append(f)
-        for i in I.keys():
-            if i not in I_match: Data['scenes'][Id]['I_move'] = i
-        for i in F.keys():
-            if i not in F_match: Data['scenes'][Id]['F_move'] = i
 
+        # if Id == 761:
+        #     print '**',I_match
+        #     print '**',F_match
+        for i in I.keys():
+            if i not in I_match:
+                Data['scenes'][Id]['I_move'] = i
+                # if Id == 761:
+                #     print '>>',i
+        for i in F.keys():
+            if i not in F_match:
+                Data['scenes'][Id]['F_move'] = i
+
+        # if Id == 761:
+        #     print Data['scenes'][Id]['I_move']
+        #     print Data['scenes'][Id]['F_move']
 
 
     return Data

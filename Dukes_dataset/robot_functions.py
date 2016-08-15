@@ -242,6 +242,7 @@ class Robot():
     def _add_objects_to_scene(self):
         self.frame_number = 0
         l1 = self.Data['layouts'][self.Data['scenes'][self.scene]['initial']]   # initial layput
+        # print l1
         for obj in l1:
             x = l1[obj]['position'][0]
             y = l1[obj]['position'][1]
@@ -265,11 +266,14 @@ class Robot():
         I = self.Data['scenes'][self.scene]['I_move']
 
         l1 = self.Data['layouts'][self.Data['scenes'][self.scene]['final']]   # initial layput
+        # print l1
+        # print '>>>',self.Data['scenes'][self.scene]['F_move']
         for obj in l1:
             if obj == self.Data['scenes'][self.scene]['F_move']:
                 x = l1[obj]['position'][0]
                 y = l1[obj]['position'][1]
                 z = l1[obj]['position'][2]
+                # print '>>;',x,y,z
                 self.positions[I]['x'].append(int(x))
                 self.positions[I]['y'].append(int(y))
                 self.positions[I]['z'].append(int(z))

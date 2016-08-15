@@ -31,14 +31,38 @@ def _get_actions(positions):
 
         # check if it's a pick up
         if x_O[1]==x_R[1] and y_O[1]==y_R[1] and z_O[1]==z_R[1]:
-            actions = ['approach','grasp','lift']
+            actions = ['approach,grasp,lift']
         elif x_O[0]==x_R[0] and y_O[0]==y_R[0] and z_O[0]==z_R[0]:
-            actions = ['move','discard','depart'] ## lower ?!?!?!?
-        elif x_R[0]!=x_R[1] or y_R[0]!=y_R[1] or z_R[0]!=z_R[1]:
-            actions = ['approach','grasp','lift','move','discard','depart']
+            actions = ['move,discard,depart'] ## lower ?!?!?!?
+        elif x_O[0]!=x_O[1] or y_O[0]!=y_O[1] or z_O[0]!=z_O[1]:
+            actions = ['approach,grasp,lift','move,discard,depart','approach,grasp,lift,move,discard,depart']
         else:
             actions = []
+            print positions[mov_obj]
+            print positions['gripper']
     return actions
+
+def _get_trees(actions,positions):
+    mov_obj = None
+    for obj in positions:
+        if obj != 'gripper':
+            if positions[obj]['moving']:
+                mov_obj = obj
+                break
+
+    if mov_obj != None:
+        x = positions[mov_obj]['x']
+        y = positions[mov_obj]['y']
+        z = positions[mov_obj]['z']
+
+    tree = ""
+    if actions == ['approach,grasp,lift']:
+        tree = "(V (action "+actions[0]+") (Entity id_"+str(mov_obj)+"))"
+    elif actions == ['move,discard,depart']:
+        tree = "(V (action "+actions[0]+") (Entity id_"+str(mov_obj)+") (Location "+str(x[1])+","+str(y[1])+","+str(z[1])+")"
+    elif actions == ['approach,grasp,lift','move,discard,depart','approach,grasp,lift,move,discard,depart']:
+        tree = ""
+    return tree
 
 def _get_locations(positions):
     locations = []
@@ -51,9 +75,28 @@ def _get_locations(positions):
     if mov_obj != None:
         x = positions[mov_obj]['x']
         y = positions[mov_obj]['y']
-        locations.append([x[0],y[0]])
-        if [x[1],y[1]] not in locations:
-            locations.append([x[1],y[1]])
+        if x[0]<3 and y[0]<3:
+            locations.append([0,0])
+        if x[0]<3 and y[0]>4:
+            locations.append([0,7])
+        if x[0]>4 and y[0]<3:
+            locations.append([7,0])
+        if x[0]>4 and y[0]>4:
+            locations.append([7,7])
+        if x[0]>1 and x[0]<5 and y[0]>1 and y[0]<5:
+            locations.append([3.5,3.5])
+
+        if x[1]<3 and y[1]<3:
+            locations.append([0,0])
+        if x[1]<3 and y[1]>4:
+            locations.append([0,7])
+        if x[1]>4 and y[1]<3:
+            locations.append([7,0])
+        if x[1]>4 and y[1]>4:
+            locations.append([7,7])
+        if x[1]>1 and x[1]<5 and y[1]>1 and y[1]<5:
+            locations.append([3.5,3.5])
+
     return locations
 
 def _get_colors(positions):
@@ -95,7 +138,7 @@ def _get_distances(positions):
     return distances
 
 def cart2sph(x,y,z):
-    num = 30
+    num = 90
     XsqPlusYsq = x**2 + y**2
     r = m.sqrt(XsqPlusYsq + z**2)               # r
     elev = m.atan2(z,m.sqrt(XsqPlusYsq))*180/np.pi     # theta
@@ -139,6 +182,10 @@ for scene in range(1,1001):
     VF['locations'] = _get_locations(positions)
     VF['colors'] = _get_colors(positions)
     VF['shapes'] = _get_shapes(positions)
-    VF['distances'] = _get_distances(positions)
+    # VF['distances'] = _get_distances(positions)
     VF['directions'] = _get_directions(positions)
     pickle.dump(VF, open(pkl_file, 'wb'))
+
+    tree_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_video_tree.p'
+    trees = _get_trees(VF['actions'],positions)
+    print trees

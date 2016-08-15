@@ -26,9 +26,11 @@ for scene in range(1,1000):
     for f in VF:
         for v in VF[f]:
             if f+'_'+str(v) not in VF_dict:
-                VF_dict[f+'_'+str(v)] = 1
+                VF_dict[f+'_'+str(v)] = {}
+                VF_dict[f+'_'+str(v)]['VF'] = v
+                VF_dict[f+'_'+str(v)]['count'] = 1
             else:
-                VF_dict[f+'_'+str(v)] += 1
+                VF_dict[f+'_'+str(v)]['count'] += 1
     for n in LF['n_grams']:
         if n not in LF_dict:
             LF_dict[n] = {}
@@ -62,21 +64,21 @@ for col,lexicon in enumerate(sorted(LF_dict.keys())):
         LF_dict[lexicon][v] = 1 - LF_dict[lexicon][v]/float(LF_dict[lexicon]['count'])
         cost_matrix[row,col] = LF_dict[lexicon][v]
 
-alpha = .1
+# this is the hangarian algorithm
+for row in range(len(VF_dict.keys())):
+    cost_matrix[row,:]-=np.min(cost_matrix[row,:])
+for col in range(len(LF_dict.keys())):
+    cost_matrix[:,col]-=np.min(cost_matrix[:,col])
+
+alpha = .01
 sorted_LF = sorted(LF_dict.keys())
-print '----'
-print sorted(VF_dict.keys())
-print '----'
-for i,val in enumerate(cost_matrix[-1,:]):
-    if val < alpha:
-        print sorted_LF[i]
+sorted_VF = sorted(VF_dict.keys())
+hypotheses_tags = {}
+for val2,VF in enumerate(sorted_VF):
+    for val1,LF in enumerate(sorted_LF):
+        if cost_matrix[val2,val1] <= alpha:
+            print VF,'---',LF,':',cost_matrix[val2,val1]
+            hypotheses_tags[(LF,VF)] = cost_matrix[val2,val1]
 
-x = LF_dict['red']
-sorted_x = sorted(x.items(), key=operator.itemgetter(1))
-
-
-
-# print len(sorted(VF_dict.keys()))
-# print len(sorted(LF_dict.keys()))
-# for k in sorted(VF_dict.keys()):
-#     print k,VF_dict[k]
+pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+pickle.dump([hypotheses_tags, VF_dict, LF_dict], open(pkl_file, 'wb'))
