@@ -36,10 +36,8 @@ def _get_actions(positions):
             actions = ['move,discard,depart'] ## lower ?!?!?!?
         elif x_O[0]!=x_O[1] or y_O[0]!=y_O[1] or z_O[0]!=z_O[1]:
             actions = ['approach,grasp,lift','move,discard,depart','approach,grasp,lift,move,discard,depart']
-        else:
-            actions = []
-            print positions[mov_obj]
-            print positions['gripper']
+    else:
+        actions = [] #'nothing'
     return actions
 
 def _get_trees(actions,positions):
@@ -57,11 +55,13 @@ def _get_trees(actions,positions):
 
     tree = ""
     if actions == ['approach,grasp,lift']:
-        tree = "(V (action "+actions[0]+") (Entity id_"+str(mov_obj)+"))"
+        tree = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+"))"
     elif actions == ['move,discard,depart']:
-        tree = "(V (action "+actions[0]+") (Entity id_"+str(mov_obj)+") (Location "+str(x[1])+","+str(y[1])+","+str(z[1])+")"
+        tree = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
     elif actions == ['approach,grasp,lift','move,discard,depart','approach,grasp,lift,move,discard,depart']:
-        tree = ""
+        tree = "(V (Action "+actions[2]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
+    elif actions == ['nothing']:
+        tree = "(V (Action "+actions[0]+"))"
     return tree
 
 def _get_locations(positions):
@@ -184,8 +184,8 @@ for scene in range(1,1001):
     VF['shapes'] = _get_shapes(positions)
     # VF['distances'] = _get_distances(positions)
     VF['directions'] = _get_directions(positions)
-    pickle.dump(VF, open(pkl_file, 'wb'))
-
-    tree_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_video_tree.p'
     trees = _get_trees(VF['actions'],positions)
-    print trees
+    pickle.dump([VF,trees], open(pkl_file, 'wb'))
+
+    # tree_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_video_tree.p'
+    # print trees

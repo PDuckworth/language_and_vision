@@ -1,4 +1,4 @@
-from visual import *
+# from visual import *
 import numpy as np
 from robot_functions import *
 

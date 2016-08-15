@@ -1,12 +1,13 @@
-from visual import *
-from shapefile import *
-from Polygon import *
+# from visual import *
+# from shapefile import *
+# from Polygon import *
 import numpy as np
-import wx
+# import wx
 from xml_functions import *
 import cv2
-import pyscreenshot as ImageGrab
+# import pyscreenshot as ImageGrab
 # http://www.anninaruest.com/pie/2014/07/inverse-kinematics-and-the-m100rak/
+import os
 from random import randint
 import pickle
 
