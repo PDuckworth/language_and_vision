@@ -45,7 +45,7 @@ for scene in range(2,3):
         for word in tfidf_words:
             S = filter(lambda a: a != word, S)
         for word in S:
-            print word,hypotheses_tags[word]
-        break
+            print word,hypotheses_tags[word].keys()
+        # break
         # S = (' ').join(S)
-        print S
+        print '---------------'
