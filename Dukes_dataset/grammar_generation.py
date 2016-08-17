@@ -31,16 +31,22 @@ def _read_vf(scene):
 pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
 data = open(pkl_file, 'rb')
 hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
+# this is why I can't have nice things
+# total = 1
+# for word in hypotheses_tags:
+#     total*=len(hypotheses_tags[word].keys())+1
+# print '>>>>>>>>>>>>>>>>>>',total
+# In this dataset, we have 114 unique words, were each word has between 2 and 4 potential visual tags. If we compute the combinations of these words tags it's is 1.7 quattuordecillion 1.7*10^45, which gives the reader an idea of how massive the search space is, and that it can't be the case where we keep track of all combinations. Therefore we take a different approach, were we do the learning incrementally. The system analyse each snetnece seperatly, and record
 
 tfidf_words = _read_tfidf_words()
-# print hypotheses_tags.keys()
-# print hypotheses_tags
+
 for scene in range(2,3):
     print 'generating grammar from scene : ',scene
     VF,Tree = _read_vf(scene)
     print Tree
     sentences = _read_sentences(scene)
     for id in sentences:
+        if id != 21232: continue
         S = sentences[id]['text'].split(' ')
         for word in tfidf_words:
             S = filter(lambda a: a != word, S)
