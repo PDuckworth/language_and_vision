@@ -10,3 +10,8 @@ python visual_features.py
 
 python tags.py
 
+python grammar_generation.py
+
+#python semantic_grammar_generation.pt
+
+python language_and_vision.py

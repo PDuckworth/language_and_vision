@@ -20,17 +20,28 @@ def _read_tfidf_words():
     return tfidf
 
 def _read_vf(scene):
-    # pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_linguistic_features.p'
-    # data = open(pkl_file, 'rb')
-    # lf = pickle.load(data)
     pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     data = open(pkl_file, 'rb')
     vf,tree = pickle.load(data)
     return vf,tree
 
-pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
-data = open(pkl_file, 'rb')
-hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
+def _get_grammar_trees(S,tree):
+    grammar_trees = {}
+    count = 0
+    if len(tree['py'].keys()) == 3:
+        for i1 in range(1,len(S)-1):
+            for i2 in range(1,len(S)-i1):
+                grammar_trees[count] = [S[0:i1],S[i1:i2+i1],S[i2+i1:]]
+                count+=1
+    if len(tree['py'].keys()) == 2:
+        for i1 in range(1,len(S)):
+            grammar_trees[count] = [S[0:i1],S[i1:]]
+            count+=1
+    return grammar_trees
+
+# pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+# data = open(pkl_file, 'rb')
+# hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
 # this is why I can't have nice things
 # total = 1
 # for word in hypotheses_tags:
@@ -40,18 +51,16 @@ hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
 
 tfidf_words = _read_tfidf_words()
 
-for scene in range(2,3):
+for scene in range(1,1001):
     print 'generating grammar from scene : ',scene
     VF,Tree = _read_vf(scene)
-    print Tree
     sentences = _read_sentences(scene)
+    grammar_trees = {}
     for id in sentences:
-        if id != 21232: continue
+        # if id != 21232: continue
         S = sentences[id]['text'].split(' ')
         for word in tfidf_words:
             S = filter(lambda a: a != word, S)
-        for word in S:
-            print word,hypotheses_tags[word].keys()
-        # break
-        # S = (' ').join(S)
-        print '---------------'
+        grammar_trees[id] = _get_grammar_trees(S,Tree)
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
+    pickle.dump(grammar_trees, open(pkl_file, 'wb'))

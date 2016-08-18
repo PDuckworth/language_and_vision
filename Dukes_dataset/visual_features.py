@@ -53,15 +53,28 @@ def _get_trees(actions,positions):
         y = positions[mov_obj]['y']
         z = positions[mov_obj]['z']
 
-    tree = ""
+    tree = {}
     if actions == ['approach,grasp,lift']:
-        tree = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+"))"
+        tree['NLTK'] = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+"))"
+        tree['py'] = {}
+        tree['py']['A'] = actions[0]
+        tree['py']['E'] = mov_obj
     elif actions == ['move,discard,depart']:
-        tree = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
+        tree['NLTK'] = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
+        tree['py'] = {}
+        tree['py']['A'] = actions[0]
+        tree['py']['E'] = mov_obj
+        tree['py']['D'] = [x[1],y[1],z[1]]
     elif actions == ['approach,grasp,lift','move,discard,depart','approach,grasp,lift,move,discard,depart']:
-        tree = "(V (Action "+actions[2]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
+        tree['NLTK'] = "(V (Action "+actions[2]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
+        tree['py'] = {}
+        tree['py']['A'] = actions[0]
+        tree['py']['E'] = mov_obj
+        tree['py']['D'] = [x[1],y[1],z[1]]
     elif actions == ['nothing']:
-        tree = "(V (Action "+actions[0]+"))"
+        tree['NLTK'] = "(V (Action "+actions[0]+"))"
+        tree['py'] = {}
+        tree['py']['A'] = actions[0]
     return tree
 
 def _get_locations(positions):

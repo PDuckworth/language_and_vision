@@ -58,6 +58,7 @@ for scene in range(1,1001):
         for v in vf_in_this_scene:
             LF_dict[n][v] += 1
 
+###################################### rows first
 rows = len(VF_dict.keys())
 cols = len(LF_dict.keys())
 cost_matrix = np.ones((rows,cols), dtype=np.float32)
@@ -85,6 +86,35 @@ for val2,VF in enumerate(sorted_VF):
             hypotheses_tags[LF][VF] = cost_matrix[val2,val1]
             print VF,'---',LF,':',cost_matrix[val2,val1]
 
+
+# ###################################### cols first
+# rows = len(VF_dict.keys())
+# cols = len(LF_dict.keys())
+# cost_matrix = np.ones((rows,cols), dtype=np.float32)
+#
+# for col,lexicon in enumerate(sorted(LF_dict.keys())):
+#     for row,v in enumerate(sorted(VF_dict.keys())):
+#         LF_dict[lexicon][v] = 1 - LF_dict[lexicon][v]/float(LF_dict[lexicon]['count'])
+#         cost_matrix[row,col] = LF_dict[lexicon][v]
+#
+# # this is the hangarian algorithm
+# for col in range(len(LF_dict.keys())):
+#     cost_matrix[:,col]-=np.min(cost_matrix[:,col])
+# for row in range(len(VF_dict.keys())):
+#     cost_matrix[row,:]-=np.min(cost_matrix[row,:])
+#
+# alpha = .0
+# sorted_LF = sorted(LF_dict.keys())
+# sorted_VF = sorted(VF_dict.keys())
+# hypotheses_tags = {}
+# for val2,VF in enumerate(sorted_VF):
+#     for val1,LF in enumerate(sorted_LF):
+#         if cost_matrix[val2,val1] <= alpha:
+#             if LF not in hypotheses_tags:
+#                 hypotheses_tags[LF] = {}
+#                 if VF not in hypotheses_tags[LF]:
+#                     hypotheses_tags[LF][VF] = cost_matrix[val2,val1]
+#                     print '>>>>>>>>>>>',VF,'---',LF,':',cost_matrix[val2,val1]
 
 pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
 pickle.dump([hypotheses_tags, VF_dict, LF_dict], open(pkl_file, 'wb'))
