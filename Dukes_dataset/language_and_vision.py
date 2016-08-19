@@ -46,17 +46,70 @@ def _is_valid_action_query(tree):
             query_valid+=1
         if actions>0 and len(query)==actions:
             query_valid+=1
-    if query_valid == len(query):
+    if query_valid == len(tree):
         action_valid=1
     return action_valid
 
+def _get_all_entities(Entity):
+    Entity = ['colors_magenta', 'shapes_sphere', 'Dir_','Dir_','colors_red', 'shapes_sphere']
+    _Entity = []
+    features = ['colors_','shapes_','locations_']
+    Entities = {}
+
+    count = 0
+    new_entity = 0
+    for word in Entity:
+        E = 0
+        for f in features:
+            if f in word:
+                E = 1
+        if E:
+            if count not in Entities:
+                Entities[count] = []
+                _Entity.append('Entity_'+str(count))
+                new_entity = 1
+            Entities[count].append(word)
+        else:
+            # _Entity.append('Entity_'+str(count))
+            if new_entity:
+                count+=1
+                new_entity = 0
+            _Entity.append(word)
+    print _Entity
+    print Entities
+
+
+
+
+def _is_valid_entity_query(tree):
+    Action = []
+    Entity = []
+    for query in tree:
+        for item in query:
+            action_item = 0
+            if 'actions_' in item:
+                if item not in Action:
+                    action_item = 1
+        if action_item:
+            Action = query
+        if not action_item:
+            Entity = query
+    print 'A >>>',Action
+    print 'E >>>',Entity
+    Entity = _get_all_entities(Entity)
+
+
+def _is_valid_entity_destination_query(tree):
+    print '>>>>',tree
 
 def _is_valid_query(tree):
     action_valid = _is_valid_action_query(tree)
-    # print tree
     if action_valid:
-        print tree
-
+        if len(tree) == 2:
+            Entity_valid = _is_valid_entity_query(tree)
+        if len(tree) == 3:
+            Entity_valid = _is_valid_entity_destination_query(tree)
+        # print tree
 
 def _validate(tree):
     valid = _is_valid_query(tree)
