@@ -287,6 +287,7 @@ def _match_Destination_with_scene(Destination,D_Entities,D_Relations,VF_dict,lay
 def _validate(tree, scene_tree, grammar, scene, id ,g):
     # print '##############################################################'
     # print grammar
+    pass_flag=0
     valid,tree_structure,Action,Entity,Entities,Relations,Destination,D_Entities,D_Relations = _is_valid_query(tree)
     if valid:
         valid_action = _match_action_with_scene(Action,scene_tree['A'],VF_dict)
@@ -301,6 +302,7 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
                     results['entity'] = [Entity,Entities,Relations]
                     pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(scene)+'_'+str(id)+'_'+str(g)+'_matched_tree.p'
                     pickle.dump(results, open(pkl_file, 'wb'))
+                    pass_flag = 1
             if len(scene_tree)==3:
                 valid_entity = _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene_tree['E'])
                 if valid_entity:
@@ -314,10 +316,12 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
                         results['destination'] = [Destination,D_Entities,D_Relations]
                         pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(scene)+'_'+str(id)+'_'+str(g)+'_matched_tree.p'
                         pickle.dump(results, open(pkl_file, 'wb'))
-
+                        pass_flag = 1
+    return pass_flag
 #---------------------------------------------------------------------------#
 hypotheses_tags, VF_dict, LF_dict = _read_tags()
-for scene in range(1,1001):
+counter = []
+for scene in range(10,11):
     layout = _read_layout(scene)
     semantic_trees = {}
     print 'test grammar from scene : ',scene
@@ -325,7 +329,14 @@ for scene in range(1,1001):
     grammar_trees = _read_grammar_trees(scene)
     semantic_trees = _read_semantic_trees(scene)
     for id in semantic_trees:
+        print id
+        print grammar_trees[id]
         for g in semantic_trees[id]:
             for semantic in semantic_trees[id][g]:
                 tree = semantic_trees[id][g][semantic]
-                _validate(tree, scene_tree['py'], grammar_trees[id][g],scene,id,g)
+                print tree
+                pass_flag = _validate(tree, scene_tree['py'], grammar_trees[id][g],scene,id,g)
+                if pass_flag and scene not in counter:
+                    counter.append(scene)
+print len(counter)
+print counter
