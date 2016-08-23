@@ -60,7 +60,7 @@ def _get_trees(actions,positions):
         tree['py']['A'] = actions[0]
         tree['py']['E'] = mov_obj
     elif actions == ['move,discard,depart']:
-        tree['NLTK'] = "(V (Action "+actions[0]+") (Entity id_"+str(mov_obj)+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
+        tree['NLTK'] = "(V (Action "+actions[0]+") (Destination "+str(x[1])+","+str(y[1])+","+str(z[1])+"))"
         tree['py'] = {}
         tree['py']['A'] = actions[0]
         tree['py']['E'] = mov_obj
@@ -228,6 +228,12 @@ def _get_directions(positions):
                     directions.append(d)
     return directions
 
+def _get_temporal(v):
+    temporal = []
+    if len(v)>1:
+        temporal = ['meets']
+    return temporal
+
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
     pkl_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
@@ -239,6 +245,7 @@ for scene in range(1,1001):
     VF['shapes'] = _get_shapes(positions)
     # VF['distances'] = _get_distances(positions)
     VF['directions'] = _get_directions(positions)
+    # VF['temporal'] = _get_temporal(VF['actions'])
     trees = _get_trees(VF['actions'],positions)
     pickle.dump([VF,trees], open(pkl_file, 'wb'))
 

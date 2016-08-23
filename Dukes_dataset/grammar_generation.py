@@ -57,9 +57,6 @@ for scene in range(1,1001):
     sentences = _read_sentences(scene)
     grammar_trees = {}
     for id in sentences:
-        # if id != 21232: continue
-        if 'tower' in sentences[id]['text']:
-            print sentences[id]['text']
         S = sentences[id]['text'].split(' ')
         for word in tfidf_words:
             S = filter(lambda a: a != word, S)

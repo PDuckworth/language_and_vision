@@ -16,6 +16,12 @@ def _read_tags():
     hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
     return [hypotheses_tags, VF_dict, LF_dict]
 
+def _read_sentences(scene):
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    data = open(pkl_file, 'rb')
+    sentences = pickle.load(data)
+    return sentences
+
 #---------------------------------------------------------------------------#
 def _read_vf(scene):
     pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
@@ -396,7 +402,9 @@ passed_ids = []
 Matching = {}
 Matching_VF = {}
 Words = {}
+passed_sentences = {}
 for scene in range(1,1001):
+    sentences = _read_sentences(scene)
     layout = _read_layout(scene)
     semantic_trees = {}
     print 'test grammar from scene : ',scene
@@ -404,7 +412,9 @@ for scene in range(1,1001):
     grammar_trees = _read_grammar_trees(scene)
     semantic_trees = _read_semantic_trees(scene)
     for id in semantic_trees:
-        # if id != 14789: continue
+        # if id != 15382: continue
+        # if 'and' in sentences[id]['text']:
+        #     print id,sentences[id]['text']
         for g in semantic_trees[id]:
             # if g != 7: continue
             # print id,g,grammar_trees[id][g]
@@ -436,19 +446,21 @@ for scene in range(1,1001):
                                 Matching_VF[meaning][word]+=1
                     if scene not in passed_scenes:
                         passed_scenes.append(scene)
-                    passed_ids.append(id)
+                    passed_sentences[id] = sentences[id]
+
 print '#########################################'
 print 'number of scenes:',len(passed_scenes)
-print 'number of sentences:',len(passed_ids)
+print 'number of sentences:',len(passed_sentences.keys())
 print '#########################################'
-# for i in range(len(passed_ids)):
-#     for j in range(i+1,len(passed_ids)):
-#         if passed_ids[i]-passed_ids[j]==0:
-#             print '>>>>>>>',passed_ids[i]
-for word in Matching:
-    for meaning in Matching[word]:
-        print word,meaning,Matching[word][meaning]
 
+
+# for id in passed_sentences:
+#     print passed_sentences[id]['text']
+#
+# for word in Matching:
+#     for meaning in Matching[word]:
+#         print word,meaning,Matching[word][meaning]
+#
 print '------------------'
 for meaning in sorted(Matching_VF.keys()):
     for word in Matching_VF[meaning]:
@@ -459,4 +471,4 @@ for meaning in sorted(Matching_VF.keys()):
 #     print word,Words[word]
 
 pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags1.p'
-pickle.dump([Matching,Matching_VF,passed_scenes,passed_ids], open(pkl_file, 'wb'))
+pickle.dump([Matching,Matching_VF,passed_scenes,passed_sentences], open(pkl_file, 'wb'))
