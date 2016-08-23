@@ -132,13 +132,13 @@ def _get_shapes(positions):
         if obj != 'gripper':
             x=positions[obj]['x'][0]
             y=positions[obj]['y'][0]
-            if (x,y) not in groups:
-                groups[(x,y)]=1
-            else:
-                groups[(x,y)]+=1
+            if positions[obj]['F_SHAPE'] in ['cube','cylinder']:
+                if (x,y) not in groups:
+                    groups[(x,y)]=1
+                else:
+                    groups[(x,y)]+=1
     for i in groups:
         if groups[i]>1:
-            # print ttt
             shapes.append('tower')
             break
     return shapes
