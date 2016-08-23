@@ -179,6 +179,27 @@ def cart2sph(x,y,z):
     az = int(az/num)*num
     return int(elev), int(az)
 
+def _func_directions(dx,dy,dz):
+        dx = float(dx)
+        dy = float(dy)
+        dz = float(dz)
+        max = np.max(np.abs([dx,dy,dz]))
+        if np.abs(dx)/max < .5:
+            dx = 0
+        else:
+            dx = np.sign(dx)
+
+        if np.abs(dy)/max < .5:
+            dy = 0
+        else:
+            dy = np.sign(dy)
+
+        if np.abs(dz)/max < .5:
+            dz = 0
+        else:
+            dz = np.sign(dz)
+        return dx,dy,dz
+
 def _get_directions(positions):
     #http://stackoverflow.com/questions/4116658/faster-numpy-cartesian-to-spherical-coordinate-conversion
     directions = []
@@ -197,10 +218,12 @@ def _get_directions(positions):
                 x2 = positions[obj]['x']
                 y2 = positions[obj]['y']
                 z2 = positions[obj]['z']
-                d = cart2sph(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
+                # d = cart2sph(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
+                d = _func_directions(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
                 if d not in directions:
                     directions.append(d)
-                d = cart2sph(x1[1]-x2[1],y1[1]-y2[1],z1[1]-z2[1])
+                # d = cart2sph(x1[1]-x2[1],y1[1]-y2[1],z1[1]-z2[1])
+                d = _func_directions(x1[1]-x2[1],y1[1]-y2[1],z1[1]-z2[1])
                 if d not in directions:
                     directions.append(d)
     return directions

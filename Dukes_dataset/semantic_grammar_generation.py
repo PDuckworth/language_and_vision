@@ -28,6 +28,13 @@ def _read_vf(scene):
     vf,tree = pickle.load(data)
     return vf,tree
 
+def _read_passed_tags():
+    pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags.p'
+    data = open(pkl_file, 'rb')
+    Matching,Matching_VF,passed_scenes,passed_ids = pickle.load(data)
+    # print Matching,Matching_VF,passed_scenes,passed_ids
+    return [Matching,Matching_VF,passed_scenes,passed_ids]
+
 def _read_grammar_trees(scene):
     pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
     data = open(pkl_file, 'rb')
@@ -76,6 +83,7 @@ def _get_semantics(tree, hypotheses_tags):
     semantic_trees = {}
     all_possibilities,words_dict = _all_possibilities_func(words, hypotheses_tags)
     for count,element in enumerate(itertools.product(*all_possibilities)):
+        # print element
         valid = _test_Actions(element)
         if valid:
             semantic_trees[count] = deepcopy(tree)
@@ -86,7 +94,16 @@ def _get_semantics(tree, hypotheses_tags):
                     c += 1
     return semantic_trees
 
+# Matching,Matching_VF,passed_scenes,passed_ids = _read_passed_tags()
+# print Matching
 hypotheses_tags, VF_dict, LF_dict = _read_tags()
+# for word in Matching:
+#     hypotheses_tags[word] = {}
+#     for key in Matching[word]:
+#         hypotheses_tags[word][key] = 0
+#         # print hypotheses_tags[word]
+#         # print Matching[word]
+#         # print '----'
 for scene in range(1,1001):
     semantic_trees = {}
     print 'generating grammar from scene : ',scene
@@ -95,7 +112,7 @@ for scene in range(1,1001):
     grammar_trees = _read_grammar_trees(scene)
     counter = 0
     for id in sentences:
-        # if id != 17800: continue
+        # if id != 14789: continue
         # print '###############################################################'
         # for word in sentences[id]['text'].split(' ')
         # if 'tower' in sentences[id]['text']:
@@ -104,7 +121,9 @@ for scene in range(1,1001):
         # print '###############################################################'
         semantic_trees[id] = {}
         for t in grammar_trees[id]:
+            # if t != 7: continue
             tree = grammar_trees[id][t]
+            # print tree
             semantic_trees[id][t] = _get_semantics(tree,hypotheses_tags)
             counter += len(semantic_trees[id][t])
     pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'

@@ -74,7 +74,7 @@ for row in range(len(VF_dict.keys())):
 for col in range(len(LF_dict.keys())):
     cost_matrix[:,col]-=np.min(cost_matrix[:,col])
 
-alpha = .002
+alpha = .01
 sorted_LF = sorted(LF_dict.keys())
 sorted_VF = sorted(VF_dict.keys())
 hypotheses_tags = {}

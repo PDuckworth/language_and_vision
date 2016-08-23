@@ -212,6 +212,29 @@ def cart2sph(x,y,z):
     az = int(az/num)*num
     return int(elev), int(az)
 
+#---------------------------------------------------------------------------#
+def _func_directions(dx,dy,dz):
+        dx = float(dx)
+        dy = float(dy)
+        dz = float(dz)
+        max = np.max(np.abs([dx,dy,dz]))
+        # print '>>>>',max
+        if np.abs(dx)/max < .5:
+            dx = 0
+        else:
+            dx = np.sign(dx)
+
+        if np.abs(dy)/max < .5:
+            dy = 0
+        else:
+            dy = np.sign(dy)
+
+        if np.abs(dz)/max < .5:
+            dz = 0
+        else:
+            dz = np.sign(dz)
+        return dx,dy,dz
+
 #-----------------------------------------------------------------------------------------------------#     find top objects
 def _is_top_object(obj,layout):
     x = layout[obj]['x'][0]
@@ -281,13 +304,16 @@ def _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene):
                 y1 = layout[id0]['y']
                 z1 = layout[id0]['z']
                 for id1 in scene_ids[1]:
-                    x2 = layout[id1]['x']
-                    y2 = layout[id1]['y']
-                    z2 = layout[id1]['z']
-                    if 'directions_' in Relations[0][0]:
-                        d = cart2sph(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
-                        if d==VF_dict[Relations[0][0]]['VF']:
-                            ids.append(id0)
+                    # if id1 != id0:
+                        x2 = layout[id1]['x']
+                        y2 = layout[id1]['y']
+                        z2 = layout[id1]['z']
+                        if x1[0]!=x2[0] or y1[0]!=y2[0] or z1[0]!=z2[0]:
+                            # print x1-x2,y1-y2,z1-z2
+                            if 'directions_' in Relations[0][0]:
+                                d = _func_directions(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
+                                if d==VF_dict[Relations[0][0]]['VF']:
+                                    ids.append(id0)
             if len(ids)==1:
                 if ids[0] == scene:
                     valid_entity = 1
@@ -321,11 +347,11 @@ def _match_Destination_with_scene(Destination,D_Entities,D_Relations,VF_dict,lay
             x2 = layout[id1]['x'][1]
             y2 = layout[id1]['y'][1]
             z2 = layout[id1]['z'][1]
-
-            if 'directions_' in D_Relations[0][0]:
-                d = cart2sph(x1-x2,y1-y2,z1-z2)
-                if d==VF_dict[D_Relations[0][0]]['VF']:
-                    valid_destination = 1
+            if x1!=x2 or y1!=y2 or z1!=z2:
+                if 'directions_' in D_Relations[0][0]:
+                    d = _func_directions(x1-x2,y1-y2,z1-z2)
+                    if d==VF_dict[D_Relations[0][0]]['VF']:
+                        valid_destination = 1
     return valid_destination
 
 #---------------------------------------------------------------------------#
@@ -378,9 +404,14 @@ for scene in range(1,1001):
     grammar_trees = _read_grammar_trees(scene)
     semantic_trees = _read_semantic_trees(scene)
     for id in semantic_trees:
+        # if id != 14789: continue
         for g in semantic_trees[id]:
+            # if g != 7: continue
+            # print id,g,grammar_trees[id][g]
+            # print semantic_trees[id][g]
             for semantic in semantic_trees[id][g]:
                 tree = semantic_trees[id][g][semantic]
+                # print tree
                 pass_flag = _validate(tree, scene_tree['py'], grammar_trees[id][g],scene,id,g)
                 if pass_flag:
                     grammar = grammar_trees[id][g]
@@ -423,9 +454,9 @@ for meaning in sorted(Matching_VF.keys()):
     for word in Matching_VF[meaning]:
         print meaning,word,Matching_VF[meaning][word]
 
-print '------------------'
-for word in Words:
-    print word,Words[word]
+# print '------------------'
+# for word in Words:
+#     print word,Words[word]
 
 pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags1.p'
-pickle.dump([Matching,Matching_VF], open(pkl_file, 'wb'))
+pickle.dump([Matching,Matching_VF,passed_scenes,passed_ids], open(pkl_file, 'wb'))
