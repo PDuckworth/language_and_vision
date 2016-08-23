@@ -48,10 +48,14 @@ for scene in range(1,1001):
                 idf[word] = 1.0
             else:
                 idf[word] += 1
+
+sorted_x = sorted(idf.items(), key=operator.itemgetter(1))
+print sorted_x
+
 x = idf
 FW = []
 alpha_min = .2
-alpha_max = np.log(n_doc/20.0)
+alpha_max = np.log(n_doc/23.0)
 for word in idf:
     idf[word]=np.log(n_doc/idf[word])
     if idf[word] < alpha_min or idf[word] > alpha_max:

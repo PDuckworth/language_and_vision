@@ -104,6 +104,8 @@ class Robot():
             S[i] = S[i].replace(" atop ", " top ")
             S[i] = S[i].replace(" i ton ", " it on ")
             S[i] = S[i].replace(" hte ", " the ")
+            S[i] = S[i].replace(" pryamid ", " pyramid ")
+
             A = S[i].split(' ')
             while '' in A:         A.remove('')
             s = ' '.join(A)
@@ -239,16 +241,78 @@ class Robot():
         self._initialize_robot()
         # self._update_scene_number()
 
+    #-----------------------------------------------------------------------------------------------------#     find top objects
+    def _is_top_object(self,obj,layout):
+        x = layout[obj]['position'][0]
+        y = layout[obj]['position'][1]
+        z = layout[obj]['position'][2]
+        top_object=1
+        for obj2 in layout:
+            if obj2 != obj:
+                x2 = layout[obj2]['position'][0]
+                y2 = layout[obj2]['position'][1]
+                z2 = layout[obj2]['position'][2]
+                if x2==x and y2==y and z2>z:
+                    top_object=0
+        return top_object
+
+    #-----------------------------------------------------------------------------------------------------#     find tower objects
+    def _get_towers(self,layout):
+        groups = {}
+        height = {}
+        colours = {}
+        shapes = {}
+        towers = {}
+        for obj in layout:
+            if obj != 'gripper':
+                x=layout[obj]['position'][0]
+                y=layout[obj]['position'][1]
+                z=layout[obj]['position'][2]
+                rgb = layout[obj]['F_HSV']
+                shape = layout[obj]['F_SHAPE']
+                if shape in ['cube','cylinder']:
+                    if (x,y) not in groups:
+                        groups[(x,y)]=1
+                        height[(x,y)]=z
+                        colours[(x,y)] = rgb
+                        shapes[(x,y)] = 'tower'
+                    else:
+                        groups[(x,y)]+=1
+                        if z>height[(x,y)]:
+                            height[(x,y)]=z
+                        if rgb not in colours[(x,y)]:
+                            colours[(x,y)]+='-'+rgb
+                        if shape not in shapes[(x,y)]:
+                            shapes[(x,y)]+='-'+shape
+                            # print colours[(x,y)]
+
+        # print np.max(self.positions.keys()),self.positions.keys()
+
+        for i in groups:
+            if groups[i]>1:
+                key = np.max(self.positions.keys())+1
+                self.positions[key] = {}
+                self.positions[key]['x'] = [i[0],i[0]]
+                self.positions[key]['y'] = [i[1],i[1]]
+                self.positions[key]['z'] = [height[i],height[i]]
+                self.positions[key]['F_HSV'] = colours[i]
+                self.positions[key]['F_SHAPE'] = 'tower'
+                self.positions[key]['moving'] = 0
+
+
     #-----------------------------------------------------------------------------------------------------#     add objects to scene
     def _add_objects_to_scene(self):
         self.frame_number = 0
-        l1 = self.Data['layouts'][self.Data['scenes'][self.scene]['initial']]   # initial layput
+        l1 = self.Data['layouts'][self.Data['scenes'][self.scene]['initial']]   # initial layout
         # print l1
         for obj in l1:
             x = l1[obj]['position'][0]
             y = l1[obj]['position'][1]
             z = l1[obj]['position'][2]
-            # inilizing the position vector to be saved later
+            # top = self._is_top_object(obj,l1)
+            # if top:
+                # print x,y,z
+                # inilizing the position vector to be saved later
             self.positions[obj] = {}
             self.positions[obj]['x'] = [int(x)]
             self.positions[obj]['y'] = [int(y)]
@@ -263,6 +327,7 @@ class Robot():
             else:
                 self.positions[obj]['moving'] = 1
 
+        self._get_towers(l1)
 
         I = self.Data['scenes'][self.scene]['I_move']
 

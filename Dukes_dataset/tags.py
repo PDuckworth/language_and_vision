@@ -74,7 +74,7 @@ for row in range(len(VF_dict.keys())):
 for col in range(len(LF_dict.keys())):
     cost_matrix[:,col]-=np.min(cost_matrix[:,col])
 
-alpha = .01
+alpha = .002
 sorted_LF = sorted(LF_dict.keys())
 sorted_VF = sorted(VF_dict.keys())
 hypotheses_tags = {}
@@ -87,7 +87,8 @@ for val2,VF in enumerate(sorted_VF):
             print VF,'---',LF,':',cost_matrix[val2,val1]
 
 
-# ###################################### cols first
+# # ###################################### cols first
+#
 # rows = len(VF_dict.keys())
 # cols = len(LF_dict.keys())
 # cost_matrix = np.ones((rows,cols), dtype=np.float32)
@@ -106,15 +107,15 @@ for val2,VF in enumerate(sorted_VF):
 # alpha = .0
 # sorted_LF = sorted(LF_dict.keys())
 # sorted_VF = sorted(VF_dict.keys())
-# hypotheses_tags = {}
+# # hypotheses_tags = {}
 # for val2,VF in enumerate(sorted_VF):
 #     for val1,LF in enumerate(sorted_LF):
 #         if cost_matrix[val2,val1] <= alpha:
 #             if LF not in hypotheses_tags:
 #                 hypotheses_tags[LF] = {}
-#                 if VF not in hypotheses_tags[LF]:
-#                     hypotheses_tags[LF][VF] = cost_matrix[val2,val1]
-#                     print '>>>>>>>>>>>',VF,'---',LF,':',cost_matrix[val2,val1]
+#             if VF not in hypotheses_tags[LF]:
+#                 hypotheses_tags[LF][VF] = cost_matrix[val2,val1]
+#                 print '>>>>>>>>>>>',VF,'---',LF,':',cost_matrix[val2,val1]
 
 pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
 pickle.dump([hypotheses_tags, VF_dict, LF_dict], open(pkl_file, 'wb'))

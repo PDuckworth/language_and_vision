@@ -116,31 +116,35 @@ def _get_colors(positions):
     colors = []
     for obj in positions:
         if obj != 'gripper':
-            if positions[obj]['F_HSV'] not in colors:
-                colors.append(positions[obj]['F_HSV'])
+            color = positions[obj]['F_HSV']
+            for c in color.split('-'):
+                if c not in colors:
+                    colors.append(c)
     return colors
 
 def _get_shapes(positions):
     shapes = []
     for obj in positions:
         if obj != 'gripper':
-            if positions[obj]['F_SHAPE'] not in shapes:
-                shapes.append(positions[obj]['F_SHAPE'])
+            shape = positions[obj]['F_SHAPE']
+            for s in shape.split('-'):
+                if s not in shapes:
+                    shapes.append(s)
 
-    groups = {}
-    for obj in positions:
-        if obj != 'gripper':
-            x=positions[obj]['x'][0]
-            y=positions[obj]['y'][0]
-            if positions[obj]['F_SHAPE'] in ['cube','cylinder']:
-                if (x,y) not in groups:
-                    groups[(x,y)]=1
-                else:
-                    groups[(x,y)]+=1
-    for i in groups:
-        if groups[i]>1:
-            shapes.append('tower')
-            break
+    # groups = {}
+    # for obj in positions:
+    #     if obj != 'gripper':
+    #         x=positions[obj]['x'][0]
+    #         y=positions[obj]['y'][0]
+    #         if positions[obj]['F_SHAPE'] in ['cube','cylinder']:
+    #             if (x,y) not in groups:
+    #                 groups[(x,y)]=1
+    #             else:
+    #                 groups[(x,y)]+=1
+    # for i in groups:
+    #     if groups[i]>1:
+    #         shapes.append('tower')
+    #         break
     return shapes
 
 def _get_distances(positions):

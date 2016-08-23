@@ -65,8 +65,11 @@ def _is_valid_action_query(tree):
             if actions==0:
                 query_valid+=1
             if actions>0 and len(query)==actions:
+                # print '>>>>>>>>>>>',query,actions
                 query_valid+=1
         if query_valid == len(tree):
+            # print tree
+            # print '----------------------'
             action_valid=1
     return action_valid
 
@@ -209,8 +212,44 @@ def cart2sph(x,y,z):
     az = int(az/num)*num
     return int(elev), int(az)
 
+#-----------------------------------------------------------------------------------------------------#     find top objects
+def _is_top_object(obj,layout):
+    x = layout[obj]['x'][0]
+    y = layout[obj]['y'][0]
+    z = layout[obj]['z'][0]
+    top_object=1
+    for obj2 in layout:
+        if obj2 != 'gripper':
+            'obj2 should not be the moving object'
+            if obj2 != obj:
+                x2 = layout[obj2]['x'][0]
+                y2 = layout[obj2]['y'][0]
+                z2 = layout[obj2]['z'][0]
+                if x2==x and y2==y and z2>z:
+                    top_object=0
+    return top_object
+
+def _get_top_objects(layout):
+    ids = []
+    for obj in layout:
+        if obj != 'gripper':
+            if layout[obj]['F_SHAPE'] == 'tower':
+                ids.append(obj)
+            elif _is_top_object(obj,layout):
+                ids.append(obj)
+    return ids
+
+def _remove_not_top_objects(scene_ids,layout):
+    ids = _get_top_objects(layout)
+    for id in scene_ids:
+        # print scene_ids[id]
+        scene_ids[id] = list(set(scene_ids[id]).intersection(ids))
+        # print scene_ids[id]
+        # print '-----------'
+    return scene_ids
 #---------------------------------------------------------------------------#
 def _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene):
+    # print '>>>>>>>>>>>>>',scene
     scene_ids = {}
     valid_entity = 0
     for id in Entities:
@@ -226,6 +265,10 @@ def _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene):
                 scene_ids[id] = ids
             else:
                 scene_ids[id] = list(set(scene_ids[id]).intersection(ids))
+
+    scene_ids = _remove_not_top_objects(scene_ids,layout)
+
+
     if len(scene_ids.keys()) == 1 and len(Entity)==1:
         if len(scene_ids[0]) == 1:
             if scene_ids[0][0] == scene:
@@ -268,6 +311,8 @@ def _match_Destination_with_scene(Destination,D_Entities,D_Relations,VF_dict,lay
                     scene_ids[id] = ids
                 else:
                     scene_ids[id] = list(set(scene_ids[id]).intersection(ids))
+
+        scene_ids = _remove_not_top_objects(scene_ids,layout)
         if len(scene_ids[id])==1:
             x1 = scene[0]
             y1 = scene[1]
@@ -320,8 +365,12 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
     return pass_flag
 #---------------------------------------------------------------------------#
 hypotheses_tags, VF_dict, LF_dict = _read_tags()
-counter = []
-for scene in range(10,11):
+passed_scenes = []
+passed_ids = []
+Matching = {}
+Matching_VF = {}
+Words = {}
+for scene in range(1,1001):
     layout = _read_layout(scene)
     semantic_trees = {}
     print 'test grammar from scene : ',scene
@@ -329,14 +378,54 @@ for scene in range(10,11):
     grammar_trees = _read_grammar_trees(scene)
     semantic_trees = _read_semantic_trees(scene)
     for id in semantic_trees:
-        print id
-        print grammar_trees[id]
         for g in semantic_trees[id]:
             for semantic in semantic_trees[id][g]:
                 tree = semantic_trees[id][g][semantic]
-                print tree
                 pass_flag = _validate(tree, scene_tree['py'], grammar_trees[id][g],scene,id,g)
-                if pass_flag and scene not in counter:
-                    counter.append(scene)
-print len(counter)
-print counter
+                if pass_flag:
+                    grammar = grammar_trees[id][g]
+                    for item in range(len(grammar_trees[id][g])):
+                        for word,meaning in zip(grammar[item],tree[item]):
+                            if word not in Words:
+                                Words[word] = [scene]
+                            else:
+                                Words[word].append(scene)
+                            if word not in Matching:
+                                Matching[word] = {}
+                            if meaning not in Matching[word]:
+                                Matching[word][meaning]=1
+                            else:
+                                Matching[word][meaning]+=1
+
+                            if meaning not in Matching_VF:
+                                Matching_VF[meaning] = {}
+                            if word not in Matching_VF[meaning]:
+                                Matching_VF[meaning][word]=1
+                            else:
+                                Matching_VF[meaning][word]+=1
+                    if scene not in passed_scenes:
+                        passed_scenes.append(scene)
+                    passed_ids.append(id)
+print '#########################################'
+print 'number of scenes:',len(passed_scenes)
+print 'number of sentences:',len(passed_ids)
+print '#########################################'
+# for i in range(len(passed_ids)):
+#     for j in range(i+1,len(passed_ids)):
+#         if passed_ids[i]-passed_ids[j]==0:
+#             print '>>>>>>>',passed_ids[i]
+for word in Matching:
+    for meaning in Matching[word]:
+        print word,meaning,Matching[word][meaning]
+
+print '------------------'
+for meaning in sorted(Matching_VF.keys()):
+    for word in Matching_VF[meaning]:
+        print meaning,word,Matching_VF[meaning][word]
+
+print '------------------'
+for word in Words:
+    print word,Words[word]
+
+pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags1.p'
+pickle.dump([Matching,Matching_VF], open(pkl_file, 'wb'))
