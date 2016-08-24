@@ -52,6 +52,9 @@ for scene in range(1,1001):
 sorted_x = sorted(idf.items(), key=operator.itemgetter(1))
 print sorted_x
 
+# print idf['lift']
+# print idf['box']
+# print idf['dark']
 x = idf
 FW = []
 alpha_min = .2
@@ -60,6 +63,7 @@ for word in idf:
     idf[word]=np.log(n_doc/idf[word])
     if idf[word] < alpha_min or idf[word] > alpha_max:
         FW.append(word)
+
 
 pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
 pickle.dump(FW, open(pkl_file, 'wb'))

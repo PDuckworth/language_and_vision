@@ -277,7 +277,7 @@ def _remove_not_top_objects(scene_ids,layout):
         # print '-----------'
     return scene_ids
 #---------------------------------------------------------------------------#
-def _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene):
+def _match_Entity_with_scene(Action,Entity,Entities,Relations,VF_dict,layout,scene):
     # print '>>>>>>>>>>>>>',scene
     scene_ids = {}
     valid_entity = 0
@@ -301,6 +301,9 @@ def _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene):
     if len(scene_ids.keys()) == 1 and len(Entity)==1:
         if len(scene_ids[0]) == 1:
             if scene_ids[0][0] == scene:
+                valid_entity = 1
+        elif Action[0] == 'actions_discard':
+            if scene in scene_ids[0]:
                 valid_entity = 1
     if len(scene_ids.keys()) == 2:
         ids = []
@@ -370,7 +373,7 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
         valid_action = _match_action_with_scene(Action,scene_tree['A'],VF_dict)
         if valid_action:
             if len(scene_tree)==2:
-                valid_entity = _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene_tree['E'])
+                valid_entity = _match_Entity_with_scene(Action,Entity,Entities,Relations,VF_dict,layout,scene_tree['E'])
                 if valid_entity:
                     results = {}
                     results['grammar'] = grammar
@@ -381,7 +384,7 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
                     pickle.dump(results, open(pkl_file, 'wb'))
                     pass_flag = 1
             if len(scene_tree)==3:
-                valid_entity = _match_Entity_with_scene(Entity,Entities,Relations,VF_dict,layout,scene_tree['E'])
+                valid_entity = _match_Entity_with_scene(Action,Entity,Entities,Relations,VF_dict,layout,scene_tree['E'])
                 if valid_entity:
                     valid_destination = _match_Destination_with_scene(Destination,D_Entities,D_Relations,VF_dict,layout,scene_tree['D'])
                     if valid_destination:
@@ -412,11 +415,11 @@ for scene in range(1,1001):
     grammar_trees = _read_grammar_trees(scene)
     semantic_trees = _read_semantic_trees(scene)
     for id in semantic_trees:
-        # if id != 15382: continue
+        # if id != 26889: continue
         # if 'and' in sentences[id]['text']:
-        #     print id,sentences[id]['text']
+        # print id,sentences[id]['text']
         for g in semantic_trees[id]:
-            # if g != 7: continue
+            # if g != 0: continue
             # print id,g,grammar_trees[id][g]
             # print semantic_trees[id][g]
             for semantic in semantic_trees[id][g]:
