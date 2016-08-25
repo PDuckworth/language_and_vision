@@ -87,10 +87,11 @@ def _change_tree(RCL,text):
     for p in (tree.treepositions()):
         p = list(p)
         if tree[p] in tokens:
-            if p[:-1] not in to_be_removed:
-                to_be_removed.append(p[:-1])
             change = p[:-1]
-            change[-1]-=1
+            if change[-1]!=0:
+                if p[:-1] not in to_be_removed:
+                    to_be_removed.append(p[:-1])
+                change[-1]-=1
             change = tuple(change)
             if change not in to_be_changed:
                 to_be_changed[change] = [p]
@@ -119,11 +120,13 @@ def _change_tree(RCL,text):
             #     s+=' '+words[int(tree[token])-1]
         # print 'change >>',tree[item],'>>',s
         tree[item]=s
+    # print '>>>>>>>>>>>>',to_be_changed
     for item in to_be_removed:
+        # print item
         # print 'remove >>',tree[item]
         del tree[item]
-    print tree
-    print '--------------------'
+    # print tree
+    # print '--------------------'
     return tree
 
 #---------------------------------------------------------------------------#
@@ -131,7 +134,7 @@ Matching,Matching_VF,passed_scenes,passed_sentences = _read_passed_tags()
 sentences_to_test = {}
 bad_trees = [14588,23958,10646,25409,25625,14427,23982,16360,22369,23928,16792,18058,25013,9323,26997,25565,14412,16159,26955,4028,9207,18582,25100,25058,23428,23985,12027,25653,14624,14423, 25682,12515,13775,4073,10186,13046,25622,26283,23217,12453,23955,23970,23756,23898,14789,25477,9418,2541,23738,24170]
 trees = []
-for scene in range(1,10):
+for scene in range(998,1001):#920!!!
     print '###',scene
     sentences = _read_sentences(scene)
     for id in sentences:
@@ -140,12 +143,17 @@ for scene in range(1,10):
                 S = sentences[id]['text']
                 sentences_to_test[id] = sentences[id]
                 # if id in passed_sentences:
+                print '>>>>',sentences[id]['RCL']
                 tree = _change_tree(sentences[id]['RCL'],sentences[id]['text'])
+                print tree
+                print '----'
                 trees.append(tree)
                 pkl_file = '/home/omari/Datasets_old/Dukes_modified/RCL-trees/'+str(id)+'_tree.p'
                 pickle.dump(tree, open(pkl_file, 'wb'))
 
 grammar = learn_trees(trees)
+print grammar
+S=S.replace('the ','')
 print prob_parse(grammar,S)
 
 

@@ -29,7 +29,7 @@ def make_tree(table, splits, left, right, nonterminal):
         return ProbabilisticTree(nonterminal.symbol(), [left_tree, right_tree],
                                  prob=prob)
 
-def parse_table(grammar, words, trace=0):
+def parse_table(grammar, words, trace=5):
     table = {}
     splits = {}
     n = len(words)
@@ -47,13 +47,15 @@ def parse_table(grammar, words, trace=0):
         for prod in grammar.productions():
             lhs = prod.lhs()
             rhs = prod.rhs()
+            # print lhs
+            if rhs != ():
 
-            if isinstance(rhs[0], basestring):
-                if words[i] == rhs[0]:
-                    table[i, i+1, lhs] = prod.prob()
-                    splits[i, i+1, lhs] = (words[i], None, None)
-                    if trace > 0:
-                        display_prod(i, i+1, n, lhs, rhs, prod.prob())
+                if isinstance(rhs[0], basestring):
+                    if words[i] == rhs[0]:
+                        table[i, i+1, lhs] = prod.prob()
+                        splits[i, i+1, lhs] = (words[i], None, None)
+                        if trace > 0:
+                            display_prod(i, i+1, n, lhs, rhs, prod.prob())
 
     # main loop
     total = 0
