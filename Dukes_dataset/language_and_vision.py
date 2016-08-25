@@ -380,7 +380,7 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
                     results['semantic'] = tree
                     results['tree_structure'] = tree_structure
                     results['entity'] = [Entity,Entities,Relations]
-                    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(scene)+'_'+str(id)+'_'+str(g)+'_matched_tree.p'
+                    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(id)+'.p'
                     pickle.dump(results, open(pkl_file, 'wb'))
                     pass_flag = 1
             if len(scene_tree)==3:
@@ -394,7 +394,7 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
                         results['tree_structure'] = tree_structure
                         results['entity'] = [Entity,Entities,Relations]
                         results['destination'] = [Destination,D_Entities,D_Relations]
-                        pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(scene)+'_'+str(id)+'_'+str(g)+'_matched_tree.p'
+                        pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(id)+'.p'
                         pickle.dump(results, open(pkl_file, 'wb'))
                         pass_flag = 1
     return pass_flag
