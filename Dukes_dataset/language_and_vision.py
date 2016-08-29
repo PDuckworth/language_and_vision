@@ -82,7 +82,7 @@ def _is_valid_action_query(tree):
 #---------------------------------------------------------------------------#
 def _get_all_entities(Entity):
     _Entity = []
-    features = ['colors_','shapes_','locations_']
+    features = ['color_','type_','locations_']
     Entities = {}
     Relations = {}
 
@@ -105,7 +105,7 @@ def _get_all_entities(Entity):
                 new_entity = 0
             _Entity.append(word)
 
-    features = ['directions_']
+    features = ['relation_']
     count = 0
     new_relation = 0
     _Entity_Relation = []
@@ -195,12 +195,12 @@ def _match_action_with_scene(Action,Scene,VF_dict):
 #---------------------------------------------------------------------------#
 def _get_object_ids(feature,value,layout):
     ids = []
-    if feature=='shapes':
+    if feature=='type':
         for id in layout:
             if id!='gripper':
                 if layout[id]['F_SHAPE']==value:
                     ids.append(id)
-    if feature=='colors':
+    if feature=='color':
         for id in layout:
             if id!='gripper':
                 if layout[id]['F_HSV']==value:
@@ -319,7 +319,7 @@ def _match_Entity_with_scene(Action,Entity,Entities,Relations,VF_dict,layout,sce
                         z2 = layout[id1]['z']
                         if x1[0]!=x2[0] or y1[0]!=y2[0] or z1[0]!=z2[0]:
                             # print x1-x2,y1-y2,z1-z2
-                            if 'directions_' in Relations[0][0]:
+                            if 'relation_' in Relations[0][0]:
                                 d = _func_directions(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
                                 if d==VF_dict[Relations[0][0]]['VF']:
                                     ids.append(id0)
@@ -357,7 +357,7 @@ def _match_Destination_with_scene(Destination,D_Entities,D_Relations,VF_dict,lay
             y2 = layout[id1]['y'][1]
             z2 = layout[id1]['z'][1]
             if x1!=x2 or y1!=y2 or z1!=z2:
-                if 'directions_' in D_Relations[0][0]:
+                if 'relation_' in D_Relations[0][0]:
                     d = _func_directions(x1-x2,y1-y2,z1-z2)
                     if d==VF_dict[D_Relations[0][0]]['VF']:
                         valid_destination = 1
