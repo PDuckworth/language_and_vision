@@ -144,6 +144,7 @@ sentences_to_test = {}
 counter = 0
 counter2= 0
 bad_trees = [14588,23958,10646,25409,25625,14427,23982,16360,22369,23928,16792,18058,25013,9323,26997,25565,14412,16159,26955,4028,9207,18582,25100,25058,23428,23985,12027,25653,14624,14423, 25682,12515,13775,4073,10186,13046,25622,26283,23217,12453,23955,23970,23756,23898,14789,25477,9418,2541,23738,24170]
+scenes = []
 for scene in range(1,1001):
     print '###',scene
     sentences = _read_sentences(scene)
@@ -151,6 +152,9 @@ for scene in range(1,1001):
         if id not in bad_trees:
             if not _is_yuk(sentences[id]['text']):
                 sentences_to_test[id] = sentences[id]
+                if scene not in scenes:
+                    scenes.append(scene)
+                counter+=1
                 if id in passed_sentences:
                     RCL_tree = _read_RCL_tree(id)
                     print RCL_tree
@@ -166,10 +170,12 @@ for scene in range(1,1001):
                         tree = Tree('event:', [A, E, D])
                     # print tree
                     if tree==RCL_tree:
-                        counter+=1
+                        # counter+=1
+                        pass
                     else:
                         print tree
                         print RCL_tree
                         counter2+=1
 print counter
 print counter2
+print len(scenes)
