@@ -11,7 +11,7 @@ import os.path
 class gui():
     """docstring for gui"""
     def __init__(self):
-        self.dir1 = '/home/strands/Paul/Mos_dataset/scene'
+        self.dir1 = '/home/omari/Datasets/scene'
         self.root = tk.Tk()
         self.root.bind('<Escape>', lambda e: self.root.quit())
         self.textFrame = tk.Frame(self.root)
@@ -41,7 +41,7 @@ class gui():
 
         #check to see if file exits
     def check_file(self):
-        fname = self.dir1+str(self.folder)+'/commands_paul.txt'
+        fname = self.dir1+str(self.folder)+'/commands_test.txt'
         if not os.path.isfile(fname):
             self.file_com = open(fname, 'w')
         else:
