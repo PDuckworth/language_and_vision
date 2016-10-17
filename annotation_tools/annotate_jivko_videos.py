@@ -11,6 +11,7 @@ import os.path
 class gui():
     """docstring for gui"""
     def __init__(self):
+        self.dir_saving = '/home/omari/Dropbox/Jivko_dataset/'
         self.dir1 = '/home/omari/Datasets_old/Jivko_dataset/t'
         self.root = tk.Tk()
         self.root.bind('<Escape>', lambda e: self.root.quit())
@@ -33,11 +34,11 @@ class gui():
 
         self.lmain = tk.Label(self.root)
         self.lmain.pack()
-        self.folder = 5
+        self.folder = 1
         self.dir2 = self.dir1+str(self.folder)+'/obj_'
-        self.obj = 20
+        self.obj = 0
         self.dir3 = self.dir2+str(self.obj)+'/trial_1/'
-        self.actions = ['drop','grasp','hold','lift','lower','press','push']
+        self.actions = ['drop']#,'grasp','lift','lower','press','push']
         self.actions_counter = 0
         self.dir4 = self.dir3+self.actions[self.actions_counter]+'/vision_data/'
         # print self.dir4
@@ -50,7 +51,7 @@ class gui():
 
         #check to see if file exits
     def check_file(self):
-        fname = self.dir1+str(self.folder)+'/commands_test.txt'
+        fname = self.dir_saving+str(self.folder)+'-'+str(self.obj)+'-'+self.actions[self.actions_counter]+'-commands_mo.txt'
         if not os.path.isfile(fname):
             self.file_com = open(fname, 'w')
         else:
