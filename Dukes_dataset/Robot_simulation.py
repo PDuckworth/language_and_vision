@@ -16,8 +16,9 @@ for scene in range(1,1001):
     R._initilize_values()
     R._fix_sentences()
     R._change_data()
-    print 'simulating scene number :',scene
+    # print 'simulating scene number :',scene
     R._initialize_scene()                  # place the robot and objects in the initial scene position without saving or motion
-    R._print_scentenses()                  # print the sentences on terminal and remove the SPAM sentence
-    R._save_motion()                       # save the motion into a text file
-    R._clear_scene()                       # remove the objects from the scene once it's done
+    # R._print_scentenses()                  # print the sentences on terminal and remove the SPAM sentence
+    # R._save_motion()                       # save the motion into a text file
+    # R._clear_scene()                       # remove the objects from the scene once it's done
+print R.total_num_objects/1000.0

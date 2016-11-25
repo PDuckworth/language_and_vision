@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.subplots_adjust(hspace=0.45, wspace=1.3)
-ax = plt.subplot(3, 1, 1)
+ax = plt.subplot(2, 1, 1)
 opacity = 0.8
 bar_width=1
 
@@ -40,50 +40,42 @@ bar_width=1
 people = ('unsupervised', 'our-system', 'supervised')
 y_pos = np.arange(len(people))
 
-plt.barh([0], [31.2], align='center', height=1, alpha=0.9,color='orange')
-plt.barh([1], [81.5], align='center', height=1, alpha=0.7, color="green")
-plt.barh([2], [97.4], align='center', height=1, alpha=0.9, color=(.4,.3,1))
+s = 88.4
+u = 28.7
+o = 83.2
+plt.barh([0], [u], align='center', height=1, alpha=0.9,color='orange')
+plt.barh([1], [o], align='center', height=1, alpha=0.7, color="green")
+plt.barh([2], [s], align='center', height=1, alpha=0.9, color=(.4,.3,1))
 
-ax.text(31.2-4,0-.2,'31.2',size=16)
-ax.text(81.5-4,1-.2,'81.5',size=16)
-ax.text(97.4-4,2-.2,'97.4',size=16)
+# ax.text(31.2-4,0-.2,'31.2',size=16)
+# ax.text(83.2-4,1-.2,'83.2',size=16)
+# ax.text(90.4-4,2-.2,'88.4',size=16)
 
 plt.xticks([0,20,40,60,80,100], ['0','20','40','60','80','100'], fontsize=20)
 plt.yticks(y_pos, people, fontsize=20)
-plt.title('Alomari (2016) dataset', fontsize=20)
+plt.title('Real-world dataset', fontsize=20)
 plt.tick_params(axis='x', which='both', bottom='on', top='off', labelbottom='on')
 plt.tick_params(axis='y', which='both', left='on', right='off', labelleft='on')
 
-ax = plt.subplot(3, 1, 2)
+ax = plt.subplot(2, 1, 2)
 
 people = ('unsupervised', 'our-system', 'supervised')
 y_pos = np.arange(len(people))
 
-plt.barh([0], [14], align='center', height=1, alpha=0.4)
-plt.barh([1], [75], align='center', height=1, alpha=0.4, color="red")
-plt.barh([2], [99], align='center', height=1, alpha=0.4, color="green")
-plt.xticks([0,20,40,60,80,100], ['0','20','40','60','80','100'], fontsize=20)
-plt.yticks(y_pos, people, fontsize=20)
-plt.title('Jivko (2016) dataset', fontsize=20)
-plt.tick_params(axis='x', which='both', bottom='on', top='off', labelbottom='on')
-plt.tick_params(axis='y', which='both', left='on', right='off', labelleft='on')
-
-ax = plt.subplot(3, 1, 3)
-
-people = ('unsupervised', 'our-system', 'supervised')
-y_pos = np.arange(len(people))
-
+s = 90.7
+u = 32.6
+o = 86.0
 plt.barh([0], [32.9], align='center', height=1, alpha=0.9,color='orange')
 plt.barh([1], [85.6], align='center', height=1, alpha=0.7, color="green")
-plt.barh([2], [98.1], align='center', height=1,  alpha=0.9, color=(.4,.3,1))
+plt.barh([2], [90.1], align='center', height=1,  alpha=0.9, color=(.4,.3,1))
 
-ax.text(32.9-4,0-.2,'32.9',size=16)
-ax.text(85.6-4,1-.2,'85.6',size=16)
-ax.text(98.1-4,2-.2,'98.1',size=16)
+# ax.text(32.9-4,0-.2,'32.9',size=16)
+# ax.text(85.6-4,1-.2,'82.6',size=16)
+# ax.text(90.1-4,2-.2,'87.1',size=16)
 
 plt.xticks([0,20,40,60,80,100], ['0','20','40','60','80','100'], fontsize=20)
 plt.yticks(y_pos, people, fontsize=20)
-plt.title('Dukes (2013) dataset', fontsize=20)
+plt.title('synthetic-world dataset', fontsize=20)
 plt.tick_params(axis='x', which='both', bottom='on', top='off', labelbottom='on')
 plt.tick_params(axis='y', which='both', left='on', right='off', labelleft='on')
 

@@ -14,11 +14,13 @@ import pickle
 class Robot():
     #-----------------------------------------------------------------------------------------------------#     initial
     def __init__(self):
+        self.total_num_objects = 0
         self._initilize_values()
         self.all_sentences_count = 1
         # self.draw_scene()
         # self.draw_robot()
         self.Data = read_data()
+        print len(self.Data['RCL'].keys())
         self.all_words = []
 
 
@@ -306,6 +308,7 @@ class Robot():
         l1 = self.Data['layouts'][self.Data['scenes'][self.scene]['initial']]   # initial layout
         # print l1
         for obj in l1:
+            self.total_num_objects += 1
             x = l1[obj]['position'][0]
             y = l1[obj]['position'][1]
             z = l1[obj]['position'][2]
