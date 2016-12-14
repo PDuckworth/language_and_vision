@@ -57,6 +57,21 @@ plt.tick_params(axis='y', which='both', left='on', right='off', labelleft='on')
 
 ax = plt.subplot(3, 1, 2)
 
+
+people = ('unsupervised', 'our-system', 'supervised')
+y_pos = np.arange(len(people))
+
+plt.barh([0], [14], align='center', height=1, alpha=0.4)
+plt.barh([1], [75], align='center', height=1, alpha=0.4, color="red")
+plt.barh([2], [99], align='center', height=1, alpha=0.4, color="green")
+plt.xticks([0,20,40,60,80,100], ['0','20','40','60','80','100'], fontsize=20)
+plt.yticks(y_pos, people, fontsize=20)
+plt.title('Jivko (2016) dataset', fontsize=20)
+plt.tick_params(axis='x', which='both', bottom='on', top='off', labelbottom='on')
+plt.tick_params(axis='y', which='both', left='on', right='off', labelleft='on')
+
+ax = plt.subplot(3, 1, 3)
+
 people = ('unsupervised', 'our-system', 'supervised')
 y_pos = np.arange(len(people))
 
