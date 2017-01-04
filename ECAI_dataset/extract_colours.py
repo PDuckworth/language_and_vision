@@ -12,10 +12,12 @@ class features():
     def __init__(self):
         self.username = getpass.getuser()
         self.dir1 = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/'
-        self.folder = 201
+        self.folder = 1
         self.shirt_mean = {}
         self.short_mean = {}
         self._read_video()
+        self.start_folder = 10
+        self.end_folder = 494
 
         self.shirt_joints = [
             'torso',
@@ -31,6 +33,9 @@ class features():
         self.skeleton_data = {}
         self.dir_img = self.dir1+'/vid'+str(self.folder)+'/images/'
         self.dir_skl = self.dir1+'/vid'+str(self.folder)+'/skeleton/'
+        self.dir_saving = self.dir1+'/features/vid'+str(self.folder)
+        if not os.path.isdir(self.dir_saving):
+            os.mkdir(self.dir_saving)
         self.imgs = sorted([f for f in os.listdir(self.dir_img) if '.jpg' in f])
         self.skls = sorted([f for f in os.listdir(self.dir_skl) if '.txt' in f])
         self.shirt = []
@@ -39,7 +44,7 @@ class features():
         self.short_mean[self.folder] = {}
 
     def create_sk_images(self):
-        for folder in [50,409]:
+        for folder in range(self.start_folder,self.end_folder):
             self.folder = folder
             self._read_video()
             for frame in range(len(self.imgs)):
@@ -49,9 +54,27 @@ class features():
                 self.get_2d_sk(frame)
                 img_skl = self.get_shirt_short(rgb_img)
                 self._get_mean_colors(frame)
-                cv2.imshow('test',img_skl)
-                cv2.waitKey(10)
-        self._plot_rgb_data()
+                # cv2.imshow('test',img_skl)
+                # cv2.waitKey(10)
+            self._save_colours()
+        # self._plot_rgb_data()
+
+    def _save_colours(self):
+        f1 = open(self.dir_saving+'/colours.txt','w')
+        for i in self.shirt_mean[self.folder]:
+            b = self.shirt_mean[self.folder][i][0]
+            g = self.shirt_mean[self.folder][i][1]
+            r = self.shirt_mean[self.folder][i][2]
+            f1.write(str(b)+','+str(g)+','+str(r)+'\n')
+        f1.write('---------------------\n')
+        for i in self.short_mean[self.folder]:
+            b = self.short_mean[self.folder][i][0]
+            g = self.short_mean[self.folder][i][1]
+            r = self.short_mean[self.folder][i][2]
+            f1.write(str(b)+','+str(g)+','+str(r)+'\n')
+        f1.close()
+
+
 
     def _plot_rgb_data(self):
         fig = plt.figure()
@@ -62,7 +85,7 @@ class features():
         r = []
         c = []
 
-        for folder in [50,409]:
+        for folder in [1,2]:
             for i in self.shirt_mean[folder]:
                 b.append(self.shirt_mean[folder][i][0])
                 g.append(self.shirt_mean[folder][i][1])
@@ -111,7 +134,7 @@ class features():
         cv2.fillConvexPoly(mask_shirt, poly, (255,255,255))
         shirt = cv2.bitwise_and(img, img, mask=mask_shirt)
         self.shirt = self._remove_black(shirt,[0,0,0])
-        cv2.imshow("shirt", self.shirt)
+        # cv2.imshow("shirt", self.shirt)
 
         mask_short = np.zeros((480,640), np.uint8)
         points = []
@@ -123,7 +146,7 @@ class features():
         cv2.fillConvexPoly(mask_short, poly, (255,0,255))
         short = cv2.bitwise_and(img, img, mask=mask_short)
         self.short = self._remove_black(short,[0,0,0])
-        cv2.imshow("short", self.short)
+        # cv2.imshow("short", self.short)
         return img
 
     def _remove_black(self,img,val):
