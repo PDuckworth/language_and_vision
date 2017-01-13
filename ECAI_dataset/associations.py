@@ -25,9 +25,22 @@ class association():
         self.good_videos = map(int, self.good_videos)
 
     def _read_colours(self):
-        self.colours = pickle.load(open( self.dir_colour+"colours_clusters.p", "rb" ) )
+        # self.colours = pickle.load(open( self.dir_colour+"colours_clusters.p", "rb" ) )
+        self.colours = {}
+        f = open(self.dir_colour+'colour_clusters_GT.txt','r')
+        for line in f:
+            line = line.split('\n')[0].split(':')
+            vid = int(line[0].split('_')[1])
+            colours = line[1].split(',')
+            self.colours[vid] = colours
+
         for key in self.colours:
             # get only the unique colours
+            # if self.colours[key][0] == 5: self.colours[key][0] = 0
+            # if self.colours[key][1] == 5: self.colours[key][1] = 0
+            # if self.colours[key][0] == 6: self.colours[key][0] = 1
+            # if self.colours[key][1] == 6: self.colours[key][1] = 1
+
             if self.colours[key][0] == self.colours[key][1]:
                 self.colours[key] = [self.colours[key][0]]
 
@@ -57,6 +70,9 @@ class association():
         # self.association['colour'] = {}
         for i in range(1,494):
             # if i not in self.good_videos: continue
+            # if 'blue' in self.words[i]:
+            #     if 'blue' not in self.colours[i]:
+                    # print '>>',i
             for word in self.words[i]:
                 if word not in self.association:
                     self.association[word] = {}
@@ -71,14 +87,15 @@ class association():
 
 
         for word in self.association:
-            if word != 'red':
-                continue
+            # if word != 'blue':
+            #     continue
             if self.association[word]['N']>10:
-                print word
-                for colour in self.association[word]['colour']:
+                print '## ',word
+                A = sorted(self.association[word]['colour'], key=lambda k: self.association[word]['colour'][k])
+                for colour in  reversed(A):
                     value = self.association[word]['colour'][colour]/self.association[word]['N']
-                    # if value>.5:
-                    print colour,':',value
+                    if value>.7:
+                        print colour,':',value
                 print '----------'
 
 
