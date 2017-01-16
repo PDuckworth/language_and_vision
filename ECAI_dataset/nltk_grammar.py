@@ -65,10 +65,17 @@ class grammar():
         for word in g:
             self.upper_garment.append(word.split('\n')[0])
 
+        g = open( self.dir2+"lower_garment.txt", "r")
+        self.lower_garment = []
+        for word in g:
+            self.lower_garment.append(word.split('\n')[0])
+
     def _read_parse(self):
         for i in range(self.start,self.end):
             self.tags[i] = {}
             self.tags[i]['upper_garment'] = {}
+            self.tags[i]['lower_garment'] = {}
+            self.tags[i]['name'] = {}
             # Parsed = self.parser.raw_parse_sents(self.raw_sentences[i])
             for c1,sentence in enumerate(self.sentences[i]):
                 tree = pickle.load(open( self.dir2+"/trees/tree_"+str(i)+'_'+str(c1)+".p", "rb" ))
@@ -95,6 +102,31 @@ class grammar():
                                             self.tags[i]['upper_garment'][leaf] = 0
                                         self.tags[i]['upper_garment'][leaf] += 1
 
+                            ok1 = 0
+                            for word in subtree.leaves():
+                                if word in self.lower_garment:
+                                    ok1 = 1
+                            if ok1 and ok2:
+                                print subtree
+                                for subsubtree in subtree.subtrees():
+                                    if subsubtree.label()=='JJ':
+                                        leaf = subsubtree.leaves()[0]
+                                        if leaf not in self.tags[i]['lower_garment']:
+                                            self.tags[i]['lower_garment'][leaf] = 0
+                                        self.tags[i]['lower_garment'][leaf] += 1
+                            ok1 = 0
+                            for subsubtree in subtree.subtrees():
+                                if subsubtree.label() == 'NN':
+                                    ok1 =1
+                            if ok1 and not ok2:
+                                print subtree
+                                for subsubtree in subtree.subtrees():
+                                    if subsubtree.label()=='NN':
+                                        leaf = subsubtree.leaves()[0]
+                                        if leaf not in self.tags[i]['name']:
+                                            self.tags[i]['name'][leaf] = 0
+                                        self.tags[i]['name'][leaf] += 1
+
 
     def _parse(self):
         for i in range(self.start,self.end):
@@ -108,6 +140,7 @@ class grammar():
                         #sub trees
                         if subtree.height() == 3:
                             if subtree.label() == 'NP':
+                                ## upper garment
                                 ok1 = 0
                                 for word in subtree.leaves():
                                     if word in self.upper_garment:
@@ -125,24 +158,8 @@ class grammar():
                                                 self.tags[i]['upper_garment'][leaf] = 0
                                             self.tags[i]['upper_garment'][leaf] += 1
 
-                                # for sub2 in subtree.subtrees():
-                                #
-                                #     leaves = sub2.leaves()
-                                #     # print leaves
-                                #     for l in leaves:
-                                #         if str(l) in self.bad_words:
-                                #             print subtree
-                        #words
-                        # if subtree.height() == 2:
-                            # loc += 1 # location of word in_sentence
-                        # if label in ['NN','JJ']:
-                        # if leaf not in self.tags[label]:
-                        #     self.tags[label][leaf] = 0
-                        # self.tags[label][leaf] += 1
-                    # print tree
-                    # print self._adj_filter(tree)
-                    # # for branch in tree:
-                    # #     print branch
+                                ## lower garment
+
                     print '---',i
                     # tree.draw()
 
@@ -153,9 +170,9 @@ class grammar():
         for i in self.tags:
             print '-------------',i
             for label in self.tags[i]:
-                if label == 'upper_garment':
-                    for word in self.tags[i][label]:
-                        print word,':',self.tags[i][label][word],self.words_count[word]
+                print '###',label,':'
+                for word in self.tags[i][label]:
+                    print word,':',self.tags[i][label][word],self.words_count[word]
 
 def main():
     f = grammar()
@@ -164,7 +181,7 @@ def main():
     # f._pos_tag()
     f._read_parse()
     # f._parse()
-    # f._save_data()
+    f._save_data()
     f._print_results()
 
 if __name__=="__main__":

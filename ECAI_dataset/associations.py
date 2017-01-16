@@ -18,6 +18,7 @@ class association():
         self.username = getpass.getuser()
         self.dir_colour = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/clusters/colours/'
         self.dir_text = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/ECAI_annotations/vid'
+        self.dir2 = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/grammar/'
         self.folder = 1
 
         self.good_videos = "1 6 13 14 18 19 20 21 26 27 28 29 163 184 186 202 322 340 5 9 12 22 200 364 481 489 8 15 30 32 37 49 92 109 111 117 217 298 358 389 460 464 469 472 477 484 50 145 309 360 375 445 454 459 483 52 81 115 253 271 284 297 308 418 435 59 66 125 277 302 386 89 90 274 307 363 379 316 324 357 366 455"
@@ -98,13 +99,22 @@ class association():
                         print colour,':',value
                 print '----------'
 
+    def _read_tags(self):
+        self.tags,self.words_count = pickle.load(open( self.dir2+"tags.p", "rb" ) )
+        # for i in self.tags.keys():
+            # for label in self.tags[i]:
+                # print '#########,',label
+                # for word in self.tags[i][label]:
+                    # print word
+
 
 
 def main():
     f = association()
     f._read_colours()
-    f._read_annotations()
-    f._build_associations()
+    # f._read_annotations()
+    f._read_tags()
+    # f._build_associations()
     # f.create_sk_images()
 
 if __name__=="__main__":
