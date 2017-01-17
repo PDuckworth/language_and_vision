@@ -3,11 +3,13 @@ from sklearn import mixture
 import itertools
 from sklearn.metrics.cluster import v_measure_score
 import cv2
+import pickle
 
 class faces_class():
     """docstring for faces"""
     def __init__(self):
         self.dir_faces =  '/home/omari/Datasets_old/ECAI_dataset_segmented/faces/'
+        self.dir_grammar = '/home/omari/Datasets_old/ECAI_dataset_segmented/grammar/'
         self.im_len = 60
 
     def _read_faces(self):
@@ -31,13 +33,18 @@ class faces_class():
 
     def _read_faces_images(self):
         f = open(self.dir_faces+'faces_images.csv','rb')
+        self.video_num = []
         self.images = []
         for line in f:
             line = line.split('\n')[0]
+            vid = line.split('/')[1].split('_')[1]
+            if vid not in self.video_num:
+                self.video_num.append(int(vid))
             img = cv2.imread(self.dir_faces+line)
             self.images.append(cv2.resize(img, (self.im_len,self.im_len), interpolation = cv2.INTER_AREA))
             # cv2.imshow('test',img)
             # cv2.waitKey(100)
+        print self.video_num
 
     def _cluster_faces(self):
         final_clf = 0
@@ -45,7 +52,7 @@ class faces_class():
 
         for i in range(25):
             print '#####',i
-            n_components_range = range(28, 35)
+            n_components_range = range(30, 65)
             cv_types = ['spherical', 'tied', 'diag', 'full']
             lowest_bic = np.infty
             # bic = []
@@ -72,13 +79,14 @@ class faces_class():
         # print '----------------'
         self.best_v = best_v
         Y_ = final_clf.predict(self.X)
+
         self.predictions = {}
         for person in self.faces:
-            self.predictions[person] = np.zeros(len(clf.means_))
+            self.predictions[person] = np.zeros(len(final_clf.means_))
             for i in self.faces[person]:
-                self.predictions[person][clf.predict([i])[0]]+=1
+                self.predictions[person][final_clf.predict([i])[0]]+=1
 
-        self.cost_matrix = np.zeros((len(self.faces),len(clf.means_)))
+        self.cost_matrix = np.zeros((len(self.faces),len(final_clf.means_)))
 
         for count,person in enumerate(self.predictions):
             self.predictions[person]/=np.sum(self.predictions[person])
@@ -115,51 +123,40 @@ class faces_class():
             # cv2.waitKey(2000)
             cv2.imwrite(self.dir_faces+str(p)+'.jpg',image)
             cv2.imwrite(self.dir_faces+str(p)+'_avg.jpg',image_avg)
-
+        pickle.dump( [self.faces,final_clf,self.X,self.best_v], open( self.dir_faces+'faces_clusters.p', "wb" ) )
 
     def _assignment(self):
-        # print np.max(self.cost_matrix)
-        # print self.cost_matrix.argmax(axis=0)
-        # print '######################################r'
-        # print self.cost_matrix
-        # indices = np.where(self.cost_matrix == self.cost_matrix.max())
-        # print indices
+        pass
 
-        # name = '/results_%s.txt' % percentage
-        f1 = open(self.dir_faces+'results.txt', 'w')
-        # f1.write('n_topics: %s \n' % n_topics)
-        # f1.write('n_iters: %s \n' % n_iters)
-        # f1.write('dirichlet_params: (%s, %s) \n' % (dirichlet_params[0], dirichlet_params[1]))
-        # f1.write('class_thresh: %s \n' % class_thresh)
-        # f1.write('code book length: %s \n' % codebook_lengh)
-        # f1.write('sum of all words: %s \n' % sum_of_all_words)
-        # f1.write('videos classified: %s \n \n' % len(pred_labels))
-
-        f1.write('v-score: %s \n' % self.best_v)
-        # f1.write('homo-score: %s \n' % 0)
-        # f1.write('comp-score: %s \n' % 0)
-        # f1.write('mi: %s \n' % mi)
-        # f1.write('nmi: %s \n \n' % nmi)
-        # f1.write('mat: \n')
-
-        # headings = ['{:3d}'.format(int(r)) for r in xrange(n_topics)]
-        # f1.write('T = %s \n \n' % headings)
-        # for row, lab in zip(mat, labs):
-        #     text_row = ['{:3d}'.format(int(r)) for r in row]
-        #     f1.write('    %s : %s \n' % (text_row, lab))
-        # f1.write('\n')
-        # f1.write('relevant_words: \n')
-        # for i, words in relevant_words[percentage].items():
-        #     f1.write('Topic %s : %s \n' % (i, words[:10]))
-        # f1.close()
-
+    def _read_tags(self):
+        self.words_top = {}
+        self.words_low = {}
+        self.words_name = {}
+        self.tags,self.words_count = pickle.load(open( self.dir_grammar+"tags.p", "rb" ) )
+        for i in self.tags.keys():
+            self.words_top[i] = []
+            self.words_low[i] = []
+            for word in self.tags[i]['upper_garment']:
+                if word not in self.words_top[i]:
+                    self.words_top[i].append(word)
+            for word in self.tags[i]['lower_garment']:
+                if word not in self.words_low[i]:
+                    self.words_low[i].append(word)
+            if i in self.video_num:
+                self.words_name[i] = []
+                for word in self.tags[i]['name']:
+                    if str(word) not in self.words_name[i]:
+                        self.words_name[i].append(str(word))
+        print self.words_name
 
 
 def main():
     f = faces_class()
     f._read_faces()
     f._read_faces_images()
-    f._cluster_faces()
+    f._read_tags()
+
+    # f._cluster_faces()
     # f._assignment()
 
 if __name__=="__main__":

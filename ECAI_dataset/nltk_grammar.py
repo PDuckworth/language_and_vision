@@ -44,6 +44,11 @@ class grammar():
                 line = line.replace('.','')
                 line = line.replace(',','')
                 line = line.replace('/','-')
+                line = line.replace('iis','is')
+                line = line.replace('daniels','daniel')
+                if 'suasan' in line:
+                    print '###########################',line,i
+                line = line.replace('suasan','susan')
                 self.sentences[i][count] = line
 
                 print i,line
@@ -116,12 +121,12 @@ class grammar():
                                         self.tags[i]['lower_garment'][leaf] += 1
                             ok1 = 0
                             for subsubtree in subtree.subtrees():
-                                if subsubtree.label() == 'NN':
+                                if subsubtree.label() in ['NN','NNS']:
                                     ok1 =1
                             if ok1 and not ok2:
                                 print subtree
                                 for subsubtree in subtree.subtrees():
-                                    if subsubtree.label()=='NN':
+                                    if subsubtree.label() in ['NN','NNS']:
                                         leaf = subsubtree.leaves()[0]
                                         if leaf not in self.tags[i]['name']:
                                             self.tags[i]['name'][leaf] = 0
@@ -133,35 +138,37 @@ class grammar():
             self.tags[i] = {}
             self.tags[i]['upper_garment'] = {}
             Parsed = self.parser.raw_parse_sents(self.raw_sentences[i])
+            print i
             for c1,sentence in enumerate(Parsed):
                 for c2,tree in enumerate(sentence):
+                    # print tree
                     pickle.dump( tree, open( self.dir2+"/trees/tree_"+str(i)+'_'+str(c1)+".p", "wb" ) )
-                    for subtree in tree.subtrees():
-                        #sub trees
-                        if subtree.height() == 3:
-                            if subtree.label() == 'NP':
-                                ## upper garment
-                                ok1 = 0
-                                for word in subtree.leaves():
-                                    if word in self.upper_garment:
-                                        ok1 = 1
-                                ok2 = 0
-                                for subsubtree in subtree.subtrees():
-                                    if subsubtree.label() == 'JJ':
-                                        ok2 =1
-                                if ok1 and ok2:
-                                    print subtree
-                                    for subsubtree in subtree.subtrees():
-                                        if subsubtree.label()=='JJ':
-                                            leaf = subsubtree.leaves()[0]
-                                            if leaf not in self.tags[i]['upper_garment']:
-                                                self.tags[i]['upper_garment'][leaf] = 0
-                                            self.tags[i]['upper_garment'][leaf] += 1
-
-                                ## lower garment
-
-                    print '---',i
-                    # tree.draw()
+                    # for subtree in tree.subtrees():
+                    #     #sub trees
+                    #     if subtree.height() == 3:
+                    #         if subtree.label() == 'NP':
+                    #             ## upper garment
+                    #             ok1 = 0
+                    #             for word in subtree.leaves():
+                    #                 if word in self.upper_garment:
+                    #                     ok1 = 1
+                    #             ok2 = 0
+                    #             for subsubtree in subtree.subtrees():
+                    #                 if subsubtree.label() == 'JJ':
+                    #                     ok2 =1
+                    #             if ok1 and ok2:
+                    #                 print subtree
+                    #                 for subsubtree in subtree.subtrees():
+                    #                     if subsubtree.label()=='JJ':
+                    #                         leaf = subsubtree.leaves()[0]
+                    #                         if leaf not in self.tags[i]['upper_garment']:
+                    #                             self.tags[i]['upper_garment'][leaf] = 0
+                    #                         self.tags[i]['upper_garment'][leaf] += 1
+                    #
+                    #             ## lower garment
+                    #
+                    # print '---',i
+                    # # tree.draw()
 
     def _save_data(self):
         pickle.dump( [self.tags,self.words_count], open( self.dir2+"tags.p", "wb" ) )
@@ -179,8 +186,8 @@ def main():
     f._read_annotations()
     f._read_garments()
     # f._pos_tag()
-    f._read_parse()
-    # f._parse()
+    # f._read_parse()
+    f._parse()
     f._save_data()
     f._print_results()
 
