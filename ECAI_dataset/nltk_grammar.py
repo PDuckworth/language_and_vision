@@ -20,6 +20,7 @@ class grammar():
         self.parser = stanford.StanfordParser(model_path="/home/omari/Datasets_old/ECAI_dataset_segmented/stanford-parser-full-2016-10-31/jar/englishPCFG.ser.gz")
         self.start = 1
         self.end = 494
+        self.list = [1,10,100,200,300]
         self.tags = {}
 
     def _read_annotations(self):
@@ -29,6 +30,8 @@ class grammar():
         self.all_words = []
         self.all_passed_words = []
         for i in range(self.start,self.end):
+        # for i in self.list:
+            print '>>>',i
             self.sentences[i] = {}
             self.raw_sentences[i] = []
             self.words[i] = []
@@ -46,9 +49,10 @@ class grammar():
                 line = line.replace('/','-')
                 line = line.replace('iis','is')
                 line = line.replace('daniels','daniel')
-                if 'suasan' in line:
-                    print '###########################',line,i
+                line = line.replace('allan','alan')
+                line = line.replace('jenas','jeans')
                 line = line.replace('suasan','susan')
+                line = line.replace(' t ',' ')
                 self.sentences[i][count] = line
 
                 print i,line
@@ -77,6 +81,7 @@ class grammar():
 
     def _read_parse(self):
         for i in range(self.start,self.end):
+        # for i in self.list:
             self.tags[i] = {}
             self.tags[i]['upper_garment'] = {}
             self.tags[i]['lower_garment'] = {}
@@ -132,9 +137,9 @@ class grammar():
                                             self.tags[i]['name'][leaf] = 0
                                         self.tags[i]['name'][leaf] += 1
 
-
     def _parse(self):
         for i in range(self.start,self.end):
+        # for i in self.list:
             self.tags[i] = {}
             self.tags[i]['upper_garment'] = {}
             Parsed = self.parser.raw_parse_sents(self.raw_sentences[i])
@@ -186,8 +191,9 @@ def main():
     f._read_annotations()
     f._read_garments()
     # f._pos_tag()
-    # f._read_parse()
-    f._parse()
+    ### swap between the next two commands: _parse save the trees, _read_parse is quicker and create the tags
+    f._read_parse()
+    # f._parse()
     f._save_data()
     f._print_results()
 
