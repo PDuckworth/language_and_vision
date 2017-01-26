@@ -8,8 +8,8 @@ import pickle
 class faces_class():
     """docstring for faces"""
     def __init__(self):
-        self.dir_faces =  '/home/omari/Datasets_old/ECAI_dataset_segmented/faces/'
-        self.dir_grammar = '/home/omari/Datasets_old/ECAI_dataset_segmented/grammar/'
+        self.dir_faces =  '/home/omari/Datasets/ECAI_dataset/faces/'
+        self.dir_grammar = '/home/omari/Datasets/ECAI_dataset/grammar/'
         self.im_len = 60
 
     def _read_faces(self):
@@ -144,8 +144,6 @@ class faces_class():
     def _read_faces_clusters(self):
         self.faces,self.final_clf,self.X,self.best_v = pickle.load(open(self.dir_faces+'faces_clusters.p',"rb"))
         self.Y_ = self.final_clf.predict(self.X)
-        # print self.Y_
-        # print self.final_clf.n_components
 
     def _assignment(self):
         self.CM_nouns = np.zeros((len(self.all_nouns),self.final_clf.n_components))
@@ -153,7 +151,6 @@ class faces_class():
         self.nouns_count = {}
         self.cluster_count = {}
         for cluster,vid in zip(self.Y_,self.video_num):
-            # print cluster,vid
             if cluster not in self.cluster_count:
                 self.cluster_count[cluster] = 0
             self.cluster_count[cluster] += 1
@@ -164,13 +161,12 @@ class faces_class():
                 if noun_i not in self.nouns_count:
                     self.nouns_count[noun_i] = 0
                 self.nouns_count[noun_i]+=1
-            # print '--------------'
-                # if name not in self.cons_n_c:
-                #     self.cons_n_c
-        # print self.CM_nouns[0,:]
         print '--------------------'
-        print self.CM_nouns[0,:]/self.nouns_count[0]
-        print self.CM_clust[0,:]/self.cluster_count[0]
+        pickle.dump( [self.CM_nouns, self.CM_clust, self.nouns_count, self.cluster_count, self.all_nouns], open( self.dir_faces+'faces_correlation.p', "wb" ) )
+        # for i in self.nouns_count:
+            # self.CM_nouns[i,:]/=self.nouns_count[i]
+        # print self.CM_nouns
+        # print self.CM_clust[0,:]/self.cluster_count[0]
         # print self.cluster_count
         # print self.all_nouns
 
@@ -180,7 +176,6 @@ class faces_class():
             if val not in self.cluster_images:
                 self.cluster_images[val] = []
             self.cluster_images[val].append(img)
-
 
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
         paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
@@ -232,8 +227,7 @@ class faces_class():
                 cv2.imwrite(self.dir_faces+'faces_clusters_ex.jpg',paper_img)
 
             cv2.imwrite(self.dir_faces+str(p)+'_cluster.jpg',image_cluster)
-
-
+            cv2.imwrite(self.dir_faces+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
 def main():
     f = faces_class()
