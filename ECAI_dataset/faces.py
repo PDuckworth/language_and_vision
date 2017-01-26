@@ -4,6 +4,8 @@ import itertools
 from sklearn.metrics.cluster import v_measure_score
 import cv2
 import pickle
+import pulp
+import sys
 
 class faces_class():
     """docstring for faces"""
@@ -145,7 +147,7 @@ class faces_class():
         self.faces,self.final_clf,self.X,self.best_v = pickle.load(open(self.dir_faces+'faces_clusters.p',"rb"))
         self.Y_ = self.final_clf.predict(self.X)
 
-    def _assignment(self):
+    def _assignment_matrix(self):
         self.CM_nouns = np.zeros((len(self.all_nouns),self.final_clf.n_components))
         self.CM_clust = np.zeros((self.final_clf.n_components,len(self.all_nouns)))
         self.nouns_count = {}
@@ -163,12 +165,6 @@ class faces_class():
                 self.nouns_count[noun_i]+=1
         print '--------------------'
         pickle.dump( [self.CM_nouns, self.CM_clust, self.nouns_count, self.cluster_count, self.all_nouns], open( self.dir_faces+'faces_correlation.p', "wb" ) )
-        # for i in self.nouns_count:
-            # self.CM_nouns[i,:]/=self.nouns_count[i]
-        # print self.CM_nouns
-        # print self.CM_clust[0,:]/self.cluster_count[0]
-        # print self.cluster_count
-        # print self.all_nouns
 
     def _pretty_plot(self):
         self.cluster_images = {}
@@ -229,6 +225,36 @@ class faces_class():
             cv2.imwrite(self.dir_faces+str(p)+'_cluster.jpg',image_cluster)
             cv2.imwrite(self.dir_faces+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
+    def _LP_assign(self):
+        faces = range(33)
+        words=self.all_nouns
+        max_assignments=int(len(faces)*2)
+        def word_strength(face, word):
+            #conditional probabiltiy: (N(w,f)/N(f) + N(w,f)/N(w)) /2
+            # return round((100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] + 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)])/2)
+            return round(max(100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] , 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)]))
+        possible_assignments = [(x,y) for x in faces for y in words]
+        #create a binary variable for assignments
+        x = pulp.LpVariable.dicts('x', possible_assignments,
+                                    lowBound = 0,
+                                    upBound = 1,
+                                    cat = pulp.LpInteger)
+        prob = pulp.LpProblem("Assignment problem", pulp.LpMaximize)
+        #main objective function
+        prob += sum([word_strength(*assignment) * x[assignment] for assignment in possible_assignments])
+        #limiting the number of assignments
+        prob += sum([x[assignment] for assignment in possible_assignments]) <= max_assignments, \
+                                    "Maximum_number_of_assignments"
+        #each face should get at least one assignment
+        for face in faces:
+            prob += sum([x[assignment] for assignment in possible_assignments
+                                        if face==assignment[0] ]) >= 1, "Must_assign_face_%d"%face
+        prob.solve()
+        # print ([sum([pulp.value(x[assignment]) for assignment in possible_assignments if face==assignment[0] ]) for face in faces])
+        f = open(self.dir_faces+"circos/faces.txt","w")
+        for assignment in possible_assignments:
+            if x[assignment].value() == 1.0:
+                print(assignment)
 def main():
     f = faces_class()
     f._read_faces()
@@ -236,8 +262,9 @@ def main():
     f._read_tags()
     # f._cluster_faces()
     f._read_faces_clusters()
-    f._assignment()
-    f._pretty_plot()
+    f._assignment_matrix()
+    f._LP_assign()
+    # f._pretty_plot()
 
 if __name__=="__main__":
     main()
