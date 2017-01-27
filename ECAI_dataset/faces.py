@@ -7,12 +7,17 @@ import pickle
 import pulp
 import sys
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 class faces_class():
     """docstring for faces"""
     def __init__(self):
         self.dir_faces =  '/home/omari/Datasets/ECAI_dataset/faces/'
         self.dir_grammar = '/home/omari/Datasets/ECAI_dataset/grammar/'
+        self.dir_annotation = '/home/omari/Datasets/ECAI_dataset/ECAI_annotations/vid'
         self.im_len = 60
+        self.f_score = []
 
     def _read_faces(self):
         f = open(self.dir_faces+'faces3_projections.csv','rb')
@@ -71,6 +76,21 @@ class faces_class():
                     if str(word) not in self.all_nouns:
                         self.all_nouns.append(str(word))
         self.all_nouns = sorted(self.all_nouns)
+
+    def _get_groundTruth(self):
+        self.GT_dict = {}
+        self.GT_total_links = 0
+        for cluster,vid in zip(self.Y_,self.video_num):
+            if cluster not in self.GT_dict:
+                self.GT_dict[cluster] = []
+            f = open(self.dir_annotation+str(vid)+"/person.txt",'r')
+            name = f.readline().split('\n')[0].split('#')[1]
+            name = str(name.lower())
+            # print vid,cluster,name
+            if name not in self.GT_dict[cluster]:
+                self.GT_dict[cluster].append(name)
+                self.GT_total_links+=1
+        # print self.GT_dict
 
     def _cluster_faces(self):
         final_clf = 0
@@ -225,45 +245,85 @@ class faces_class():
             cv2.imwrite(self.dir_faces+str(p)+'_cluster.jpg',image_cluster)
             cv2.imwrite(self.dir_faces+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
-    def _LP_assign(self):
-        faces = range(33)
-        words=self.all_nouns
-        max_assignments=int(len(faces)*2)
-        def word_strength(face, word):
-            #conditional probabiltiy: (N(w,f)/N(f) + N(w,f)/N(w)) /2
-            # return round((100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] + 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)])/2)
-            return round(max(100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] , 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)]))
-        possible_assignments = [(x,y) for x in faces for y in words]
-        #create a binary variable for assignments
-        x = pulp.LpVariable.dicts('x', possible_assignments,
-                                    lowBound = 0,
-                                    upBound = 1,
-                                    cat = pulp.LpInteger)
-        prob = pulp.LpProblem("Assignment problem", pulp.LpMaximize)
-        #main objective function
-        prob += sum([word_strength(*assignment) * x[assignment] for assignment in possible_assignments])
-        #limiting the number of assignments
-        prob += sum([x[assignment] for assignment in possible_assignments]) <= max_assignments, \
-                                    "Maximum_number_of_assignments"
-        #each face should get at least one assignment
-        for face in faces:
-            prob += sum([x[assignment] for assignment in possible_assignments
-                                        if face==assignment[0] ]) >= 1, "Must_assign_face_%d"%face
-        prob.solve()
-        # print ([sum([pulp.value(x[assignment]) for assignment in possible_assignments if face==assignment[0] ]) for face in faces])
-        f = open(self.dir_faces+"circos/faces.txt","w")
-        for assignment in possible_assignments:
-            if x[assignment].value() == 1.0:
-                print(assignment)
+    def _LP_assign(self,max_assignments):
+        if max_assignments != 0:
+            faces = range(33)
+            words=self.all_nouns
+            def word_strength(face, word):
+                #conditional probabiltiy: (N(w,f)/N(f) + N(w,f)/N(w)) /2
+                # return round((100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] + 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)])/2)
+                return round(max(100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] , 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)]))
+            possible_assignments = [(x,y) for x in faces for y in words]
+            #create a binary variable for assignments
+            x = pulp.LpVariable.dicts('x', possible_assignments,
+                                        lowBound = 0,
+                                        upBound = 1,
+                                        cat = pulp.LpInteger)
+            prob = pulp.LpProblem("Assignment problem", pulp.LpMaximize)
+            #main objective function
+            prob += sum([word_strength(*assignment) * x[assignment] for assignment in possible_assignments])
+            #limiting the number of assignments
+            prob += sum([x[assignment] for assignment in possible_assignments]) <= max_assignments, \
+                                        "Maximum_number_of_assignments"
+            #each face should get at least one assignment
+            # for face in faces:
+            #     prob += sum([x[assignment] for assignment in possible_assignments
+            #                                 if face==assignment[0] ]) >= 1, "Must_assign_face_%d"%face
+            prob.solve()
+            # print ([sum([pulp.value(x[assignment]) for assignment in possible_assignments if face==assignment[0] ]) for face in faces])
+            f = open(self.dir_faces+"circos/faces.txt","w")
+            correct = 0
+            for assignment in possible_assignments:
+                if x[assignment].value() == 1.0:
+                    if assignment[1] in self.GT_dict[assignment[0]]:
+                        correct += 1
+            Precision = correct/float(max_assignments)
+            Recall = correct/float(self.GT_total_links)
+            # print Precision,Recall
+            if not Precision and not Recall:
+                f_score=0
+            else:
+                f_score = 2*(Precision*Recall)/(Precision+Recall)
+        else:
+            f_score = 0
+        self.f_score.append(f_score)
+        print max_assignments
+        print self.f_score
+        print '-----------'
+        # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
+
+    def _plot_f_score(self):
+        self.f_score = pickle.load(open(self.dir_faces+'faces_f_score.p',"rb"))
+        x = []
+        maxi = 0
+        for i in range(len(self.f_score)):
+            x.append(i/float(len(self.cluster_count.keys())*len(self.all_nouns)))
+            if self.f_score[i]>maxi:
+                maxi = self.f_score[i]
+                print i,maxi
+        y = self.f_score
+        x.append(x[-1])
+        y.append(0)
+        fig, ax = plt.subplots()
+        ax.fill(x, y, zorder=10)
+        ax.grid(True, zorder=5)
+        plt.show()
+
+
 def main():
     f = faces_class()
     f._read_faces()
     f._read_faces_images()
     f._read_tags()
-    # f._cluster_faces()
+    # # f._cluster_faces()
     f._read_faces_clusters()
+    f._get_groundTruth()
     f._assignment_matrix()
-    f._LP_assign()
+    # f.min = 0
+    # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
+    # for i in range(f.min,f.max):
+    f._LP_assign(62)
+    # f._plot_f_score()
     # f._pretty_plot()
 
 if __name__=="__main__":
