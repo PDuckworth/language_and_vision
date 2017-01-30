@@ -18,6 +18,8 @@ class faces_class():
         self.dir_annotation = '/home/omari/Datasets/ECAI_dataset/ECAI_annotations/vid'
         self.im_len = 60
         self.f_score = []
+        self.Pr = []
+        self.Re = []
 
     def _read_faces(self):
         f = open(self.dir_faces+'faces3_projections.csv','rb')
@@ -167,22 +169,34 @@ class faces_class():
         self.faces,self.final_clf,self.X,self.best_v = pickle.load(open(self.dir_faces+'faces_clusters.p',"rb"))
         self.Y_ = self.final_clf.predict(self.X)
 
-    def _assignment_matrix(self):
+    def _assignment_matrix(self,fraction):
         self.CM_nouns = np.zeros((len(self.all_nouns),self.final_clf.n_components))
         self.CM_clust = np.zeros((self.final_clf.n_components,len(self.all_nouns)))
+
         self.nouns_count = {}
         self.cluster_count = {}
+        stop = len(self.video_num)*fraction
+        count = 0
         for cluster,vid in zip(self.Y_,self.video_num):
             if cluster not in self.cluster_count:
                 self.cluster_count[cluster] = 0
-            self.cluster_count[cluster] += 1
+            if count <= stop:
+                self.cluster_count[cluster] += 1
             for name in self.nouns[vid]:
                 noun_i = self.all_nouns.index(name)
-                self.CM_nouns[noun_i,cluster] += 1
-                self.CM_clust[cluster,noun_i] += 1
                 if noun_i not in self.nouns_count:
                     self.nouns_count[noun_i] = 0
-                self.nouns_count[noun_i]+=1
+                if count <= stop:
+                    self.CM_nouns[noun_i,cluster] += 1
+                    self.CM_clust[cluster,noun_i] += 1
+                    self.nouns_count[noun_i]+=1
+            count += 1
+        for i in self.nouns_count:
+            if not self.nouns_count[i]:
+                self.nouns_count[i] = 1
+        for i in self.cluster_count:
+            if not self.cluster_count[i]:
+                self.cluster_count[i] = 1
         print '--------------------'
         pickle.dump( [self.CM_nouns, self.CM_clust, self.nouns_count, self.cluster_count, self.all_nouns], open( self.dir_faces+'faces_correlation.p', "wb" ) )
 
@@ -246,6 +260,8 @@ class faces_class():
             cv2.imwrite(self.dir_faces+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
     def _LP_assign(self,max_assignments):
+        Precision = 0
+        Recall = 0
         if max_assignments != 0:
             faces = range(33)
             words=self.all_nouns
@@ -287,10 +303,23 @@ class faces_class():
         else:
             f_score = 0
         self.f_score.append(f_score)
+        self.Pr.append(Precision)
+        self.Re.append(Recall)
         print max_assignments
         print self.f_score
-        print '-----------'
+        # print '-----------'
+        pickle.dump( self.f_score, open( self.dir_faces+'faces_incremental.p', "wb" ) )
         # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
+
+    def _plot_incremental(self):
+        self.f_score = pickle.load(open(self.dir_faces+'faces_incremental.p',"rb"))
+        x = np.arange(len(self.f_score))/float(self.max-1)*493
+        fig, ax = plt.subplots()
+        ax.plot(x, self.f_score,'b',linewidth=2)
+        # ax.plot(x, yp,'r')
+        # ax.plot(x, yr,'g')
+        ax.grid(True, zorder=5)
+        plt.show()
 
     def _plot_f_score(self):
         self.f_score = pickle.load(open(self.dir_faces+'faces_f_score.p',"rb"))
@@ -318,11 +347,14 @@ def main():
     # # f._cluster_faces()
     f._read_faces_clusters()
     f._get_groundTruth()
-    f._assignment_matrix()
+    f.max = 20
+    for i in range(1,f.max+1):
+        f._assignment_matrix(i/float(f.max))
+        f._LP_assign(62)
+    f._plot_incremental()
     # f.min = 0
     # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
     # for i in range(f.min,f.max):
-    f._LP_assign(62)
     # f._plot_f_score()
     # f._pretty_plot()
 

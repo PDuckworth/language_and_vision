@@ -12,16 +12,15 @@ import matplotlib.pyplot as plt
 import colorsys
 from sklearn import mixture
 import operator
-
 import pickle
 
 class clustering():
     """docstring for clustering"""
     def __init__(self):
         self.username = getpass.getuser()
-        self.dir1 = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/features/vid'
-        self.dir2 = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/clusters/colours/'
-        self.dir_text = '/home/'+self.username+'/Datasets_old/ECAI_dataset_segmented/ECAI_annotations/vid'
+        self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset/features/vid'
+        self.dir2 = '/home/'+self.username+'/Datasets/ECAI_dataset/clusters/colours/'
+        self.dir_text = '/home/'+self.username+'/Datasets/ECAI_dataset/ECAI_annotations/vid'
         self.folder = 1
         self.main_word = 'red'
         self.list_of_bad_words = []#['hair','watch','zipper','shoes','wristwatch','head']
