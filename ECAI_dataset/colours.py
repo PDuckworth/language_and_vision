@@ -30,11 +30,11 @@ class colours_class():
         self.X = []
         self.rgb = []
         self.video_num = []
-        for f in range(139,140):
+        for f1 in range(1,494):
             count1 = 0
             count2 = 0
             top = 1
-            f = open(self.dir_colours+str(f)+'/colours.txt','r')
+            f = open(self.dir_colours+str(f1)+'/colours.txt','r')
             for line in f:
                 line = line.split('\n')[0]
                 if '-' in line:
@@ -53,7 +53,7 @@ class colours_class():
                     if data != []:
                         hls = colorsys.rgb_to_hls(data[2]/255.0, data[1]/255.0, data[0]/255.0)
                         xyz = self._hls_to_xyz(hls)
-                        self.video_num.append(f)
+                        self.video_num.append(f1)
                         if self.X == []:
                             self.X = [xyz]
                             self.rgb = [(data[2]/255.0, data[1]/255.0, data[0]/255.0)]
@@ -170,10 +170,10 @@ class colours_class():
 
         self.rgb = []
         for i in self.Y_:
-            # if i in [8,10,12]:
+            if i in [7]:
                 self.rgb.append(self._colors[i])
-            # else:
-            #     self.rgb.append((0,0,0))
+            else:
+                self.rgb.append((0,0,0))
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
@@ -195,42 +195,6 @@ class colours_class():
 
     def _assignment_matrix(self,fraction):
 
-        # self.adj_count = {}
-        # self.cluster_count = {}
-        # stop = len(self.video_num)*fraction
-        # count = 0
-        # for cluster,vid in zip(self.Y_,self.video_num):
-        #     if cluster not in self.cluster_count:
-        #         self.cluster_count[cluster] = 0
-        #     if count <= stop:
-        #         self.cluster_count[cluster] += 1
-        #     for name in self.adj[vid]:
-        #         noun_i = self.all_adj.index(name)
-        #         if noun_i not in self.adj_count:
-        #             self.adj_count[noun_i] = 0
-        #         if count <= stop:
-        #             # self.CM_nouns[noun_i,cluster] += 1
-        #             # self.CM_clust[cluster,noun_i] += 1
-        #             self.adj_count[noun_i]+=1
-        #     count += 1
-        # for i in self.adj_count:
-        #     if not self.adj_count[i]:
-        #         self.adj_count[i] = 1
-        # for i in self.cluster_count:
-        #     if not self.cluster_count[i]:
-        #         self.cluster_count[i] = 1
-        #
-        # # remove low counts
-        # adj_to_remove = []
-        # for i in self.adj_count:
-        #     if self.adj_count[i]<3:
-        #         adj_to_remove.append(i)
-        # for i in reversed(adj_to_remove):
-        #     # print '>>>>>>>', self.all_adj[i]
-        #     del self.all_adj[i]
-
-        self.CM_nouns = np.zeros((len(self.all_adj),self.final_clf.n_components))
-        self.CM_clust = np.zeros((self.final_clf.n_components,len(self.all_adj)))
         self.adj_count = {}
         self.cluster_count = {}
         stop = len(self.video_num)*fraction
@@ -241,8 +205,54 @@ class colours_class():
             if count <= stop:
                 self.cluster_count[cluster] += 1
             for name in self.adj[vid]:
-                if name == "red":
-                    print '>>>>>>>>>>>>',vid
+                noun_i = self.all_adj.index(name)
+                if noun_i not in self.adj_count:
+                    self.adj_count[noun_i] = 0
+                if count <= stop:
+                    # self.CM_nouns[noun_i,cluster] += 1
+                    # self.CM_clust[cluster,noun_i] += 1
+                    self.adj_count[noun_i]+=1
+            count += 1
+        for i in self.adj_count:
+            if not self.adj_count[i]:
+                self.adj_count[i] = 1
+        for i in self.cluster_count:
+            if not self.cluster_count[i]:
+                self.cluster_count[i] = 1
+
+        # remove low counts
+        adj_to_remove = []
+        for i in self.adj_count:
+            if self.adj_count[i]<3:
+                adj_to_remove.append(i)
+        for i in reversed(adj_to_remove):
+            print '>>>>>>>', self.all_adj[i]
+            del self.all_adj[i]
+
+        self.CM_nouns = np.zeros((len(self.all_adj),self.final_clf.n_components))
+        self.CM_clust = np.zeros((self.final_clf.n_components,len(self.all_adj)))
+        self.adj_count = {}
+        self.cluster_count = {}
+        stop = len(self.video_num)*fraction
+        count = 0
+        videos_seen = {}
+        for cluster,vid in zip(self.Y_,self.video_num):
+            videos_seen[vid] = {}
+            videos_seen[vid]['clusters'] = []
+            videos_seen[vid]['nouns'] = []
+
+
+        for cluster,vid in zip(self.Y_,self.video_num):
+            if cluster in videos_seen[vid]['clusters']:
+                continue
+            videos_seen[vid]['clusters'].append(cluster)
+            if cluster not in self.cluster_count:
+                self.cluster_count[cluster] = 0
+            if count <= stop:
+                self.cluster_count[cluster] += 1
+            for name in self.adj[vid]:
+                # if name == "red":
+                #     print '>>>>>>>>>>>>',vid
                 if name in self.all_adj:
                     noun_i = self.all_adj.index(name)
                     if noun_i not in self.adj_count:
@@ -250,7 +260,9 @@ class colours_class():
                     if count <= stop:
                         self.CM_nouns[noun_i,cluster] += 1
                         self.CM_clust[cluster,noun_i] += 1
-                        self.adj_count[noun_i]+=1
+                        if noun_i not in videos_seen[vid]['nouns']:
+                            self.adj_count[noun_i]+=1
+                            videos_seen[vid]['nouns'].append(noun_i)
             count += 1
         for i in self.adj_count:
             if not self.adj_count[i]:
@@ -261,7 +273,7 @@ class colours_class():
 
         print '--------------------'
         print self.CM_nouns[self.all_adj.index("red")],self.adj_count[self.all_adj.index("red")]
-        pickle.dump( [self.CM_nouns, self.CM_clust, self.adj_count, self.cluster_count, self.all_adj], open( self.dir2+'colours_correlation.p', "wb" ) )
+        # pickle.dump( [self.CM_nouns, self.CM_clust, self.adj_count, self.cluster_count, self.all_adj], open( self.dir2+'colours_correlation.p', "wb" ) )
 
     def _pretty_plot(self):
         self.cluster_images = {}
