@@ -11,12 +11,12 @@ def _get_f(i):
         f = "0"+str(i)
     return f
 
-folder = "138"
-obj = "0"
-read = 43
-start = 44
-finish = 229
-dir = "/home/omari/Datasets/scene"+folder+"/tracking/"
+folder = "155"
+obj = "2"
+read = 95
+start = 96
+finish = 160
+dir = "/home/omari/Datasets/Baxter_Dataset_final/scene"+folder+"/tracking/"
 file1 = _get_f(read)
 
 srcfile = dir+"obj"+obj+"_"+file1+".pcd"
