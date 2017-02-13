@@ -10,6 +10,7 @@ import colorsys
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class colours_class():
     """docstring for faces"""
@@ -26,10 +27,10 @@ class colours_class():
         self.Re = []
 
     def _read_colours(self):
-        self.X = [[1,1,1]]
+        self.X = []
+        self.rgb = []
         self.video_num = []
-        for f in range(1,494):
-            self.video_num.append(f)
+        for f in range(139,140):
             count1 = 0
             count2 = 0
             top = 1
@@ -41,19 +42,25 @@ class colours_class():
                 else:
                     data = []
                     line = line.split(',')
-                    if top and count1<10:
+                    if top and count1<3:
                         count1+=1
                         data = map(int, line)
 
-                    if not top and count2<10:
+                    if not top and count2<3:
                         count2+=1
                         data = map(int, line)
 
                     if data != []:
                         hls = colorsys.rgb_to_hls(data[2]/255.0, data[1]/255.0, data[0]/255.0)
                         xyz = self._hls_to_xyz(hls)
-                        self.X = np.vstack((self.X,xyz))
-        # print self.X
+                        self.video_num.append(f)
+                        if self.X == []:
+                            self.X = [xyz]
+                            self.rgb = [(data[2]/255.0, data[1]/255.0, data[0]/255.0)]
+                        else:
+                            self.X = np.vstack((self.X,xyz))
+                            self.rgb.append((data[2]/255.0, data[1]/255.0, data[0]/255.0))
+                        # print self.X
 
     def _hls_to_xyz(self,hls):
         h = hls[0]*2*np.pi
@@ -121,8 +128,6 @@ class colours_class():
         final_clf = 0
         best_v = 0
 
-        # for i in range(2):
-            # print '#####',i
         n_components_range = range(5, 15)
         cv_types = ['spherical', 'tied', 'diag', 'full']
         lowest_bic = np.infty
@@ -136,98 +141,93 @@ class colours_class():
                     best_gmm = gmm
         clf = best_gmm
         Y_ = clf.predict(self.X)
-            # v_meas = v_measure_score(self.persons, Y_)
-            # if v_meas > best_v:
-            #     best_v = v_meas
-            #     final_clf = clf
-            #     print best_v
-        # self.best_v = best_v
-        # Y_ = clf.predict(self.X)
-        # self.predictions = {}
-        # for person in self.faces:
-        #     self.predictions[person] = np.zeros(len(clf.means_))
-        #     for i in self.faces[person]:
-        #         self.predictions[person][clf.predict([i])[0]]+=1
-
-        # self.cost_matrix = np.zeros((len(self.all_adj),len(clf.means_)))
-        # print self.cost_matrix
-
-        # for count,person in enumerate(self.predictions):
-        #     self.predictions[person]/=np.sum(self.predictions[person])
-        #     self.cost_matrix[count] = self.predictions[person]
-
-        # self.cluster_images = {}
-        # for img,val in zip(self.images,Y_):
-        #     if val not in self.cluster_images:
-        #         self.cluster_images[val] = []
-        #     self.cluster_images[val].append(img)
-        #
-        # rows = 0
-        # maxi = 0
-        # for p in self.cluster_images:
-        #     if len(self.cluster_images[p])>maxi:
-        #         maxi = len(self.cluster_images[p])
-        #
-        # maxi = int(np.sqrt(maxi))
-        # for p in self.cluster_images:
-        #     count = 0
-        #     image = np.zeros((self.im_len*maxi,self.im_len*maxi,3),dtype=np.uint8)+255
-        #     image_avg = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
-        #     for i in range(maxi):
-        #         for j in range(maxi):
-        #             if count < len(self.cluster_images[p]):
-        #                 image[i*self.im_len:(i+1)*self.im_len,j*self.im_len:(j+1)*self.im_len,:] = self.cluster_images[p][count]
-        #                 image_avg += self.cluster_images[p][count]/(len(self.cluster_images[p])+1)
-        #             image[i*self.im_len:i*self.im_len+1,  j*self.im_len:(j+1)*self.im_len,  :] = 0
-        #             image[(i+1)*self.im_len:(i+1)*self.im_len+1,  j*self.im_len:(j+1)*self.im_len,  :] = 0
-        #             image[i*self.im_len:(i+1)*self.im_len,  j*self.im_len:j*self.im_len+1,  :] = 0
-        #             image[i*self.im_len:(i+1)*self.im_len,  (j+1)*self.im_len:(j+1)*self.im_len+1,  :] = 0
-        #             count+=1
-        #     # cv2.imshow('test',image)
-        #     # cv2.waitKey(2000)
-        #     cv2.imwrite(self.dir_faces+str(p)+'.jpg',image)
-        #     cv2.imwrite(self.dir_faces+str(p)+'_avg.jpg',image_avg)
         pickle.dump( [clf,self.X], open( self.dir2+'colour_clusters.p', "wb" ) )
+        self.final_clf = clf
+        self.Y_ = Y_
 
     def _read_colours_clusters(self):
-        self.final_clf,self.X = pickle.load(open(self.dir2+'colour_clusters.p',"rb"))
+        self.final_clf,X_ = pickle.load(open(self.dir2+'colour_clusters.p',"rb"))
         self.Y_ = self.final_clf.predict(self.X)
         # print self.Y_
 
+    def _plot_colours_clusters(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        X = []
+        Y = []
+        Z = []
+        for x,y,z in self.X:
+            X.append(x)
+            Y.append(y)
+            Z.append(z)
+        ax.scatter(X,Y,Z, c=self.rgb, marker='o')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+
+        self._HSV_tuples = [(x*1.0/11, 1.0, .7) for x in range(len(self.final_clf.means_))]
+        self._colors = map(lambda x: colorsys.hsv_to_rgb(*x), self._HSV_tuples)
+
+        self.rgb = []
+        for i in self.Y_:
+            # if i in [8,10,12]:
+                self.rgb.append(self._colors[i])
+            # else:
+            #     self.rgb.append((0,0,0))
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        X = []
+        Y = []
+        Z = []
+        for x,y,z in self.X:
+            X.append(x)
+            Y.append(y)
+            Z.append(z)
+        ax.scatter(X,Y,Z, c=self.rgb, marker='o')
+
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+
+        plt.show()
+        print self.Y_
+
     def _assignment_matrix(self,fraction):
 
-        self.adj_count = {}
-        self.cluster_count = {}
-        stop = len(self.video_num)*fraction
-        count = 0
-        for cluster,vid in zip(self.Y_,self.video_num):
-            if cluster not in self.cluster_count:
-                self.cluster_count[cluster] = 0
-            if count <= stop:
-                self.cluster_count[cluster] += 1
-            for name in self.adj[vid]:
-                noun_i = self.all_adj.index(name)
-                if noun_i not in self.adj_count:
-                    self.adj_count[noun_i] = 0
-                if count <= stop:
-                    # self.CM_nouns[noun_i,cluster] += 1
-                    # self.CM_clust[cluster,noun_i] += 1
-                    self.adj_count[noun_i]+=1
-            count += 1
-        for i in self.adj_count:
-            if not self.adj_count[i]:
-                self.adj_count[i] = 1
-        for i in self.cluster_count:
-            if not self.cluster_count[i]:
-                self.cluster_count[i] = 1
-
-        # remove low counts
-        adj_to_remove = []
-        for i in self.adj_count:
-            if self.adj_count[i]<3:
-                adj_to_remove.append(i)
-        for i in reversed(adj_to_remove):
-            del self.all_adj[i]
+        # self.adj_count = {}
+        # self.cluster_count = {}
+        # stop = len(self.video_num)*fraction
+        # count = 0
+        # for cluster,vid in zip(self.Y_,self.video_num):
+        #     if cluster not in self.cluster_count:
+        #         self.cluster_count[cluster] = 0
+        #     if count <= stop:
+        #         self.cluster_count[cluster] += 1
+        #     for name in self.adj[vid]:
+        #         noun_i = self.all_adj.index(name)
+        #         if noun_i not in self.adj_count:
+        #             self.adj_count[noun_i] = 0
+        #         if count <= stop:
+        #             # self.CM_nouns[noun_i,cluster] += 1
+        #             # self.CM_clust[cluster,noun_i] += 1
+        #             self.adj_count[noun_i]+=1
+        #     count += 1
+        # for i in self.adj_count:
+        #     if not self.adj_count[i]:
+        #         self.adj_count[i] = 1
+        # for i in self.cluster_count:
+        #     if not self.cluster_count[i]:
+        #         self.cluster_count[i] = 1
+        #
+        # # remove low counts
+        # adj_to_remove = []
+        # for i in self.adj_count:
+        #     if self.adj_count[i]<3:
+        #         adj_to_remove.append(i)
+        # for i in reversed(adj_to_remove):
+        #     # print '>>>>>>>', self.all_adj[i]
+        #     del self.all_adj[i]
 
         self.CM_nouns = np.zeros((len(self.all_adj),self.final_clf.n_components))
         self.CM_clust = np.zeros((self.final_clf.n_components,len(self.all_adj)))
@@ -241,6 +241,8 @@ class colours_class():
             if count <= stop:
                 self.cluster_count[cluster] += 1
             for name in self.adj[vid]:
+                if name == "red":
+                    print '>>>>>>>>>>>>',vid
                 if name in self.all_adj:
                     noun_i = self.all_adj.index(name)
                     if noun_i not in self.adj_count:
@@ -258,7 +260,7 @@ class colours_class():
                 self.cluster_count[i] = 1
 
         print '--------------------'
-        print self.CM_nouns[self.all_adj.index("red")]
+        print self.CM_nouns[self.all_adj.index("red")],self.adj_count[self.all_adj.index("red")]
         pickle.dump( [self.CM_nouns, self.CM_clust, self.adj_count, self.cluster_count, self.all_adj], open( self.dir2+'colours_correlation.p', "wb" ) )
 
     def _pretty_plot(self):
@@ -406,12 +408,13 @@ def main():
     f._read_tags()
     # f._cluster_colours()
     f._read_colours_clusters()
+    f._plot_colours_clusters()
     f._assignment_matrix(1.0)
     # f._get_groundTruth()
-    # f._LP_assign(32)
+    f._LP_assign(20)
     # f._plot_incremental()
     # f._plot_f_score()
-    f._pretty_plot()
+    # f._pretty_plot()
 
 if __name__=="__main__":
     main()
