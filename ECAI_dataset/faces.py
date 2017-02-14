@@ -270,6 +270,7 @@ class faces_class():
                 # return round((100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] + 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)])/2)
                 return round(max(100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] , 100.0*self.CM_nouns[words.index(word)][face]/self.nouns_count[words.index(word)]))
             possible_assignments = [(x,y) for x in faces for y in words]
+            max_assignments = int(len(possible_assignments)*max_assignments)
             #create a binary variable for assignments
             x = pulp.LpVariable.dicts('x', possible_assignments,
                                         lowBound = 0,
@@ -347,10 +348,10 @@ def main():
     # # f._cluster_faces()
     f._read_faces_clusters()
     f._get_groundTruth()
-    f.max = 20
+    f.max = 10
     for i in range(1,f.max+1):
         f._assignment_matrix(i/float(f.max))
-        f._LP_assign(62)
+        f._LP_assign(.05)
     f._plot_incremental()
     # f.min = 0
     # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
