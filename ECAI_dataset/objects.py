@@ -13,13 +13,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from random import shuffle
 
-class actions_class():
+class objects_class():
     """docstring for faces"""
     def __init__(self):
         # self.username = getpass.getuser()
         # self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset/features/vid'
-        self.dir2 = '/home/omari/Datasets/ECAI_dataset/actions/'
-        self.dir_actions =  '/home/omari/Datasets/ECAI_dataset/features/vid'
+        self.dir2 = '/home/omari/Datasets/ECAI_dataset/objects/'
+        self.dir_objects =  '/home/omari/Datasets/ECAI_dataset/features/vid'
         self.dir_grammar = '/home/omari/Datasets/ECAI_dataset/grammar/'
         self.dir_annotation = '/home/omari/Datasets/ECAI_dataset/ECAI_annotations/vid'
         self.im_len = 60
@@ -27,36 +27,52 @@ class actions_class():
         self.Pr = []
         self.Re = []
 
-    def _read_actions(self):
-        actions = pickle.load(open(self.dir2+"document_topics_.p", "rb" ) )
-        self.actions = {}
+    def _read_objects(self):
+        f = open(self.dir2+"per_video_objects.txt","r")
+        self.objects = {}
         self.video_num = []
-        for i,act in zip(range(1,494),actions):
+        self.all_objects = []
+        for i in range(1,494):
             self.video_num.append(i)
-            self.actions[i] = []
-            if i not in [196,211]:
-                for j in range(len(act)):
-                    if act[j] > .3:
-                        self.actions[i].append(j)
+            self.objects[i] = []
+
+        count = 0
+        count2 = 1
+        for line in f:
+            if count == 2:
+                line1 = line.split('\n')[0]
+            if count == 3:
+                line2 = line.split('\n')[0]
+            if count == 4:
+                vals = map(float, line1.split(' '))
+                obj_ids = map(int, line2.split(' '))
+                for id in obj_ids:
+                    if vals[id]>0:
+                        if id not in self.all_objects:
+                            self.all_objects.append(id)
+                        self.objects[count2].append(id)
+                count=0
+                print self.objects[count2]
+                count2+=1
+                print '-----------'
+            else:
+                count+=1
+        # print self.all_objects
+
 
     def _read_tags(self):
-        self.verbs = {}
-        self.all_verbs = []
+        self.objects_words = {}
+        self.all_objects_words = []
         self.tags,self.words_count = pickle.load(open( self.dir_grammar+"tags_activity.p", "rb" ) )
         for i in self.tags.keys():
-            self.verbs[i] = []
-            for word in self.tags[i]['verb']:
-                if word not in self.verbs[i]:
-                    self.verbs[i].append(word)
-                if str(word) not in self.all_verbs:
-                    self.all_verbs.append(str(word))
-            # for word in self.tags[i]['object']:
-            #     if word not in self.verbs[i]:
-            #         self.verbs[i].append(word)
-            #     if str(word) not in self.all_verbs:
-            #         self.all_verbs.append(str(word))
-        self.all_verbs = sorted(self.all_verbs)
-        self.all_verbs_copy = copy.copy(self.all_verbs)
+            self.objects_words[i] = []
+            for word in self.tags[i]['object']:
+                if word not in self.objects_words[i]:
+                    self.objects_words[i].append(word)
+                if str(word) not in self.all_objects_words:
+                    self.all_objects_words.append(str(word))
+        self.all_objects_words = sorted(self.all_objects_words)
+        self.all_objects_words_copy = copy.copy(self.all_objects_words)
 
     def _get_groundTruth(self):
         self.GT_dict = {}
@@ -72,7 +88,7 @@ class actions_class():
                 self.GT_dict[cluster].append(name)
                 self.GT_total_links+=1
 
-    def _cluster_actions(self):
+    def _cluster_objects(self):
         final_clf = 0
         best_v = 0
 
@@ -95,12 +111,12 @@ class actions_class():
         for i in range(len(self.final_clf.means_)):
             print i,self.Y_.count(i)
 
-    def _read_actions_clusters(self):
+    def _read_objects_clusters(self):
         self.final_clf,X_ = pickle.load(open(self.dir2+'colour_clusters.p',"rb"))
         self.Y_ = self.final_clf.predict(self.X)
         # print self.Y_
 
-    def _plot_actions_clusters(self):
+    def _plot_objects_clusters(self):
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         X = []
@@ -141,8 +157,8 @@ class actions_class():
         plt.show()
 
     def _assignment_matrix(self,fraction):
-        self.all_verbs = copy.copy(self.all_verbs_copy)
-        self.verbs_count = {}
+        self.all_objects_words = copy.copy(self.all_objects_words_copy)
+        self.objects_words_count = {}
         self.cluster_count = {}
         stop = len(self.video_num)*fraction
         count = 0
@@ -150,9 +166,9 @@ class actions_class():
         for vid in self.video_num:
             videos_seen[vid] = {}
             videos_seen[vid]['clusters'] = []
-            videos_seen[vid]['verb'] = []
+            videos_seen[vid]['object'] = []
         for vid in self.video_num:
-            for cluster in self.actions[vid]:
+            for cluster in self.objects[vid]:
                 if cluster in videos_seen[vid]['clusters']:
                     continue
                 videos_seen[vid]['clusters'].append(cluster)
@@ -160,46 +176,46 @@ class actions_class():
                     self.cluster_count[cluster] = 0
                 if count <= stop:
                     self.cluster_count[cluster] += 1
-                for name in self.verbs[vid]:
-                    if name in self.all_verbs:
-                        noun_i = self.all_verbs.index(name)
-                        if noun_i not in self.verbs_count:
-                            self.verbs_count[noun_i] = 0
+                for name in self.objects_words[vid]:
+                    if name in self.all_objects_words:
+                        noun_i = self.all_objects_words.index(name)
+                        if noun_i not in self.objects_words_count:
+                            self.objects_words_count[noun_i] = 0
                         if count <= stop:
-                            if noun_i not in videos_seen[vid]['verb']:
-                                self.verbs_count[noun_i]+=1
-                                videos_seen[vid]['verb'].append(noun_i)
+                            if noun_i not in videos_seen[vid]['object']:
+                                self.objects_words_count[noun_i]+=1
+                                videos_seen[vid]['object'].append(noun_i)
             count += 1
-        for i in self.verbs_count:
-            if not self.verbs_count[i]:
-                self.verbs_count[i] = 1
+        for i in self.objects_words_count:
+            if not self.objects_words_count[i]:
+                self.objects_words_count[i] = 1
         for i in self.cluster_count:
             if not self.cluster_count[i]:
                 self.cluster_count[i] = 1
         # remove low counts
-        verbs_to_remove = []
-        for i in self.verbs_count:
-            if self.verbs_count[i]<5:
-                verbs_to_remove.append(i)
-        for i in reversed(verbs_to_remove):
-            print '>>', self.all_verbs[i]
-            del self.all_verbs[i]
+        objects_words_to_remove = []
+        for i in self.objects_words_count:
+            if self.objects_words_count[i]<3:
+                objects_words_to_remove.append(i)
+        for i in reversed(objects_words_to_remove):
+            print '>>', self.all_objects_words[i]
+            del self.all_objects_words[i]
 
-
-        self.CM_nouns = np.zeros((len(self.all_verbs),11))
-        self.CM_clust = np.zeros((11,len(self.all_verbs)))
-        self.verbs_count = {}
+        self.CM_nouns = np.zeros((len(self.all_objects_words),len(self.all_objects)))
+        self.CM_clust = np.zeros((len(self.all_objects),len(self.all_objects_words)))
+        self.objects_words_count = {}
         self.cluster_count = {}
         stop = len(self.video_num)*fraction
         count = 0
         videos_seen = {}
-        for cluster,vid in zip(self.actions,self.video_num):
+        for cluster,vid in zip(self.objects,self.video_num):
             videos_seen[vid] = {}
             videos_seen[vid]['clusters'] = []
-            videos_seen[vid]['verb'] = []
+            videos_seen[vid]['object'] = []
 
         for vid in self.video_num:
-            for cluster in self.actions[vid]:
+            for cluster_name in self.objects[vid]:
+                cluster = self.all_objects.index(cluster_name)
                 if cluster in videos_seen[vid]['clusters']:
                     continue
                 videos_seen[vid]['clusters'].append(cluster)
@@ -207,32 +223,32 @@ class actions_class():
                     self.cluster_count[cluster] = 0
                 if count <= stop:
                     self.cluster_count[cluster] += 1
-                for name in self.verbs[vid]:
+                for name in self.objects_words[vid]:
                     # if name == 'printing':
                     #     print '>>>>>>>>',vid
-                    #     print self.actions[vid]
-                    if name in self.all_verbs:
-                        noun_i = self.all_verbs.index(name)
-                        if noun_i not in self.verbs_count:
-                            self.verbs_count[noun_i] = 0
+                    #     print self.objects[vid]
+                    if name in self.all_objects_words:
+                        noun_i = self.all_objects_words.index(name)
+                        if noun_i not in self.objects_words_count:
+                            self.objects_words_count[noun_i] = 0
                         if count <= stop:
                             self.CM_nouns[noun_i,cluster] += 1
                             self.CM_clust[cluster,noun_i] += 1
-                            if noun_i not in videos_seen[vid]['verb']:
-                                self.verbs_count[noun_i]+=1
-                                videos_seen[vid]['verb'].append(noun_i)
+                            if noun_i not in videos_seen[vid]['object']:
+                                self.objects_words_count[noun_i]+=1
+                                videos_seen[vid]['object'].append(noun_i)
             count += 1
-        for i in self.verbs_count:
-            if not self.verbs_count[i]:
-                self.verbs_count[i] = 1
+        for i in self.objects_words_count:
+            if not self.objects_words_count[i]:
+                self.objects_words_count[i] = 1
         for i in self.cluster_count:
             if not self.cluster_count[i]:
                 self.cluster_count[i] = 1
 
         print '--------------------'
-        # print self.CM_nouns[self.all_verbs.index("printing")],self.verbs_count[self.all_verbs.index("printing")]
+        # print self.CM_nouns[self.all_objects_words.index("printing")],self.objects_words_count[self.all_objects_words.index("printing")]
         # print self.CM_clust[1]
-        # pickle.dump( [self.CM_nouns, self.CM_clust, self.verbs_count, self.cluster_count, self.all_verbs], open( self.dir2+'actions_correlation.p', "wb" ) )
+        # pickle.dump( [self.CM_nouns, self.CM_clust, self.objects_words_count, self.cluster_count, self.all_objects_words], open( self.dir2+'objects_correlation.p', "wb" ) )
 
     def _pretty_plot(self):
         self.cluster_images = {}
@@ -311,17 +327,17 @@ class actions_class():
         Recall = 0
         if max_assignments != 0:
             faces = self.cluster_count.keys()
-            words = self.all_verbs
+            words = self.all_objects_words
             # print words
             def word_strength(face, word):
                 # print face,word,words.index(word)
                 A = 100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face]
-                if words.index(word) in self.verbs_count:
-                    B = 100.0*self.CM_nouns[words.index(word)][face]/self.verbs_count[words.index(word)]
+                if words.index(word) in self.objects_words_count:
+                    B = 100.0*self.CM_nouns[words.index(word)][face]/self.objects_words_count[words.index(word)]
                 else:
                     B=0
                 #conditional probabiltiy: (N(w,f)/N(f) + N(w,f)/N(w)) /2
-                # return round((100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] + 100.0*self.CM_nouns[words.index(word)][face]/self.verbs_count[words.index(word)])/2)
+                # return round((100.0*self.CM_nouns[words.index(word)][face]/self.cluster_count[face] + 100.0*self.CM_nouns[words.index(word)][face]/self.objects_words_count[words.index(word)])/2)
                 return round(max(A , B))
 
             possible_assignments = [(x,y) for x in faces for y in words]
@@ -347,7 +363,7 @@ class actions_class():
             correct = 0
             for assignment in possible_assignments:
                 if x[assignment].value() == 1.0:
-                    print assignment
+                    print self.all_objects[assignment[0]],assignment[1]
         #             if assignment[1] in self.GT_dict[assignment[0]]:
         #                 correct += 1
         #     Precision = correct/float(max_assignments)
@@ -365,11 +381,11 @@ class actions_class():
         # # print max_assignments
         # print self.f_score
         # # print '-----------'
-        # pickle.dump( self.f_score, open( self.dir2+'actions_incremental.p', "wb" ) )
+        # pickle.dump( self.f_score, open( self.dir2+'objects_incremental.p', "wb" ) )
         # # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
 
     def _plot_incremental(self):
-        self.f_score = pickle.load(open(self.dir2+'actions_incremental.p',"rb"))
+        self.f_score = pickle.load(open(self.dir2+'objects_incremental.p',"rb"))
         x = np.arange(len(self.f_score))/float(self.max-1)*493
         fig, ax = plt.subplots()
         ax.plot(x, self.f_score,'b',linewidth=2)
@@ -383,7 +399,7 @@ class actions_class():
         x = []
         maxi = 0
         for i in range(len(self.f_score)):
-            x.append(i/float(len(self.cluster_count.keys())*len(self.all_verbs)))
+            x.append(i/float(len(self.cluster_count.keys())*len(self.all_objects_words)))
             if self.f_score[i]>maxi:
                 maxi = self.f_score[i]
                 print i,maxi
@@ -396,12 +412,12 @@ class actions_class():
         plt.show()
 
 def main():
-    f = actions_class()
-    f._read_actions()
+    f = objects_class()
+    f._read_objects()
     f._read_tags()
-    # f._cluster_actions()
-    # f._read_actions_clusters()
-    # f._plot_actions_clusters()
+    # f._cluster_objects()
+    # f._read_objects_clusters()
+    # f._plot_objects_clusters()
     # f._get_groundTruth()
     f._assignment_matrix(1.0)
     f._LP_assign(.05)

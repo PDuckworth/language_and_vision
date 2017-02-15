@@ -301,6 +301,7 @@ class colours_class():
                         selected.append(self.cluster_images[val][i])
                 self.cluster_images[val] = selected
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
+        paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
         count3 = 0
         for count2,p in enumerate(self.cluster_images):
             maxi = len(self.cluster_images[p])
@@ -340,15 +341,15 @@ class colours_class():
                 i2y = (int(count2/7)+1)*self.im_len*5
                 image_cluster_total[i1x:i2x,i1y:i2y,:] = image_cluster
                 cv2.imwrite(self.dir2+'all_clusters.jpg',image_cluster_total)
-        #
-        #     if p in [2,3,4]:
-        #         i1x = np.mod(count3,3)*self.im_len*5
-        #         i2x = (np.mod(count3,3)+1)*self.im_len*5
-        #         count3+=1
-        #         i1y = 0
-        #         i2y = self.im_len*5
-        #         paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
-        #         cv2.imwrite(self.dir_faces+'faces_clusters_ex.jpg',paper_img)
+
+            if p in [5,2]:
+                i1x = np.mod(count3,3)*self.im_len*5
+                i2x = (np.mod(count3,3)+1)*self.im_len*5
+                count3+=1
+                i1y = 0
+                i2y = self.im_len*5
+                paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
+                cv2.imwrite(self.dir2+'faces_clusters_ex.jpg',paper_img)
         #
             cv2.imwrite(self.dir2+str(p)+'_cluster.jpg',image_cluster)
         #     cv2.imwrite(self.dir_faces+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
