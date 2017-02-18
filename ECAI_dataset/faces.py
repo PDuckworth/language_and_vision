@@ -238,7 +238,7 @@ class faces_class():
         # remove low counts
         nouns_to_remove = []
         for i in self.nouns_count:
-            if self.nouns_count[i]<3:
+            if self.nouns_count[i]<2:
                 nouns_to_remove.append(i)
         for i in reversed(nouns_to_remove):
             print '>>>>>>>', self.all_nouns[i]
@@ -406,7 +406,7 @@ class faces_class():
             #each face should get at least one assignment
             # for face in faces:
             #     prob += sum([x[assignment] for assignment in possible_assignments
-            #                                 if face==assignment[0] ]) >= 1, "Must_assign_face_%d"%face
+            #                             if face==assignment[0] ]) >= 1, "Must_assign_face_%d"%face
             prob.solve()
             # print ([sum([pulp.value(x[assignment]) for assignment in possible_assignments if face==assignment[0] ]) for face in faces])
             f = open(self.dir_faces+"circos/faces.txt","w")

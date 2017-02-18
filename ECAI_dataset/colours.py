@@ -512,6 +512,90 @@ class colours_class():
         metrics.normalized_mutual_info_score(true_labels, pred_labels),
         metrics.accuracy_score(true_labels, pred_labels))
 
+    def _pretty_plot_incremental(self):
+        self.cluster_images = {}
+        # print '-------------------------------------',len(self.Y_),len(self.rgb)
+        print len(self.Y_)
+        # print self.Y_[self.ok_videos]
+        print len(self.ok_videos)
+        # # print ttt
+        # print self.rgb
+        for i in self.ok_videos:
+            rgb = self.rgb[i]
+            val = self.Y_[i]
+            if val not in self.cluster_images:
+                self.cluster_images[val] = []
+            rgb = [rgb[0]+rgb[1]+rgb[2],int(rgb[0]*255),int(rgb[1]*255),int(rgb[2]*255)]
+            # if rgb not in self.cluster_images[val]:
+            self.cluster_images[val].append(rgb)
+
+        for val in self.cluster_images:
+            self.cluster_images[val] = sorted(self.cluster_images[val])
+            if len(self.cluster_images[val])>30:
+                selected = []
+                count = 0
+                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/19):
+                    if count < 30:
+                        selected.append(self.cluster_images[val][i])
+                self.cluster_images[val] = selected
+
+        image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
+        paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
+        count3 = 0
+        for count2,p in enumerate(self.cluster_images):
+            maxi = len(self.cluster_images[p])
+            image_avg = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
+            image_cluster = np.zeros((self.im_len*5,self.im_len*5,3),dtype=np.uint8)+255
+            # print maxi
+            for count,rgb in enumerate(self.cluster_images[p]):
+                img = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
+                img[:,:,0]+=rgb[3]
+                img[:,:,1]+=rgb[2]
+                img[:,:,2]+=rgb[1]
+                # img[0:2,:,:]=0
+                # img[-2:,:,:]=0
+                # img[:,0:2,:]=0
+                # img[:,-2:,:]=0
+                image_avg += img/(len(self.cluster_images[p])+1)
+                ang = count/float(maxi)*2*np.pi
+                xc = int(1.95*self.im_len*np.cos(ang))
+                yc = int(1.95*self.im_len*np.sin(ang))
+                # print xc,yc
+                C = int(2.5*self.im_len)
+                x1 = int(xc-self.im_len/2.0+2.5*self.im_len)
+                x2 = x1+self.im_len
+                y1 = int(yc-self.im_len/2.0+2.5*self.im_len)
+                y2 = y1+self.im_len
+                cv2.line(image_cluster,(int(y1+y2)/2,int(x1+x2)/2),(C,C),(20,20,20),2)
+                # print x1,x2,y1,y2
+                image_cluster[x1:x2,y1:y2,:] = img
+            image_avg = cv2.resize(image_avg, (int(self.im_len*1.4),int(self.im_len*1.4)), interpolation = cv2.INTER_AREA)
+            x1 = int((2.5-.7)*self.im_len)
+            x2 = int(x1+1.4*self.im_len)
+            image_cluster[x1:x2,x1:x2,:] = image_avg
+            if count2<35:
+                i1x = int(count2/5)*self.im_len*5
+                i2x = (int(count2/5)+1)*self.im_len*5
+                i1y = np.mod(count2,5)*self.im_len*5
+                i2y = (np.mod(count2,5)+1)*self.im_len*5
+                image_cluster_total[i1x:i2x,i1y:i2y,:] = image_cluster
+                # cv2.imwrite(self.dir2+'all_clusters.jpg',image_cluster_total)
+
+            # if p in [5,2]:
+            #     i1x = np.mod(count3,3)*self.im_len*5
+            #     i2x = (np.mod(count3,3)+1)*self.im_len*5
+            #     count3+=1
+            #     i1y = 0
+            #     i2y = self.im_len*5
+            #     paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
+            #     # cv2.imwrite(self.dir2+'faces_clusters_ex.jpg',paper_img)
+        #
+            # cv2.imwrite(self.dir2+str(p)+'_cluster.jpg',image_cluster)
+            # cv2.imwrite(self.dir2+str(p)+'_cluster_avg.jpg',image_avg)
+        cv2.imshow("img",image_cluster_total)
+        cv2.waitKey(1000)
+
+
 def main():
     f = colours_class()
     f._get_video_per_days()
@@ -532,9 +616,10 @@ def main():
     for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
         f._assignment_matrix(date)
         f._LP_assign(.05)
+        f._pretty_plot_incremental()
     f._plot_incremental()
     # # f._plot_f_score()
-    f._pretty_plot()
+    # f._pretty_plot()
 
 if __name__=="__main__":
     main()
