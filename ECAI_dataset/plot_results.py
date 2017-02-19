@@ -15,24 +15,26 @@ from random import shuffle
 
 
 colours = ['red','blue','green','purple']
+markers = ["o","^","*","s"]
 fig, ax = plt.subplots()
 
 for c,i in enumerate(["faces","colours","objects","actions"]):
 # for c,i in enumerate(["faces","colours","objects"]):
     dir2 = "/home/omari/Datasets/ECAI_dataset/"+i+"/"
-    f_score = [0]
+    f_score = []
     f = pickle.load(open(dir2+i+'_incremental.p',"rb"))
     for f1 in f:
         f_score.append(f1)
 
     x = np.arange(len(f_score))/float(5)*499
-    ax.plot(x, f_score,'o-b',linewidth=2,c=colours[c],label=i)
-    plt.ylim([0,1])
-plt.xticks([0,100,200,300,400,500], ['','5-Apr','6-Apr','7-Apr','8-Apr','11-Apr'], fontsize=20)
-    # ax.plot(x, yp,'r')
-    # ax.plot(x, yr,'g')
+    print x
+    ax.plot(x, f_score,markers[c]+'-b',linewidth=2,markersize=14,c=colours[c],label=i)
+plt.xlim([-50,450])
+plt.xticks([00,100,200,300,400], ['5-Apr','6-Apr','7-Apr','8-Apr','11-Apr'], fontsize=20)
+plt.yticks([0,.1,.200,.300,.400,.5,.6], ['','0.1','0.2','0.3','0.4','0.5','0.6'], fontsize=20)
+plt.ylabel("f1-score", fontsize=25)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
 ax.grid(True, zorder=5)
-plt.legend()
+plt.legend(loc='lower right', fontsize=23)
 plt.show()

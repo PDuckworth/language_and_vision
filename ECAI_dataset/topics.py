@@ -47,51 +47,48 @@ class actions_class():
         actions = pickle.load(open(self.dir2+"document_topics_.p", "rb" ) )
         self.actions = {}
         self.video_num = []
-        count=0
-        for i in range(1,494):
+        # print actions
+        # count=0
+        # for i in range(1,494):
+        paul_is_not_smart = ['vid437', 'vid400', 'vid465', 'vid486', 'vid376', 'vid441', 'vid458', 'vid374', 'vid481', 'vid489', 'vid365', 'vid429', 'vid451', 'vid454', 'vid436', 'vid361', 'vid351', 'vid372', 'vid446', 'vid388', 'vid392', 'vid466', 'vid409', 'vid460', 'vid358', 'vid453', 'vid359', 'vid382', 'vid490', 'vid364', 'vid395', 'vid352', 'vid350', 'vid484', 'vid394', 'vid348', 'vid399', 'vid405', 'vid450', 'vid448', 'vid416', 'vid487', 'vid411', 'vid387', 'vid360', 'vid421', 'vid383', 'vid424', 'vid377', 'vid455', 'vid483', 'vid369', 'vid438', 'vid461', 'vid386', 'vid468', 'vid356', 'vid434', 'vid493', 'vid403', 'vid469', 'vid473', 'vid433', 'vid425', 'vid449', 'vid459', 'vid378', 'vid389', 'vid367', 'vid479', 'vid485', 'vid474', 'vid406', 'vid456', 'vid491', 'vid475', 'vid431', 'vid432', 'vid375', 'vid444', 'vid428', 'vid357', 'vid355', 'vid480', 'vid419', 'vid368', 'vid371', 'vid380', 'vid488', 'vid393', 'vid353', 'vid442', 'vid467', 'vid443', 'vid362', 'vid423', 'vid422', 'vid391', 'vid463', 'vid381', 'vid404', 'vid476', 'vid435', 'vid396', 'vid349', 'vid397', 'vid401', 'vid402', 'vid430', 'vid390', 'vid370', 'vid412', 'vid385', 'vid439', 'vid410', 'vid464', 'vid363', 'vid470', 'vid354', 'vid417', 'vid452', 'vid472', 'vid440', 'vid482', 'vid478', 'vid447', 'vid477', 'vid413', 'vid379', 'vid445', 'vid492', 'vid366', 'vid427', 'vid420', 'vid414', 'vid426', 'vid407', 'vid415', 'vid398', 'vid471', 'vid457', 'vid384', 'vid373', 'vid462', 'vid418', 'vid408', 'vid144', 'vid222', 'vid200', 'vid195', 'vid159', 'vid187', 'vid296', 'vid314', 'vid287', 'vid148', 'vid157', 'vid295', 'vid267', 'vid264', 'vid280', 'vid209', 'vid176', 'vid217', 'vid204', 'vid259', 'vid163', 'vid224', 'vid291', 'vid154', 'vid271', 'vid262', 'vid290', 'vid219', 'vid218', 'vid220', 'vid183', 'vid306', 'vid164', 'vid266', 'vid190', 'vid155', 'vid215', 'vid244', 'vid173', 'vid225', 'vid208', 'vid250', 'vid221', 'vid234', 'vid308', 'vid203', 'vid298', 'vid238', 'vid286', 'vid210', 'vid312', 'vid196', 'vid282', 'vid153', 'vid226', 'vid309', 'vid161', 'vid269', 'vid142', 'vid301', 'vid245', 'vid231', 'vid145', 'vid303', 'vid168', 'vid316', 'vid275', 'vid198', 'vid311', 'vid281', 'vid305', 'vid283', 'vid292', 'vid184', 'vid294', 'vid270', 'vid233', 'vid297', 'vid169', 'vid160', 'vid194', 'vid273', 'vid201', 'vid230', 'vid258', 'vid223', 'vid172', 'vid152', 'vid213', 'vid178', 'vid285', 'vid175', 'vid261', 'vid242', 'vid186', 'vid313', 'vid207', 'vid263', 'vid177', 'vid255', 'vid307', 'vid151', 'vid284', 'vid293', 'vid254', 'vid146', 'vid214', 'vid150', 'vid278', 'vid276', 'vid227', 'vid256', 'vid253', 'vid197', 'vid147', 'vid162', 'vid188', 'vid211', 'vid182', 'vid180', 'vid199', 'vid149', 'vid299', 'vid212', 'vid165', 'vid310', 'vid277', 'vid191', 'vid265', 'vid170', 'vid143', 'vid240', 'vid171', 'vid304', 'vid237', 'vid236', 'vid257', 'vid174', 'vid232', 'vid205', 'vid179', 'vid268', 'vid206', 'vid248', 'vid252', 'vid249', 'vid243', 'vid166', 'vid202', 'vid279', 'vid288', 'vid192', 'vid193', 'vid228', 'vid247', 'vid246', 'vid239', 'vid181', 'vid241', 'vid289', 'vid272', 'vid251', 'vid229', 'vid156', 'vid235', 'vid189', 'vid158', 'vid260', 'vid315', 'vid167', 'vid216', 'vid274', 'vid185', 'vid300', 'vid302', 'vid15', 'vid33', 'vid19', 'vid11', 'vid24', 'vid9', 'vid21', 'vid5', 'vid14', 'vid7', 'vid26', 'vid16', 'vid13', 'vid28', 'vid36', 'vid3', 'vid35', 'vid22', 'vid2', 'vid18', 'vid30', 'vid12', 'vid34', 'vid4', 'vid25', 'vid27', 'vid8', 'vid23', 'vid1', 'vid32', 'vid20', 'vid29', 'vid6', 'vid17', 'vid31', 'vid10', 'vid318', 'vid345', 'vid333', 'vid335', 'vid338', 'vid319', 'vid321', 'vid326', 'vid342', 'vid322', 'vid334', 'vid317', 'vid329', 'vid343', 'vid336', 'vid325', 'vid331', 'vid337', 'vid324', 'vid320', 'vid340', 'vid323', 'vid347', 'vid332', 'vid328', 'vid327', 'vid330', 'vid341', 'vid344', 'vid346', 'vid339', 'vid68', 'vid51', 'vid114', 'vid103', 'vid123', 'vid131', 'vid83', 'vid100', 'vid87', 'vid109', 'vid62', 'vid91', 'vid49', 'vid55', 'vid129', 'vid115', 'vid82', 'vid64', 'vid96', 'vid77', 'vid107', 'vid38', 'vid71', 'vid90', 'vid125', 'vid88', 'vid127', 'vid58', 'vid133', 'vid139', 'vid69', 'vid97', 'vid93', 'vid92', 'vid116', 'vid67', 'vid95', 'vid104', 'vid66', 'vid86', 'vid40', 'vid126', 'vid48', 'vid120', 'vid72', 'vid105', 'vid44', 'vid50', 'vid47', 'vid122', 'vid45', 'vid79', 'vid46', 'vid94', 'vid117', 'vid59', 'vid137', 'vid128', 'vid53', 'vid54', 'vid63', 'vid132', 'vid61', 'vid119', 'vid56', 'vid65', 'vid41', 'vid111', 'vid124', 'vid73', 'vid39', 'vid57', 'vid84', 'vid52', 'vid136', 'vid81', 'vid76', 'vid141', 'vid121', 'vid140', 'vid102', 'vid113', 'vid80', 'vid70', 'vid98', 'vid85', 'vid138', 'vid78', 'vid60', 'vid110', 'vid37', 'vid130', 'vid43', 'vid75', 'vid99', 'vid112', 'vid108', 'vid134', 'vid135', 'vid42', 'vid101', 'vid74', 'vid89', 'vid106', 'vid118']
+        for i,vid in zip(range(1,494),paul_is_not_smart):
+            vid = int(vid.split("vid")[1])
             self.video_num.append(i)
-            self.actions[i] = []
-            if i not in [196,211]:
-                act = actions[count]
-                count+=1
-                for j in range(len(act)):
-                    if act[j] > .3:
-                        self.actions[i].append(j)
+            self.actions[vid] = [actions[i-1]]
+
 
     def _read_tags(self):
         self.verbs = {}
         self.all_verbs = []
         self.tags,self.words_count = pickle.load(open( self.dir_grammar+"tags_activity.p", "rb" ) )
         for i in self.tags.keys():
-            # print i
             self.verbs[i] = []
             for word in self.tags[i]['verb']:
+                # if word == 'printing':
+                #     print ">>>>>>>",i
                 if word not in self.verbs[i]:
                     self.verbs[i].append(word)
                 if str(word) not in self.all_verbs:
                     self.all_verbs.append(str(word))
-            # for word in self.tags[i]['object']:
-            #     if word not in self.verbs[i]:
-            #         self.verbs[i].append(word)
-            #     if str(word) not in self.all_verbs:
-            #         self.all_verbs.append(str(word))
         self.all_verbs = sorted(self.all_verbs)
         self.all_verbs_copy = copy.copy(self.all_verbs)
 
     def _get_groundTruth(self):
         print self.all_verbs
         self.list_of_bad_verbs = {}
-        self.list_of_bad_verbs[0] = ['takes', 'puts', 'placing', 'gets', 'opens', 'grabbing', 'getting', 'taking']
-        self.list_of_bad_verbs[1] = ['doing', 'reaching', 'preparing', 'making']
-        self.list_of_bad_verbs[2] = ['adding','pouring','washing','stirring','preparing']
-        self.list_of_bad_verbs[3] = ['uses','pressing', 'standing', 'waiting', 'reaching', 'touching', 'using', 'getting', 'taking', 'printing']
-        self.list_of_bad_verbs[4] = ['walking']
-        self.list_of_bad_verbs[5] = ['getting', 'grabbing', 'taking', 'gets','takes']
-        self.list_of_bad_verbs[7] = ['cooking', 'pouring', 'takes', 'puts', 'removing', 'placing','waiting','opens', 'opening', 'pours', 'preparing']
-        self.list_of_bad_verbs[8] = ['takes','rinsing', 'turning', 'pouring','cleaning', 'washing', 'turns']
-        self.list_of_bad_verbs[9] = ['getting', 'grabbing','taking','grabs', 'gets']
-        self.list_of_bad_verbs[10] = ['adding','puts', 'placing',  'pouring', 'putting', 'getting', 'taking', 'filling', 'making', 'preparing']
-
+        self.list_of_bad_verbs[0] = ['adding', 'appears', 'emptying', 'pouring', 'uses','rinses','adding', 'pours''rinsing','pouring','fills','filling', 'preparing']
+        self.list_of_bad_verbs[1] = ['dumping','using','grabs', 'picks', 'throwing','takes','removing','opening','disposing','closes','grabbing','talking','picking','getting','closing', 'drying', 'gets', 'grabbing', 'grabs', 'keeping', 'opening', 'opens', 'pulling', 'putting', 'throwing', 'throws']
+        self.list_of_bad_verbs[2] = ['adding', 'getting','pouring','filling']
+        self.list_of_bad_verbs[3] = ['rinsing','cleaning','washing']
+        self.list_of_bad_verbs[4] = ['pouring','preparing','making']
+        self.list_of_bad_verbs[5] = ['getting', 'grabbing','taking','opening','grabs']
+        self.list_of_bad_verbs[6] = ['cooking','waiting','opening','microwaving','pouring','warming','heating','filling']
+        self.list_of_bad_verbs[7] = ['rinsing','wiping','cleaning','washing']
+        self.list_of_bad_verbs[8] = ['getting','filling','using']
+        self.list_of_bad_verbs[9] = ['adding','puts','rinsing','pouring','preparing','using','washing','getting','filling','making']
+        self.list_of_bad_verbs[10] = ['cleaning', 'using','washes']
+        self.list_of_bad_verbs[11] = ['pushing','pressing','standing','takes','retrieving','waiting','touching','taking','printing']
+        self.list_of_bad_verbs[12] = ['pressing','swipping','standing','touching', 'using','printing','swiping']
 
         self.mentioned_words = {}
         for i in range(1,494):
@@ -99,15 +96,22 @@ class actions_class():
                 if obj not in self.mentioned_words:
                     self.mentioned_words[obj] = []
                 for word in self.verbs[i]:
+                    # if obj==12:
+                    #     print ">>>>>>>",obj,i
+                        # print 'kkk',vid,word
+                            # if word == 'getting':
                     if word not in self.mentioned_words[obj]:
                         self.mentioned_words[obj].append(word)
+        # print '>>>>@',self.mentioned_words[12]
+        # print ttt
         self.GT_dict = {}
         for i in self.mentioned_words:
             self.GT_dict[i] = list(set(self.mentioned_words[i]).intersection(self.all_verbs))
-            if i in [0,1,2,3,4,5,7,8,9,10]:
+            # print i,self.GT_dict[i]
+            if i in [0,1,2,3,4,5,6,7,8,9,10,11,12]:
                 self.GT_dict[i] = list(set(self.GT_dict[i]).intersection(self.list_of_bad_verbs[i]))
-            print i,self.GT_dict[i]
-            print '--------------'
+            # print i,self.GT_dict[i]
+            # print '--------------'
         self.GT_total_links = 0
         for i in self.GT_dict:
             self.GT_total_links += len(self.GT_dict[i])
@@ -228,11 +232,11 @@ class actions_class():
             if self.verbs_count[i]<5:
                 verbs_to_remove.append(i)
         for i in reversed(verbs_to_remove):
-            # print '>>', self.all_verbs[i]
+            print '>>', self.all_verbs[i]
             del self.all_verbs[i]
 
-        self.CM_nouns = np.zeros((len(self.all_verbs),11))
-        self.CM_clust = np.zeros((11,len(self.all_verbs)))
+        self.CM_nouns = np.zeros((len(self.all_verbs),13))
+        self.CM_clust = np.zeros((13,len(self.all_verbs)))
         self.verbs_count = {}
         self.cluster_count = {}
         # stop = len(self.video_num)*fraction
@@ -277,7 +281,8 @@ class actions_class():
                 self.cluster_count[i] = 1
 
         print '--------------------'
-        # print self.CM_nouns[self.all_verbs.index("printing")],self.verbs_count[self.all_verbs.index("printing")]
+        if "printing" in self.all_verbs:
+            print self.CM_nouns[self.all_verbs.index("printing")],self.verbs_count[self.all_verbs.index("printing")]
         # print self.CM_clust[1]
         # pickle.dump( [self.CM_nouns, self.CM_clust, self.verbs_count, self.cluster_count, self.all_verbs], open( self.dir2+'actions_correlation.p', "wb" ) )
 
@@ -455,7 +460,7 @@ def main():
 
     for i,date in enumerate(['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']):
         f._assignment_matrix(date)
-        f._LP_assign(.06)
+        f._LP_assign(.07)
     f._plot_incremental()
     # f._LP_assign(.05)
     # f.max = 10

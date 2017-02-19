@@ -50,6 +50,7 @@ class faces_class():
             GT = line.split(',')[0]
             self.persons.append(GT)
             data = line.split(',')[1:]
+            data = map(float, data)
             if GT not in self.faces:
                 self.faces[GT] = []
             self.faces[GT].append(data)
@@ -253,6 +254,8 @@ class faces_class():
         count = 0
         videos_seen = {}
         for cluster,vid in zip(self.Y_,self.video_num):
+            if cluster == 17:
+                print vid
             videos_seen[vid] = {}
             videos_seen[vid]['clusters'] = []
             videos_seen[vid]['nouns'] = []
@@ -287,37 +290,6 @@ class faces_class():
                 self.cluster_count[i] = 1
         print '--------------------'
         # pickle.dump( [self.CM_nouns, self.CM_clust, self.nouns_count, self.cluster_count, self.all_nouns], open( self.dir_faces+'faces_correlation.p', "wb" ) )
-
-    # def _assignment_matrix(self,date):
-    #     self.CM_nouns = np.zeros((len(self.all_nouns),self.final_clf.n_components))
-    #     self.CM_clust = np.zeros((self.final_clf.n_components,len(self.all_nouns)))
-    #
-    #     self.nouns_count = {}
-    #     self.cluster_count = {}
-    #     stop = len(self.video_num)*fraction
-    #     count = 0
-    #     for cluster,vid in zip(self.Y_,self.video_num):
-    #         if cluster not in self.cluster_count:
-    #             self.cluster_count[cluster] = 0
-    #         if count <= stop:
-    #             self.cluster_count[cluster] += 1
-    #         for name in self.nouns[vid]:
-    #             noun_i = self.all_nouns.index(name)
-    #             if noun_i not in self.nouns_count:
-    #                 self.nouns_count[noun_i] = 0
-    #             if count <= stop:
-    #                 self.CM_nouns[noun_i,cluster] += 1
-    #                 self.CM_clust[cluster,noun_i] += 1
-    #                 self.nouns_count[noun_i]+=1
-    #         count += 1
-    #     for i in self.nouns_count:
-    #         if not self.nouns_count[i]:
-    #             self.nouns_count[i] = 1
-    #     for i in self.cluster_count:
-    #         if not self.cluster_count[i]:
-    #             self.cluster_count[i] = 1
-    #     print '--------------------'
-    #     pickle.dump( [self.CM_nouns, self.CM_clust, self.nouns_count, self.cluster_count, self.all_nouns], open( self.dir_faces+'faces_correlation.p', "wb" ) )
 
     def _pretty_plot(self):
         self.cluster_images = {}
@@ -411,9 +383,13 @@ class faces_class():
             # print ([sum([pulp.value(x[assignment]) for assignment in possible_assignments if face==assignment[0] ]) for face in faces])
             f = open(self.dir_faces+"circos/faces.txt","w")
             correct = 0
+            self.assignments_to_save = {}
             for assignment in possible_assignments:
                 if x[assignment].value() == 1.0:
                     print assignment
+                    if assignment[0] not in self.assignments_to_save:
+                        self.assignments_to_save[assignment[0]] = []
+                    self.assignments_to_save[assignment[0]].append(assignment[1])
                     if assignment[1] in self.GT_dict[assignment[0]]:
                         correct += 1
             Precision = correct/float(max_assignments)
@@ -430,9 +406,9 @@ class faces_class():
         self.Re.append(Recall)
         print max_assignments
         print self.f_score
-        # print '-----------'
+        print self.assignments_to_save
         pickle.dump( self.f_score, open( self.dir_faces+'faces_incremental.p', "wb" ) )
-        # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
+        pickle.dump( self.assignments_to_save, open( self.dir_faces+'faces_assignments.p', "wb" ) )
 
     def _plot_incremental(self):
         self.f_score = pickle.load(open(self.dir_faces+'faces_incremental.p',"rb"))
@@ -490,7 +466,7 @@ def main():
     # for i in range(1,f.max+1):
         # print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',i/float(f.max)
         f._assignment_matrix(date)
-        f._LP_assign(.05)
+        f._LP_assign(.06)
     f._plot_incremental()
     # f.max = 10
     # for i in range(1,f.max+1):

@@ -446,9 +446,13 @@ class colours_class():
             # print ([sum([pulp.value(x[assignment]) for assignment in possible_assignments if face==assignment[0] ]) for face in faces])
             # f = open(self.dir_faces+"circos/faces.txt","w")
             correct = 0
+            self.assignments_to_save = {}
             for assignment in possible_assignments:
                 if x[assignment].value() == 1.0:
                     print assignment
+                    if assignment[0] not in self.assignments_to_save:
+                        self.assignments_to_save[assignment[0]] = []
+                    self.assignments_to_save[assignment[0]].append(assignment[1])
                     if assignment[1] in self.GT_dict[assignment[0]]:
                         correct += 1
             Precision = correct/float(max_assignments)
@@ -467,6 +471,7 @@ class colours_class():
         print self.f_score
         # print '-----------'
         pickle.dump( self.f_score, open( self.dir2+'colours_incremental.p', "wb" ) )
+        pickle.dump( self.assignments_to_save, open( self.dir2+'colours_assignments.p', "wb" ) )
         # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
 
     def _plot_incremental(self):
@@ -615,7 +620,7 @@ def main():
     # f.max = 10
     for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
         f._assignment_matrix(date)
-        f._LP_assign(.05)
+        f._LP_assign(.07)
         f._pretty_plot_incremental()
     f._plot_incremental()
     # # f._plot_f_score()

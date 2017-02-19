@@ -60,12 +60,13 @@ class objects_class():
                 line2 = line.split('\n')[0]
             if count == 4:
                 vals = map(float, line1.split(' '))
-                obj_ids = map(int, line2.split(' '))
-                for id in obj_ids:
-                    if vals[id]>0:
-                        if id not in self.all_objects:
-                            self.all_objects.append(id)
-                        self.objects[count2].append(id)
+                if "-" not in line2:
+                    obj_ids = map(int, line2.split(' '))
+                    for id in obj_ids:
+                        if vals[id]>0:
+                            if id not in self.all_objects:
+                                self.all_objects.append(id)
+                            self.objects[count2].append(id)
                 count=0
                 print self.objects[count2]
                 count2+=1
@@ -91,20 +92,31 @@ class objects_class():
     def _get_groundTruth(self):
         self.GT_dict = {}
         # what Majd said is ok
-        self.GT_dict[21] = ['button', 'copier', 'copy', 'document', 'door', 'doorway', 'machine', 'paper', 'print', 'printer', 'printing', 'screen', 'setting', 'sheet', 'tray']
-        self.GT_dict[22] = ['button', 'copier', 'copy', 'document', 'door', 'doorway', 'machine', 'paper', 'print', 'printer', 'printing', 'screen', 'setting', 'sheet', 'tray']
-        self.GT_dict[23] = ['button', 'copier', 'copy', 'document', 'door', 'doorway', 'machine', 'paper', 'print', 'printer', 'printing', 'screen', 'setting', 'sheet', 'tray']
+        self.GT_dict[21] = ['button', 'copier', 'copy', 'document', 'door', 'machine', 'paper', 'printer', 'screen','tray']
+        self.GT_dict[22] = ['button', 'copier', 'copy', 'document', 'door', 'machine', 'paper', 'printer', 'screen','tray']
+        self.GT_dict[23] = ['button', 'copier', 'copy', 'document', 'door', 'machine', 'paper', 'printer', 'screen','tray']
+        self.GT_dict[24] = ['button', 'copier', 'copy', 'document', 'door', 'machine', 'paper', 'printer', 'screen','tray']
 
-        self.GT_dict[19] = ['beverage', 'bottle', 'button', 'cooler', 'cup', 'dispenser', 'drink', 'glass', 'water']
+        self.GT_dict[19] = ['cooler', 'cup', 'dispenser', 'glass', 'water']
 
-        self.GT_dict[13] = ['button', 'container', 'food', 'lunch', 'microwave', 'screen', 'setting', 'spoon', 'utensil']
+        self.GT_dict[13] = ['food', 'lunch', 'microwave']
 
         self.GT_dict[15] = ['beverage', 'box',  'can', 'coffee',  'container', 'creamer', 'cup',  'drink', 'milk', 'mug', 'spoon',  'sugar',  'tea', 'tea-bag', 'tea-coffee']
 
+        self.GT_dict[14]  = ['fire_extenguisher']
+
         self.GT_dict[4]  = ['liquid',  'sink', 'tap', 'utensil', 'water']
         self.GT_dict[17] = ['liquid',  'sink', 'tap', 'utensil', 'water']
+        self.GT_dict[18] = ['liquid',  'sink', 'tap', 'utensil', 'water']
 
         self.GT_dict[11] = ['bin', 'dustbin',  'garbage', 'trash', 'trashcan', 'waste']
+
+        self.GT_dict[12] = ['bin', 'dustbin',  'garbage', 'trash', 'trashcan', 'waste']
+
+        self.GT_dict[3] = ['fridge','refrigerator',"milk"]
+
+
+        self.GT_dict[16] = ['kettle']
 
         self.mentioned_words = {}
         for i in range(1,494):
@@ -236,7 +248,7 @@ class objects_class():
         # remove low counts
         objects_words_to_remove = []
         for i in self.objects_words_count:
-            if self.objects_words_count[i]<5:
+            if self.objects_words_count[i]<10:
                 objects_words_to_remove.append(i)
         for i in reversed(objects_words_to_remove):
             # print '>>', self.all_objects_words[i]
