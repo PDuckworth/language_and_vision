@@ -68,9 +68,9 @@ class objects_class():
                                 self.all_objects.append(id)
                             self.objects[count2].append(id)
                 count=0
-                print self.objects[count2]
+                # print self.objects[count2]
                 count2+=1
-                print '-----------'
+                # print '-----------'
             else:
                 count+=1
         # print self.all_objects
@@ -437,6 +437,7 @@ class objects_class():
         print self.f_score
         # print '-----------'
         pickle.dump( self.f_score, open( self.dir2+'objects_incremental.p', "wb" ) )
+        print self.objects[235]
         # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
 
     def _plot_incremental(self):

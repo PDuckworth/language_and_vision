@@ -58,6 +58,10 @@ class faces_class():
                 self.X.append(data)
             else:
                 self.X = np.vstack((self.X,data))
+        # print self.persons
+        # print self.X
+        # pickle.dump( [self.persons,self.X], open( self.dir_faces+'face_supervised.p', "wb" ) )
+        # self.persons,self.X = pickle.load(open( self.dir_faces+"face_supervised.p", "rb" ) )
 
     def _read_faces_images(self):
         f = open(self.dir_faces+'faces_images.csv','rb')
@@ -408,6 +412,11 @@ class faces_class():
         print self.f_score
         print self.assignments_to_save
         pickle.dump( self.f_score, open( self.dir_faces+'faces_incremental.p', "wb" ) )
+
+        for cluster,vid in zip(self.Y_,self.video_num):
+            if vid == 235:
+                print cluster
+
         pickle.dump( self.assignments_to_save, open( self.dir_faces+'faces_assignments.p', "wb" ) )
 
     def _plot_incremental(self):

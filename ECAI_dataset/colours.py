@@ -174,6 +174,10 @@ class colours_class():
         #         for l in  line.split(','):
         #             self.true_labels.append(l)
         # print self.true_labels
+        pickle.dump( [self.true_labels,self.X], open( self.dir2+'colour_supervised.p', "wb" ) )
+        self.colours,self.X = pickle.load(open( self.dir2+"colour_supervised.p", "rb" ) )
+        print self.colours
+        print self.X
 
     def _cluster_colours(self):
         final_clf = 0
@@ -471,6 +475,9 @@ class colours_class():
         print self.f_score
         # print '-----------'
         pickle.dump( self.f_score, open( self.dir2+'colours_incremental.p', "wb" ) )
+        for cluster,vid in zip(self.Y_,self.video_num):
+            if vid == 106:
+                print '>>>>>>>',cluster
         pickle.dump( self.assignments_to_save, open( self.dir2+'colours_assignments.p', "wb" ) )
         # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
 
@@ -597,8 +604,8 @@ class colours_class():
         #
             # cv2.imwrite(self.dir2+str(p)+'_cluster.jpg',image_cluster)
             # cv2.imwrite(self.dir2+str(p)+'_cluster_avg.jpg',image_avg)
-        cv2.imshow("img",image_cluster_total)
-        cv2.waitKey(1000)
+        # cv2.imshow("img",image_cluster_total)
+        # cv2.waitKey(1000)
 
 
 def main():

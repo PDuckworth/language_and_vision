@@ -16,6 +16,7 @@ from random import shuffle
 
 colours = ['red','blue','green','purple']
 markers = ["o","^","*","s"]
+markers_size = [11,11,15,11]
 fig, ax = plt.subplots()
 
 for c,i in enumerate(["faces","colours","objects","actions"]):
@@ -28,11 +29,11 @@ for c,i in enumerate(["faces","colours","objects","actions"]):
 
     x = np.arange(len(f_score))/float(5)*499
     print x
-    ax.plot(x, f_score,markers[c]+'-b',linewidth=2,markersize=14,c=colours[c],label=i)
+    ax.plot(x, f_score,markers[c]+'-b',linewidth=2,markersize=markers_size[c],c=colours[c],label=i)
 plt.xlim([-50,450])
 plt.xticks([00,100,200,300,400], ['5-Apr','6-Apr','7-Apr','8-Apr','11-Apr'], fontsize=20)
-plt.yticks([0,.1,.200,.300,.400,.5,.6], ['','0.1','0.2','0.3','0.4','0.5','0.6'], fontsize=20)
-plt.ylabel("f1-score", fontsize=25)
+plt.yticks([0,.1,.200,.300,.400,.5,.6], ['0.0','0.1','0.2','0.3','0.4','0.5','0.6'], fontsize=20)
+plt.ylabel("F1-score", fontsize=25)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
 ax.grid(True, zorder=5)

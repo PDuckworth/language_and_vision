@@ -56,7 +56,6 @@ class actions_class():
             self.video_num.append(i)
             self.actions[vid] = [actions[i-1]]
 
-
     def _read_tags(self):
         self.verbs = {}
         self.all_verbs = []
@@ -418,6 +417,7 @@ class actions_class():
         print self.f_score
         # print '-----------'
         pickle.dump( self.f_score, open( self.dir2+'actions_incremental.p', "wb" ) )
+        print self.actions[235]
         # pickle.dump( self.f_score, open( self.dir_faces+'faces_f_score3.p', "wb" ) )
 
     def _plot_incremental(self):
