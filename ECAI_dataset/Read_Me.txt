@@ -1,0 +1,3 @@
+# nltk_grammar, reads the annotations and parse them, then stores the grammar trees.
+# faces.py reads the faces, cluster them, and do the associations (LP)
+# colours.py ...
