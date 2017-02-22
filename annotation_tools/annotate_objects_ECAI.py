@@ -16,8 +16,10 @@ class gui():
     """docstring for gui"""
     def __init__(self):
         self.username = getpass.getuser()
-        self.dir_saving = '/home/'+self.username+'/Datasets/ECAI_dataset/annotation'
-        self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset/dataset_images/'
+        self.dir_saving = '/home/'+self.username+'/Datasets/ECAI_dataset_segmented_robot/annotation'
+        self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset_segmented_robot'
+        #self.dir_saving = '/home/'+self.username+'/Datasets/ECAI_dataset/annotation'
+        #self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset/dataset_images/'
         if not os.path.isdir(self.dir_saving):
             os.mkdir(self.dir_saving)
         self.dir_saving += '/vid'
@@ -105,30 +107,31 @@ class gui():
             cv2.imwrite(self.dir_saving+str(self.folder)+'/obj_images/'+im_name,img)
             count+=1
         self.clear
+        self.NextVideo()
 
 
     def Printer_console(self):
-        self.object = 'Printer_console'; self.read_mouse=2; print 'Printer_console';self.color = self._colors[0]
+        self.object = 'Printer screen'; self.read_mouse=2; print 'Printer screen';self.color = self._colors[0]
     def Printer_paper_tray(self):
-        self.object = 'Printer_paper_tray'; self.read_mouse=2; print 'Printer_paper_tray';self.color = self._colors[3]
+        self.object = 'Printer paper tray'; self.read_mouse=2; print 'Printer paper tray';self.color = self._colors[3]
     def Microwave(self):
         self.object = 'Microwave'; self.read_mouse=2; print 'Microwave';self.color = self._colors[1]
     def Kettle(self):
         self.object = 'Kettle'; self.read_mouse=2; print 'Kettle';self.color = self._colors[2]
     def Tea_Pot(self):
-        self.object = 'Tea_Pot'; self.read_mouse=2; print 'Tea_Pot';self.color = self._colors[4]
+        self.object = 'Tea/coffee'; self.read_mouse=2; print 'Tea/coffee pots';self.color = self._colors[4]
     def Water_Cooler(self):
-        self.object = 'Water_Cooler'; self.read_mouse=2; print 'Water_Cooler';self.color = self._colors[5]
+        self.object = 'Water cooler'; self.read_mouse=2; print 'Water cooler';self.color = self._colors[5]
     def Waste_Bin(self):
-        self.object = 'Waste_Bin'; self.read_mouse=2; print 'Waste_Bin';self.color = self._colors[6]
+        self.object = 'Trash bin'; self.read_mouse=2; print 'Trash bin';self.color = self._colors[6]
     def Sink(self):
         self.object = 'Sink'; self.read_mouse=2; print 'Sink';self.color = self._colors[7]
     def Fridge(self):
         self.object = 'Fridge'; self.read_mouse=2; print 'Fridge';self.color = self._colors[8]
     def Paper_towel(self):
-        self.object = 'Paper_towel'; self.read_mouse=2; print 'Paper_towel';self.color = self._colors[9]
+        self.object = 'Paper towels'; self.read_mouse=2; print 'Paper towels';self.color = self._colors[9]
     def Double_doors(self):
-        self.object = 'Double_doors'; self.read_mouse=2; print 'Double_doors';self.color = self._colors[10]
+        self.object = 'Double doors'; self.read_mouse=2; print 'Double doors';self.color = self._colors[10]
 
     def mouse_callback(self,event):
         if self.read_mouse:

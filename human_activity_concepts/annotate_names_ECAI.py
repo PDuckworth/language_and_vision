@@ -14,9 +14,8 @@ class gui():
     """docstring for gui"""
     def __init__(self):
         self.username = getpass.getuser()
-        self.dir_saving = '/home/'+self.username+'/Datasets/ECAI_dataset_segmented_robot/annotation'
-        self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset_segmented_robot'
-
+        self.dir_saving = '/home/'+self.username+'/Datasets/ECAI_dataset_segmented/annotation'
+        self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset_segmented/'
         if not os.path.isdir(self.dir_saving):
             os.mkdir(self.dir_saving)
         self.dir_saving += '/vid'
