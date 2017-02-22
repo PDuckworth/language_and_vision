@@ -41,6 +41,8 @@ class faces_class():
 
     def _read_faces(self):
         f = open(self.dir_faces+'faces3_projections.csv','rb')
+        f = open(self.dir_faces+'projections_day1.csv','rb')
+
         self.faces = {}
         self.X = []
         self.persons = []
@@ -464,29 +466,29 @@ def main():
     f._read_faces()
     f._read_faces_images()
     f._read_tags()
-    # # f._cluster_faces()
+    # f._cluster_faces()
     f._read_faces_clusters()
     f._get_groundTruth()
-
-    # f._assignment_matrix(1.0)
-    # f._LP_assign(.05)
-    # f._compute_measures()
+    #
+    # # f._assignment_matrix(1.0)
+    # # f._LP_assign(.05)
+    f._compute_measures()
     for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
     # for i in range(1,f.max+1):
         # print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',i/float(f.max)
         f._assignment_matrix(date)
-        f._LP_assign(.06)
+        f._LP_assign(.05)
     f._plot_incremental()
-    # f.max = 10
-    # for i in range(1,f.max+1):
-    #     f._assignment_matrix(i/float(f.max))
-    #     f._LP_assign(.05)
-    # f._plot_incremental()
-    # f.min = 0
-    # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
-    # for i in range(f.min,f.max):
-    # f._plot_f_score()
-    # f._pretty_plot()
+    # # f.max = 10
+    # # for i in range(1,f.max+1):
+    # #     f._assignment_matrix(i/float(f.max))
+    # #     f._LP_assign(.05)
+    # # f._plot_incremental()
+    # # f.min = 0
+    # # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
+    # # for i in range(f.min,f.max):
+    # # f._plot_f_score()
+    f._pretty_plot()
 
 if __name__=="__main__":
     main()
