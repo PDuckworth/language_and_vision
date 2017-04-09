@@ -65,12 +65,15 @@ class gui():
         self.lmain2 = tk.Label(self.root)
         self.lmain2.grid(row=0, column=2, columnspan=1, rowspan=16, pady=10, padx=2, sticky="ew")
 
-        self.folder = 198
+        self.folder = 0
         self.file = 0
         self.NextVideo()
 
     def _object_selection(self,obj):
-        f1 = open(self.dir1+str(self.folder)+"/features/shapes/GT_obj_"+str(self.file)+".txt","w")
+        directory = self.dir1+str(self.folder)+"/ground_truth"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        f1 = open(self.dir1+str(self.folder)+"/ground_truth/GT_obj_"+str(self.file)+".txt","w")
         f1.write(obj)
         f1.close()
         if self.file==len(self.unique_objects)-1:
