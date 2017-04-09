@@ -74,12 +74,13 @@ class shapes():
     def _read_shapes(self):
         for video in range(1,205):
             dir1 = self.dir+str(video)+"/features/shapes/"
+            dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"fpfh*.pcd"))
             gfiles = sorted(glob.glob(dir1+"gfpfh_*.pcd"))
             # efiles = sorted(glob.glob(dir1+"esf*.pcd"))
             # efiles = gfiles
-            ground = sorted(glob.glob(dir1+"GT*.txt"))
-            print ground
+            ground = sorted(glob.glob(dir2+"GT*.txt"))
+            # print ground
             for f1,f2,f3 in zip(files,ground,gfiles):
                 num=1
                 fpfh = 0
@@ -164,7 +165,7 @@ class shapes():
             #         img[c1*(th+sp):c1*sp+(c1+1)*th,c2*th:(c2+1)*th,:] = int(val/100.0*255)
             # cv2.imshow("img",img)
             # cv2.imwrite(self.dir_save+"feature_"+obj+".png",img)
-        for T in range(25):
+        for T in range(50):
             V = []
             count = 0
             for a1,a2 in zip(self.Y_,self.X):
@@ -291,13 +292,14 @@ class shapes():
         #     self.cluster_images[val].append(img)
 
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
-        paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
+        paper_img = np.zeros((self.im_len*5,self.im_len*5*4,3),dtype=np.uint8)+255
         # print len(self.cluster_images)
         # print iii
         count3 = 0
         for count2,p in enumerate(self.cluster_images):
-            maxi = len(self.cluster_images[p])
-            image_avg = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
+            MAX_NUMBER_OF_IMAGES_SHOWN = 14
+            maxi = np.min([len(self.cluster_images[p]),MAX_NUMBER_OF_IMAGES_SHOWN])
+            # image_avg = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
             image_cluster = np.zeros((self.im_len*5,self.im_len*5,3),dtype=np.uint8)+255
             # print maxi
             for count,img in enumerate(self.cluster_images[p]):
@@ -305,7 +307,7 @@ class shapes():
                 img[-2:,:,:]=0
                 img[:,0:2,:]=0
                 img[:,-2:,:]=0
-                image_avg += img/(len(self.cluster_images[p])+1)
+                # image_avg += img/(len(self.cluster_images[p])+1)
                 ang = count/float(maxi)*2*np.pi
                 xc = int(1.95*self.im_len*np.cos(ang))
                 yc = int(1.95*self.im_len*np.sin(ang))
@@ -318,9 +320,11 @@ class shapes():
                 cv2.line(image_cluster,(int(y1+y2)/2,int(x1+x2)/2),(C,C),(20,20,20),2)
                 # print x1,x2,y1,y2
                 image_cluster[x1:x2,y1:y2,:] = img
-            image_avg = cv2.resize(image_avg, (int(self.im_len*1.4),int(self.im_len*1.4)), interpolation = cv2.INTER_AREA)
+            # image_avg = cv2.resize(image_avg, (int(self.im_len*1.4),int(self.im_len*1.4)), interpolation = cv2.INTER_AREA)
             x1 = int((2.5-.7)*self.im_len)
             x2 = int(x1+1.4*self.im_len)
+            image_avg = cv2.imread(self.dir_save+"feature_"+str(p)+".png")
+            image_avg = cv2.resize(image_avg, (int(self.im_len*1.4),int(self.im_len*1.4)), interpolation = cv2.INTER_AREA)
             image_cluster[x1:x2,x1:x2,:] = image_avg
             if count2<35:
                 i1x = np.mod(count2,7)*self.im_len*5
@@ -330,14 +334,14 @@ class shapes():
                 image_cluster_total[i1x:i2x,i1y:i2y,:] = image_cluster
                 cv2.imwrite(self.dir_save+'all_clusters.jpg',image_cluster_total)
 
-            # if p in [2,3,4]:
-            #     i1x = np.mod(count3,3)*self.im_len*5
-            #     i2x = (np.mod(count3,3)+1)*self.im_len*5
-            #     count3+=1
-            #     i1y = 0
-            #     i2y = self.im_len*5
-            #     paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
-            #     cv2.imwrite(self.dir_save+'faces_clusters_ex.jpg',paper_img)
+            if p in [0,7,19,26]:
+                i1x = np.mod(count3,4)*self.im_len*5
+                i2x = (np.mod(count3,4)+1)*self.im_len*5
+                count3+=1
+                i1y = 0
+                i2y = self.im_len*5
+                paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
+                cv2.imwrite(self.dir_save+'shapes_clusters_ex.jpg',paper_img)
 
             # cv2.imwrite(self.dir_save+str(p)+'_cluster.jpg',image_cluster)
             cv2.imwrite(self.dir_save+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
@@ -346,10 +350,10 @@ class shapes():
 def main():
     S = shapes()
     # S._extract_object_images()
-    S._read_shapes()
+    # S._read_shapes()
     S._read_pickle_shapes()
     S._read_shapes_images()
-    S._cluster_objs()
+    # S._cluster_objs()
     S._read_clusters()
     S._plot_fpfh_values()
     S._pretty_plot()
