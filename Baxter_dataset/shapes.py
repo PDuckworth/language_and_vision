@@ -154,17 +154,22 @@ class shapes():
                 self.images.append(cv2.resize(img, (self.im_len,self.im_len), interpolation = cv2.INTER_AREA))
 
     def _plot_fpfh_values(self):
-        # for obj in self.shapes:
-            # L = len(self.shapes[obj])
-        th = self.th
-        sp = self.sp
-            # img = np.zeros((th*L + sp*(L-1),th*len(self.shapes[obj][0]),3),dtype=np.uint8)
-            # for c1,i in enumerate(self.shapes[obj]):
-            #     # print np.max(i)/100.0*255
-            #     for c2,val in enumerate(i):
-            #         img[c1*(th+sp):c1*sp+(c1+1)*th,c2*th:(c2+1)*th,:] = int(val/100.0*255)
-            # cv2.imshow("img",img)
-            # cv2.imwrite(self.dir_save+"feature_"+obj+".png",img)
+        th = self.th+15
+        sp = self.sp+3
+        for obj in self.shapes:
+            L = len(self.shapes[obj])
+            # L = 1
+            img = np.zeros((th*L + sp*(L-1)+2*sp,   th*len(self.shapes[obj][0])+sp*(len(self.shapes[obj][0])-1)+2*sp,   3),dtype=np.uint8)
+            for c1,i in enumerate(self.shapes[obj]):
+                # print np.max(i)/100.0*255
+                # if c1 == 30:
+                    for c2,val in enumerate(i):
+                        # c1 = 0
+                        img[sp+c1*(th+sp):sp+c1*sp+(c1+1)*th,   sp+c2*(th+sp):sp+(c2+1)*th+c2*sp,  :] = int(val/100.0*255)+5
+                # break
+            cv2.imshow("img",img)
+            cv2.imwrite(self.dir_save+"raw_features_"+obj+".png",img)
+
         for T in range(50):
             V = []
             count = 0
