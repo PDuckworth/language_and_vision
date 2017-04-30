@@ -14,7 +14,7 @@ from qsrlib_io.world_trace import Object_State, World_Trace
 from tf.transformations import euler_from_quaternion
 import pdb
 from random import randint
-from videos_segmented_by_day import segmented_videos
+from ECAI_videos_segmented_by_day import segmented_videos
 
 def pretty_print_world_qsr_trace(which_qsr, qsrlib_response_message):
     print(which_qsr, "request was made at ", str(qsrlib_response_message.req_made_at)
@@ -132,6 +132,7 @@ def plot_mean_filter(values, filtered_values, text1, text2):
     plt.xlabel('frames')
     plt.show()
 
+
 def apply_median_filter(skeleton_data, window_size=11, vis=False):
     """Once obtained the joint x,y,z coords.
     Apply a median filter over a temporal window to smooth the joint positions.
@@ -170,7 +171,7 @@ def apply_median_filter(skeleton_data, window_size=11, vis=False):
             f_data[joint_id][dim] = filtered_values
 
             if vis and "hand" in joint_id:
-                print joint_id
+                print "plotting ", joint_id, "  " , dim
                 title1 = 'input %s position: %s' % (joint_id, dim)
                 title2 = 'filtered %s position: %s' % (joint_id, dim)
                 plot_mean_filter(values, filtered_values, title1, title2)
@@ -190,7 +191,7 @@ def apply_median_filter(skeleton_data, window_size=11, vis=False):
                 ob_states[joint_id].append(Object_State(name=joint_id, timestamp=cnt, x=x, y=y, z=z))
             except:
                 ob_states[joint_id] = [Object_State(name=joint_id, timestamp=cnt, x=x, y=y, z=z)]
-
+    sys.exit(1)
     # #Add all the joint IDs into the World Trace
     for joint_id, obj in ob_states.items():
         camera_world.add_object_state_series(obj)
@@ -251,9 +252,9 @@ if __name__ == "__main__":
     # ****************************************************************************************************
     data_subset = False
     frame_rate_reduce = 1  # drop every other frame - before median filter applies
-    mean_window = 1 # use scipy medfilt with the window_size - after down sampling frame rate
+    mean_window = 5 # use scipy medfilt with the window_size - after down sampling frame rate
     qsr_median_window = 3
-    tpcc = True
+    tpcc = False
     objects_inc_type = True
     using_language = False
 
@@ -314,7 +315,7 @@ if __name__ == "__main__":
     # Dynamic Args list
     # ****************************************************************************************************
     which_qsr=["argd", "qtcbs"]
-    objects_used = ['left_hand', 'right_hand', 'torso']
+    objects_used = ['left_hand', 'right_hand'] #, 'torso']
 
     qsrs_for = []
     for selected_joint in objects_used:
@@ -335,7 +336,7 @@ if __name__ == "__main__":
     dynamic_args = { "qtcbs": {"qsrs_for" : qsrs_for, "no_collapse": True, "quantisation_factor":0.1, "validate":False },
                      "argd" : {"qsrs_for": qsrs_for, "qsr_relations_and_values": {'Touch': 0.25, 'Near': 0.5, 'Away': 1.0, 'Ignore': 10}},
                     #  "qstag" : {"params" : {"min_rows": 1, "max_rows": 2, "max_eps": 4}, "object_types": object_types},
-                     "qstag" : {"params" : {"min_rows": 1, "max_rows": 2, "max_eps": 4}, "object_types": object_types},
+                     "qstag" : {"params" : {"min_rows": 1, "max_rows": 1, "max_eps": 4}, "object_types": object_types},
                      "filters" : {"median_filter": {"window": qsr_median_window}}}
 
     # ****************************************************************************************************
@@ -440,7 +441,7 @@ if __name__ == "__main__":
             # ****************************************************************************************************
             # filter skeleton data
             # ****************************************************************************************************
-            f_skeleton_data, camera_world = apply_median_filter(skeleton_data, mean_window)
+            f_skeleton_data, camera_world = apply_median_filter(skeleton_data, mean_window, vis=False)
 
             # ****************************************************************************************************
             # transform to map coordinate frame
