@@ -9,31 +9,30 @@ counter = 0
 for i in range(1,205):
     folder = str(i)
     # dir_src = "/home/omari/Datasets/Baxter_Dataset_final/scene"+folder
-    dir_dst = "/home/omari/Datasets/AAAI-17-Baxter-dataset/scene"+folder
+    dir_dst = "/home/omari/Datasets/Baxter_Dataset_final/scene"+folder
 
-    # remove HSV clusters
-    # files = sorted(glob.glob(dir_dst+"/objects/"+"HSV_cluster_*"))
-    # for file in files:
-    #     os.remove(file)
-
-    # change .png to ,jpg
-    for d in ["/rgb_cam"]:#,"/rgb_kinect","/objects","/rgb_lefthand","/rgb_righthand","/robot_state","/table_pointcloud","/tabletop_pointcloud","/object_tracks"]:
-        files = sorted(glob.glob(dir_dst+d+"/*.jpg"))
+    for d in ["/cam"]:#,"/rgb_kinect","/objects","/rgb_lefthand","/rgb_righthand","/robot_state","/table_pointcloud","/tabletop_pointcloud","/object_tracks"]:
+        files = sorted(glob.glob(dir_dst+d+"/*.png"))
         count = 0
+        count2 = 0
         for file in files:
-            count+=1
-            # print count
-            if np.mod(count,5.0)==0:
-                # print count
-                img = cv2.imread(file)
+            img = cv2.imread(file)
+            img = img[:,:-140,:]
+            img[:,-10:,:] = 255
+            if np.mod(count,len(files)/3)==0:
+                count2+=1
+                if count2 > 3:
+                    continue
                 cv2.imshow("img",img)
                 cv2.waitKey(10)
-                img = cv2.resize(img,None,fx=.6, fy=.6, interpolation = cv2.INTER_CUBIC)
-                cv2.imwrite("/home/omari/Datasets/AAAI-17-Baxter-dataset/all_images/img"+str(counter)+".jpg",img)
-                counter+=1
-    #             cv2.imwrite(file.split(".")[0]+".jpg",img)
-    #             os.remove(file)
-    #         except Exception as e:
-    #             pass
-    #
-    # shutil.make_archive(dir_dst, 'zip', dir_dst)
+                #img = cv2.resize(img,None,fx=.6, fy=.6, interpolation = cv2.INTER_CUBIC)
+                if count == 0:
+                    img_final = img
+                else:
+                    img_final = np.concatenate((img_final, img), axis=1)
+            count+=1
+    img_final = np.concatenate((img_final, img), axis=1)
+
+    img_final = img_final[:,:-10,:]
+    cv2.imwrite("/home/omari/Datasets/Baxter_Dataset_final/all_images/img"+str(counter)+".png",img_final)
+    counter+=1
