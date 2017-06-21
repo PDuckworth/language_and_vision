@@ -26,6 +26,7 @@ class grammar():
     def _read_annotations(self):
         self.sentences = {}
         self.words = {}
+        self.all_words = []
         self.words_count = {}
         self.all_words = []
         self.all_passed_words = []
@@ -59,6 +60,8 @@ class grammar():
                 self.raw_sentences[i].append(line)
 
                 for word in line.split(' '):
+                    if word != '' and word not in self.all_words:
+                        self.all_words.append(word)
                     if word != '' and word not in self.words[i]:
                         self.words[i].append(word)
                     if word != '' and word not in self.all_words:
@@ -162,6 +165,7 @@ def main():
     f._read_parse()
     # f._parse()
     f._save_data()
+    print "the total number of unique words is: ",len(f.all_words)
     # f._print_results()
 
 if __name__=="__main__":
