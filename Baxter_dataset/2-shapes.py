@@ -79,7 +79,7 @@ class shapes():
             gfiles = sorted(glob.glob(dir1+"gfpfh_*.pcd"))
             # efiles = sorted(glob.glob(dir1+"esf*.pcd"))
             # efiles = gfiles
-            ground = sorted(glob.glob(dir2+"GT*.txt"))
+            ground = sorted(glob.glob(dir2+"GT_obj*.txt"))
             # print ground
             for f1,f2,f3 in zip(files,ground,gfiles):
                 num=1
