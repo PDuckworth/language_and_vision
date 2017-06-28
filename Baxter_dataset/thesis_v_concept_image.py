@@ -2,18 +2,19 @@ import cv2
 import numpy as np
 
 shapes = '/home/omari/Datasets/Baxter_Dataset_final/features/shapes/cluster_images/'
+colors = '/home/omari/Datasets/Baxter_Dataset_final/features/colours/'
 #colors = '/home/omari/Datasets/ECAI_dataset/colours/'
 #actions = '/home/omari/Datasets/ECAI_dataset/actions/'
 #objects = '/home/omari/Datasets/ECAI_dataset/objects/'
 image_dir = "/home/omari/Dropbox/Thesis/writing/Chapter7/Chapter7Figs/PNG/LUCAS-visual-concepts.jpg"
 
 shape_im = ['7_cluster', '26_cluster']
-#color_im = ['5_cluster', '4_cluster', '9_cluster']
+color_im = ['5_cluster', '11_cluster']
 #action_im = ['3_cluster', '6_cluster', '11_cluster']
 #object_im = ['0_cluster', '1_cluster', '2_cluster']
-all_images = [shape_im]#, color_im, action_im, object_im]
-all_dir = [shapes]#, colors, actions, objects]
-text = ["shape"]#, "colour", "action", "object"]
+all_images = [shape_im, color_im]#, action_im, object_im]
+all_dir = [shapes, colors]#, actions, objects]
+text = ["shape", "colour"]#, "action", "object"]
 
 im_len = 60
 th = 20
