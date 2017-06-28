@@ -9,7 +9,7 @@ colors = '/home/omari/Datasets/Baxter_Dataset_final/features/colours/'
 image_dir = "/home/omari/Dropbox/Thesis/writing/Chapter7/Chapter7Figs/PNG/LUCAS-visual-concepts.jpg"
 
 shape_im = ['7_cluster', '26_cluster']
-color_im = ['5_cluster', '11_cluster']
+color_im = ['4_cluster', '13_cluster']
 #action_im = ['3_cluster', '6_cluster', '11_cluster']
 #object_im = ['0_cluster', '1_cluster', '2_cluster']
 all_images = [shape_im, color_im]#, action_im, object_im]
