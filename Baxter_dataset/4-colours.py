@@ -119,15 +119,6 @@ class colours():
         #     print '----------------'
         # pickle.dump( [self.shapes, self.GT, self.X, self.gX, self.eX], open(self.dir_save+"colours.p", "wb" ) )
 
-    # def _read_pickle_shapes(self):
-    #     self.shapes,self.GT,self.X, self.gX, self.eX = pickle.load(open(self.dir_save+"colours.p", "rb" ) )
-        #
-        # for shape in self.shapes:
-        #     print shape,len(self.shapes[shape])
-        # for i in range(len(self.GT)):
-        #     if self.GT[i] in ["egg","carrot","banana","dolphin","apple","cup","octopus"]:
-        #         self.GT[i] = "ball"
-
     def _read_shapes_images(self):
         for video in range(1,205):
             dir1 = self.dir+str(video)+"/clusters/"
@@ -225,13 +216,7 @@ class colours():
 
     def _read_clusters(self):
         final_clf,self.best_v = pickle.load(open( self.dir_save+'colours_clusters.p', "rb" ) )
-        # X = []
-        # for i,j in zip(self.X,self.gX):
-        #     if X == []:
-        #         X = list(i)+list(j)
-        #     else:
-        #         X = np.vstack((X,list(i)+list(j)))
-        # self.X = X
+        print "number of clusters",len(final_clf.means_)
         self.Y_ = final_clf.predict(self.X)
 
     def _pretty_plot(self):
