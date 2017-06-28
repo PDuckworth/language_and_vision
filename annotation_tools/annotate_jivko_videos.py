@@ -11,8 +11,8 @@ import os.path
 class gui():
     """docstring for gui"""
     def __init__(self):
-        self.dir_saving = '/home/omari/Dropbox/Jivko_dataset/'
-        self.dir1 = '/home/omari/Datasets_old/Jivko_dataset/t'
+        self.dir_saving = '/home/omari/Datasets/jivko_dataset/annotations/'
+        self.dir1 = '/home/omari/Datasets/jivko_dataset/t'
         self.root = tk.Tk()
         self.root.bind('<Escape>', lambda e: self.root.quit())
         self.textFrame = tk.Frame(self.root)
