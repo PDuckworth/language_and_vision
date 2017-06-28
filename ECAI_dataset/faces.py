@@ -304,6 +304,19 @@ class faces_class():
                 self.cluster_images[val] = []
             self.cluster_images[val].append(img)
 
+        for val in self.cluster_images:
+            #self.cluster_images[val] = sorted(self.cluster_images[val])
+            print val,len(self.cluster_images[val])
+            if len(self.cluster_images[val])>12:
+                selected = []
+                count = 0
+                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/12):
+                    if count < 12:
+                        selected.append(self.cluster_images[val][i])
+                        count+=1
+                self.cluster_images[val] = selected
+            print val,len(self.cluster_images[val])
+            
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
         paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
         # print len(self.cluster_images)
