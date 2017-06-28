@@ -134,7 +134,10 @@ class gui():
         self.folder += 1
         self.unique_pcd = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/cloud_*.png"))
         self.unique_objects = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/obj_*.png"))
+        self.unique_GT = sorted(glob.glob(self.dir1+str(self.folder)+"/ground_truth/GT_obj_*.txt"))
         print "video: ",self.folder," objects: ",len(self.unique_objects)
+        if len(self.unique_objects) == len(self.unique_GT):
+            self.NextVideo()
 
     def show_frame(self):
         img = cv2.imread(self.unique_objects[self.file])
