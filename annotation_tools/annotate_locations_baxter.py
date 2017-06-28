@@ -65,7 +65,7 @@ class gui():
         self.lmain2 = tk.Label(self.root)
         self.lmain2.grid(row=0, column=2, columnspan=1, rowspan=16, pady=10, padx=2, sticky="ew")
 
-        self.folder = 0
+        self.folder = 139
         self.file = 0
         self.NextVideo()
 
@@ -134,10 +134,7 @@ class gui():
         self.folder += 1
         self.unique_pcd = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/cloud_*.png"))
         self.unique_objects = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/obj_*.png"))
-        self.unique_GT = sorted(glob.glob(self.dir1+str(self.folder)+"/ground_truth/GT_colour_*.txt"))
         print "video: ",self.folder," objects: ",len(self.unique_objects)
-        if len(self.unique_objects) == len(self.unique_GT):
-            self.NextVideo()
 
     def show_frame(self):
         img = cv2.imread(self.unique_objects[self.file])
