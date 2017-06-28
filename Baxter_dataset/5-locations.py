@@ -79,29 +79,35 @@ class locations():
             dir1 = self.dir+str(video)+"/tracking/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
-            print files
-            ground = sorted(glob.glob(dir2+"GT_colour*.txt"))
+            #print files
+            types = sorted(glob.glob(dir2+"GT_obj*.txt"))
+            ground = sorted(glob.glob(dir2+"GT_obj*.txt"))
             # print ground
-            for f1,f2 in zip(files,ground):
+            img = np.zeros((200,200,3),dtype=np.uint8)+255
+            for f1,f2,f3 in zip(files,types,ground):
                 # num=1
-                for f1 in files:
-                    f = open(f1,"r")
-                    xyz = []
-                    for line in f:
-                        line = line.split("\n")[0]
-                        a,val = line.split(":")
-                        xyz.append(float(val))
-                    xyz = xyz[:-1]
+                # for f1 in files:
+                f = open(f1,"r")
+                xyz = []
+                for line in f:
+                    line = line.split("\n")[0]
+                    a,val = line.split(":")
+                    xyz.append(float(val))
+                xyz = xyz[:-1]
 
                 # plot the location
-                x = int((xyz[0]-min_X)/(max_X-min_X)*180+10)
-                y = int((xyz[1]-min_Y)/(max_Y-min_Y)*180+10)
+                x = 200-int((xyz[0]-min_X)/(max_X-min_X)*180+10)
+                y = 200-int((xyz[1]-min_Y)/(max_Y-min_Y)*180+10)
+                # check type
+                f = open(f2,"r")
+                for line in f:
+                    line = line.split('\n')[0]
+                    if line == "cup":
+                        x += 35
+
                 print x,y
-                img = np.zeros((200,200,3),dtype=np.uint8)+255
-                img[y-1:y+1, x-6:x+6, :] = [0,0,255]
-                img[y-6:y+6, x-1:x+1, :] = [0,0,255]
-                cv2.imshow("test",img)
-                cv2.waitKey(1200)
+                img[x-6:x+6, y-1:y+1, :] = [0,0,255]
+                img[x-1:x+1, y-6:y+6, :] = [0,0,255]
 
                 if self.X == []:
                     self.X = xyz
@@ -110,7 +116,7 @@ class locations():
                 # print self.X
                 f.close()
 
-                f = open(f2,"r")
+                f = open(f3,"r")
                 for line in f:
                     line = line.split('\n')[0]
                     # if line == "orange":
@@ -121,6 +127,9 @@ class locations():
                     else:
                         self.shapes[line].append(xyz)
                 f.close()
+
+            cv2.imshow("test",img)
+            cv2.waitKey(1200)
         # print "min X ",min(self.X[:,0])
         # print "max X ",max(self.X[:,0])
         # print "min Y ",min(self.X[:,1])
