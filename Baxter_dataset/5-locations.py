@@ -8,6 +8,12 @@ from sklearn import mixture
 from sklearn.metrics.cluster import v_measure_score
 from sklearn import metrics
 from sklearn import svm
+import matplotlib.pyplot as plt
+
+from scipy.interpolate import griddata
+import numpy.ma as ma
+from numpy.random import uniform, seed
+from matplotlib import cm
 
 class locations():
     """docstring for shapes."""
@@ -17,6 +23,7 @@ class locations():
         self.th = 10
         self.sp = 2
         self.X = []     # fpfh vales
+        self.XY = []
         self.eX = []    # esf vales
         self.GT = []
         self.shapes = {}
@@ -68,21 +75,36 @@ class locations():
                     A = np.max([a,b])
                     x1,x2 = int(xo-A/2), int(xo+A/2)
                     y1,y2 = int(yo-A/2), int(yo+A/2)
-                    cv2.imwrite(self.dir+str(video)+"/clusters/obj_"+str(obj)+".png",img[y1:y2,x1:x2,:])
+                    canvas = img.copy()
+                    # for i in range(x1,x2+1):
+                    #     A = np.abs((i-(x2+x1)/2.0)/((x1+x2)/2.0-x1))
+                    #     im[y1:y2,i:i+1,:] = [int(A*255),0,0]
+                        # print i
+                    # canvas = np.add(np.multiply(im,0.5,casting="unsafe"),np.multiply(img,0.5,casting="unsafe"),casting="unsafe")
+                    canvas[y1:y2,x1-10:x1,:] = [0,0,0]
+                    canvas[y1:y2,x2:x2+10,:] = [0,0,0]
+                    canvas[y1-10:y1,x1:x2,:] = [0,0,0]
+                    canvas[y2:y2+10,x1:x2,:] = [0,0,0]
+                    cv2.line(canvas,(x1,y1),(x2,y2),(0,0,0),3)
+                    cv2.line(canvas,(x1,y2),(x2,y1),(0,0,0),3)
+                    canvas = canvas[:-60,120:-250,:]
+                    cv2.imwrite(self.dir+str(video)+"/clusters/location_obj_"+str(obj)+".png",canvas)
+                    canvas = cv2.resize(canvas, (60,60), interpolation = cv2.INTER_AREA)
+                    self.images.append(canvas)
 
     def _read_locations(self):
         min_X = 0.607891
         max_X = 0.844499
         min_Y = -0.261884
         max_Y =  0.22944
-        # img = np.zeros((200,200,3),dtype=np.uint8)+255
+        img_all = np.zeros((200,200,3),dtype=np.uint8)+255
         for video in range(1,205):
             dir1 = self.dir+str(video)+"/tracking/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
             #print files
             types = sorted(glob.glob(dir2+"GT_obj*.txt"))
-            ground = sorted(glob.glob(dir2+"GT_obj*.txt"))
+            ground = sorted(glob.glob(dir2+"GT_location_*.txt"))
             # print ground
             obj = 0
             for f1,f2,f3 in zip(files,types,ground):
@@ -104,12 +126,36 @@ class locations():
                     line = line.split('\n')[0]
                     if line == "cup":
                         x += 35
-
-                print x,y
+                # print x,y
                 th = 12
                 l = 2
                 img[x-th:x+th, y-l:y+l, :] = [0,0,255]
                 img[x-l:x+l, y-th:y+th, :] = [0,0,255]
+                img_all[x-th:x+th, y-l:y+l, :] = [0,0,255]
+                img_all[x-l:x+l, y-th:y+th, :] = [0,0,255]
+
+                # ## save the ground_truth
+                # if x<100:
+                #     val1 = "top_"
+                # else:
+                #     val1 = "centre_"
+                #
+                # if y < 200/3:
+                #     val2 = "left"
+                # elif y<200/3*2:
+                #     val2 = ""
+                # else:
+                #     val2 = "right"
+                # # print val1+val2
+                # f1 = open(self.dir+str(video)+"/ground_truth/GT_location_"+str(obj)+".txt","w")
+                # f1.write(val1+val2)
+                # f1.close()
+
+
+                if self.XY == []:
+                    self.XY = [x,y]
+                else:
+                    self.XY = np.vstack((self.XY,[x,y]))
 
                 if self.X == []:
                     self.X = xyz
@@ -130,9 +176,10 @@ class locations():
                         self.shapes[line].append(xyz)
                 f.close()
 
-                self.images.append(img)
+                # self.images.append(img)
                 cv2.imwrite(self.dir+str(video)+"/clusters/loc_"+str(obj)+".png",img)
                 obj+=1
+        cv2.imwrite(self.dir_save+"all_locations.png",img_all)
 
     def _read_shapes_images(self):
         for video in range(1,205):
@@ -180,14 +227,14 @@ class locations():
                 cv2.imshow("img",img)
                 cv2.imwrite(self.dir_save+"feature_"+str(T)+".png",img)
 
-    def _cluster_colours(self):
+    def _cluster_locations(self):
         final_clf = 0
         best_v = 0
         X = self.X
         for i in range(10):
             print '#####',i
             ## 18 components did well!! 0.45
-            n_components_range = range(8, 22)
+            n_components_range = range(3, 10)
             cv_types = ['spherical', 'tied', 'diag', 'full']
             lowest_bic = np.infty
             for cv_type in cv_types:
@@ -204,6 +251,7 @@ class locations():
                         best_v = v_meas
                         final_clf = gmm
                         print best_v
+                        print "clusters: ",len(final_clf.means_)
             # clf = best_gmm
             # Y_ = clf.predict(X)
             # v_meas = v_measure_score(self.GT, Y_)
@@ -227,51 +275,96 @@ class locations():
         #     self.cost_matrix[count] = self.predictions[obj]
         #
 
-        pickle.dump( [final_clf,self.best_v], open( self.dir_save+'colours_clusters.p', "wb" ) )
+        pickle.dump( [final_clf,self.best_v], open( self.dir_save+'locations_clusters.p', "wb" ) )
 
     def _read_clusters(self):
-        final_clf,self.best_v = pickle.load(open( self.dir_save+'colours_clusters.p', "rb" ) )
-        print "number of clusters",len(final_clf.means_)
-        self.Y_ = final_clf.predict(self.X)
+        self.final_clf,self.best_v = pickle.load(open( self.dir_save+'locations_clusters.p', "rb" ) )
+        print "number of clusters",len(self.final_clf.means_)
+        self.Y_ = self.final_clf.predict(self.X)
+
+    def _plot_clusters(self):
+        self.clusters = {}
+        for x,val in zip(self.XY,self.Y_):
+            if val not in self.clusters:
+                self.clusters[val] = np.zeros((200,200,3),dtype=np.uint8)
+            a,b = x
+            for i in range(10):
+                self.clusters[val][a-i:a+i,b-i:b+i,:]+=1
+        self.avg_images = {}
+        for c in self.clusters:
+            plt.matshow(self.clusters[c][:,:,0])
+            plt.axis("off")
+            plt.savefig(self.dir_save+'avg_'+str(c)+".png")
+            self.avg_images[c] = cv2.imread(self.dir_save+'avg_'+str(c)+".png")
 
     def _pretty_plot(self):
+
+        # Data to plot.
+        self._plot_clusters()
+
         self.cluster_images = {}
-        print '-------------------------------------',len(self.Y_),len(self.X)
-        for rgb,val in zip(self.X,self.Y_):
+        for img,val in zip(self.images,self.Y_):
             if val not in self.cluster_images:
                 self.cluster_images[val] = []
-            rgb = [rgb[0]+rgb[1]+rgb[2],int(rgb[2]),int(rgb[1]),int(rgb[0])]
-            # if rgb not in self.cluster_images[val]:
-            self.cluster_images[val].append(rgb)
+            img = cv2.resize(img, (60,60), interpolation = cv2.INTER_AREA)
+            self.cluster_images[val].append(img)
 
         for val in self.cluster_images:
-            self.cluster_images[val] = sorted(self.cluster_images[val])
-            if len(self.cluster_images[val])>20:
+            #self.cluster_images[val] = sorted(self.cluster_images[val])
+            if len(self.cluster_images[val])>12:
                 selected = []
                 count = 0
-                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/19):
-                    if count < 20:
+                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/12):
+                    if count < 12:
                         selected.append(self.cluster_images[val][i])
                         count+=1
                 self.cluster_images[val] = selected
+
+        rows = 0
+        maxi = 0
+        for p in self.cluster_images:
+            if len(self.cluster_images[p])>maxi:
+                maxi = len(self.cluster_images[p])
+
+        maxi = int(np.sqrt(maxi))
+        for p in self.cluster_images:
+            count = 0
+            image = np.zeros((self.im_len*maxi,self.im_len*maxi,3),dtype=np.uint8)+255
+            for i in range(maxi):
+                for j in range(maxi):
+                    if count < len(self.cluster_images[p]):
+                        image[i*self.im_len:(i+1)*self.im_len,j*self.im_len:(j+1)*self.im_len,:] = self.cluster_images[p][count]
+                    image[i*self.im_len:i*self.im_len+1,  j*self.im_len:(j+1)*self.im_len,  :] = 0
+                    image[(i+1)*self.im_len:(i+1)*self.im_len+1,  j*self.im_len:(j+1)*self.im_len,  :] = 0
+                    image[i*self.im_len:(i+1)*self.im_len,  j*self.im_len:j*self.im_len+1,  :] = 0
+                    image[i*self.im_len:(i+1)*self.im_len,  (j+1)*self.im_len:(j+1)*self.im_len+1,  :] = 0
+                    count+=1
+            # cv2.imshow('test',image)
+            # cv2.waitKey(2000)
+            cv2.imwrite(self.dir_save+"cluster_"+str(p)+'.png',image)
+
+        # self.cluster_images = {}
+        # for img,val in zip(self.images,self.Y_):
+        #     if val not in self.cluster_images:
+        #         self.cluster_images[val] = []
+        #     self.cluster_images[val].append(img)
+
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
-        paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
+        paper_img = np.zeros((self.im_len*5*2,self.im_len*5*4,3),dtype=np.uint8)+255
+        # print len(self.cluster_images)
+        # print iii
         count3 = 0
         for count2,p in enumerate(self.cluster_images):
-            maxi = len(self.cluster_images[p])
-            image_avg = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
+            image_avg = self.avg_images[p][80:545,90:555,:]#np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
+            MAX_NUMBER_OF_IMAGES_SHOWN = 14
+            maxi = np.min([len(self.cluster_images[p]),MAX_NUMBER_OF_IMAGES_SHOWN])
             image_cluster = np.zeros((self.im_len*5,self.im_len*5,3),dtype=np.uint8)+255
             # print maxi
-            for count,rgb in enumerate(self.cluster_images[p]):
-                img = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
-                img[:,:,0]+=rgb[3]
-                img[:,:,1]+=rgb[2]
-                img[:,:,2]+=rgb[1]
-                # img[0:2,:,:]=0
-                # img[-2:,:,:]=0
-                # img[:,0:2,:]=0
-                # img[:,-2:,:]=0
-                image_avg += img/(len(self.cluster_images[p])+1)
+            for count,img in enumerate(self.cluster_images[p]):
+                img[0:2,:,:]=0
+                img[-2:,:,:]=0
+                img[:,0:2,:]=0
+                img[:,-2:,:]=0
                 ang = count/float(maxi)*2*np.pi
                 xc = int(1.95*self.im_len*np.cos(ang))
                 yc = int(1.95*self.im_len*np.sin(ang))
@@ -284,9 +377,11 @@ class locations():
                 cv2.line(image_cluster,(int(y1+y2)/2,int(x1+x2)/2),(C,C),(20,20,20),2)
                 # print x1,x2,y1,y2
                 image_cluster[x1:x2,y1:y2,:] = img
-            image_avg = cv2.resize(image_avg, (int(self.im_len*1.4),int(self.im_len*1.4)), interpolation = cv2.INTER_AREA)
-            x1 = int((2.5-.7)*self.im_len)
-            x2 = int(x1+1.4*self.im_len)
+            # image_avg = cv2.resize(image_avg, (int(self.im_len*1.4),int(self.im_len*1.4)), interpolation = cv2.INTER_AREA)
+            x1 = int((2.5-.9)*self.im_len)
+            x2 = int(x1+1.8*self.im_len)
+            # image_avg = cv2.imread(self.dir_save+"feature_"+str(p)+".png")
+            image_avg = cv2.resize(image_avg, (int(self.im_len*1.8),int(self.im_len*1.8)), interpolation = cv2.INTER_AREA)
             image_cluster[x1:x2,x1:x2,:] = image_avg
             if count2<35:
                 i1x = np.mod(count2,7)*self.im_len*5
@@ -296,17 +391,17 @@ class locations():
                 image_cluster_total[i1x:i2x,i1y:i2y,:] = image_cluster
                 cv2.imwrite(self.dir_save+'all_clusters.jpg',image_cluster_total)
 
-            # if p in [5,2]:
-            #     i1x = np.mod(count3,3)*self.im_len*5
-            #     i2x = (np.mod(count3,3)+1)*self.im_len*5
-            #     count3+=1
-            #     i1y = 0
-            #     i2y = self.im_len*5
-            #     paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
-            #     cv2.imwrite(self.dir_save+'faces_clusters_ex.jpg',paper_img)
-        #
-            cv2.imwrite(self.dir_save+str(p)+'_cluster.jpg',image_cluster)
-            cv2.imwrite(self.dir_save+str(p)+'_cluster_avg.jpg',image_avg)
+            if p in [0,1,2,3]:
+                i1x = np.mod(count3,4)*self.im_len*5
+                i2x = (np.mod(count3,4)+1)*self.im_len*5
+                count3+=1
+                i1y = 0
+                i2y = self.im_len*5
+                paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
+                cv2.imwrite(self.dir_save+'shapes_clusters_ex.jpg',paper_img)
+
+            # cv2.imwrite(self.dir_save+str(p)+'_cluster.jpg',image_cluster)
+            cv2.imwrite(self.dir_save+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
     def _print_results(self):
         #print v_measure_score(self.GT, self.Y_)
@@ -321,15 +416,15 @@ class locations():
 
 def main():
     L = locations()
-    # # S._extract_object_images()
+    L._extract_object_images()
     # # S._read_shapes()
     L._read_locations()
     # # S._read_shapes_images()
-    # L._cluster_colours()
-    # C._read_clusters()
+    #L._cluster_locations()
+    L._read_clusters()
     # # S._plot_fpfh_values()
-    # C._pretty_plot()
-    # C._print_results()
+    L._pretty_plot()
+    L._print_results()
 
 if __name__=="__main__":
     main()
