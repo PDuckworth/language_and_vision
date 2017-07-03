@@ -75,7 +75,8 @@ class locations():
         max_X = 0.844499
         min_Y = -0.261884
         max_Y =  0.22944
-        for video in range(14,15):
+        # img = np.zeros((200,200,3),dtype=np.uint8)+255
+        for video in range(1,205):
             dir1 = self.dir+str(video)+"/tracking/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
@@ -83,10 +84,9 @@ class locations():
             types = sorted(glob.glob(dir2+"GT_obj*.txt"))
             ground = sorted(glob.glob(dir2+"GT_obj*.txt"))
             # print ground
-            img = np.zeros((200,200,3),dtype=np.uint8)+255
+            obj = 0
             for f1,f2,f3 in zip(files,types,ground):
-                # num=1
-                # for f1 in files:
+                img = np.zeros((200,200,3),dtype=np.uint8)+255
                 f = open(f1,"r")
                 xyz = []
                 for line in f:
@@ -106,8 +106,10 @@ class locations():
                         x += 35
 
                 print x,y
-                img[x-6:x+6, y-1:y+1, :] = [0,0,255]
-                img[x-1:x+1, y-6:y+6, :] = [0,0,255]
+                th = 12
+                l = 2
+                img[x-th:x+th, y-l:y+l, :] = [0,0,255]
+                img[x-l:x+l, y-th:y+th, :] = [0,0,255]
 
                 if self.X == []:
                     self.X = xyz
@@ -128,17 +130,9 @@ class locations():
                         self.shapes[line].append(xyz)
                 f.close()
 
-            cv2.imshow("test",img)
-            cv2.waitKey(1200)
-        # print "min X ",min(self.X[:,0])
-        # print "max X ",max(self.X[:,0])
-        # print "min Y ",min(self.X[:,1])
-        # print "max Y ",max(self.X[:,1])
-        # for i in self.shapes:
-        #     print i
-        #     print self.shapes[i]
-        #     print '----------------'
-        # pickle.dump( [self.shapes, self.GT, self.X, self.gX, self.eX], open(self.dir_save+"colours.p", "wb" ) )
+                self.images.append(img)
+                cv2.imwrite(self.dir+str(video)+"/clusters/loc_"+str(obj)+".png",img)
+                obj+=1
 
     def _read_shapes_images(self):
         for video in range(1,205):
