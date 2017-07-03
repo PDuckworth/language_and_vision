@@ -26,26 +26,26 @@ class gui():
         self.root = tk.Tk()
         self.root.bind('<Escape>', lambda e: self.root.quit())
 
-        self.button1 = tk.Button(self.root, text="red", command=self.red)
+        self.button1 = tk.Button(self.root, text="top", command=self.top)
         self.button1.grid(row=0, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="green", command=self.green)
+        self.button2 = tk.Button(self.root, text="top_right", command=self.top_right)
         self.button2.grid(row=1, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="blue", command=self.blue)
+        self.button2 = tk.Button(self.root, text="top_left", command=self.top_left)
         self.button2.grid(row=2, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="yellow", command=self.yellow)
+        self.button2 = tk.Button(self.root, text="right", command=self.right)
         self.button2.grid(row=3, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="black", command=self.black)
+        self.button2 = tk.Button(self.root, text="left", command=self.left)
         self.button2.grid(row=4, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="white", command=self.white)
+        self.button2 = tk.Button(self.root, text="centre", command=self.centre)
         self.button2.grid(row=5, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="brown", command=self.brown)
-        self.button2.grid(row=6, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="orange", command=self.orange)
-        self.button2.grid(row=7, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="purple", command=self.purple)
-        self.button2.grid(row=8, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        self.button2 = tk.Button(self.root, text="pink", command=self.pink)
-        self.button2.grid(row=9, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
+        # self.button2 = tk.Button(self.root, text="brown", command=self.brown)
+        # self.button2.grid(row=6, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
+        # self.button2 = tk.Button(self.root, text="orange", command=self.orange)
+        # self.button2.grid(row=7, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
+        # self.button2 = tk.Button(self.root, text="purple", command=self.purple)
+        # self.button2.grid(row=8, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
+        # self.button2 = tk.Button(self.root, text="pink", command=self.pink)
+        # self.button2.grid(row=9, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
         # self.button2 = tk.Button(self.root, text="duck", command=self.duck)
         # self.button2.grid(row=10, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
         # self.button2 = tk.Button(self.root, text="octopus", command=self.octopus)
@@ -65,7 +65,7 @@ class gui():
         self.lmain2 = tk.Label(self.root)
         self.lmain2.grid(row=0, column=2, columnspan=1, rowspan=16, pady=10, padx=2, sticky="ew")
 
-        self.folder = 139
+        self.folder = 0
         self.file = 0
         self.NextVideo()
 
@@ -73,7 +73,7 @@ class gui():
         directory = self.dir1+str(self.folder)+"/ground_truth"
         if not os.path.exists(directory):
             os.makedirs(directory)
-        f1 = open(self.dir1+str(self.folder)+"/ground_truth/GT_colour_"+str(self.file)+".txt","w")
+        f1 = open(self.dir1+str(self.folder)+"/ground_truth/GT_location_"+str(self.file)+".txt","w")
         f1.write(obj)
         f1.close()
         if self.file==len(self.unique_objects)-1:
@@ -81,35 +81,35 @@ class gui():
         else:
             self.file+=1
 
-    def red(self):
-        self._object_selection("red")
+    def top(self):
+        self._object_selection("top")
 
-    def green(self):
-        self._object_selection("green")
+    def top_right(self):
+        self._object_selection("top_right")
 
-    def blue(self):
-        self._object_selection("blue")
+    def top_left(self):
+        self._object_selection("top_left")
 
-    def yellow(self):
-        self._object_selection("yellow")
+    def right(self):
+        self._object_selection("right")
 
-    def black(self):
-        self._object_selection("black")
+    def left(self):
+        self._object_selection("left")
 
-    def white(self):
-        self._object_selection("white")
+    def centre(self):
+        self._object_selection("centre")
 
-    def brown(self):
-        self._object_selection("brown")
-
-    def orange(self):
-        self._object_selection("orange")
-
-    def purple(self):
-        self._object_selection("purple")
-
-    def pink(self):
-        self._object_selection("pink")
+    # def brown(self):
+    #     self._object_selection("brown")
+    #
+    # def orange(self):
+    #     self._object_selection("orange")
+    #
+    # def purple(self):
+    #     self._object_selection("purple")
+    #
+    # def pink(self):
+    #     self._object_selection("pink")
     #
     # def octopus(self):
     #     self._object_selection("octopus")
@@ -132,12 +132,12 @@ class gui():
     def NextVideo(self):
         self.file = 0
         self.folder += 1
-        self.unique_pcd = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/cloud_*.png"))
+        self.unique_pcd = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/loc_*.png"))
         self.unique_objects = sorted(glob.glob(self.dir1+str(self.folder)+"/clusters/obj_*.png"))
         print "video: ",self.folder," objects: ",len(self.unique_objects)
 
     def show_frame(self):
-        img = cv2.imread(self.unique_objects[self.file])
+        img = cv2.imread(self.unique_pcd[self.file])
         cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
         img = Image.fromarray(cv2image)
         imgtk = ImageTk.PhotoImage(image=img)
@@ -145,7 +145,8 @@ class gui():
         self.lmain.configure(image=imgtk)
         # self.lmain.after(1, self.show_frame)
 
-        img = cv2.imread(self.unique_pcd[self.file])
+        # img = cv2.imread(self.unique_pcd[self.file])
+        img = cv2.imread("/home/omari/Datasets/Baxter_Dataset_final/features/locations/all_locations.png")
         cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
         img = Image.fromarray(cv2image)
         imgtk = ImageTk.PhotoImage(image=img)
