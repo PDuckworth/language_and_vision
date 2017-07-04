@@ -357,8 +357,10 @@ class distances():
             # image_avg = cv2.imread(self.dir_save+"feature_"+str(p)+".png")
             image_avg = cv2.resize(image_avg, (int(self.im_len*1.8),int(self.im_len*1.8)), interpolation = cv2.INTER_AREA)
             image_avg[0:2,:,:]=0
+            image_avg[94:96,:,:]=0
             image_avg[-2:,:,:]=0
             image_avg[:,0:2,:]=0
+            image_avg[:,10:12,:]=0
             image_avg[:,-2:,:]=0
             image_cluster[x1:x2,x1:x2,:] = image_avg
             if count2<35:
