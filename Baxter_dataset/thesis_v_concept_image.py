@@ -4,6 +4,7 @@ import numpy as np
 shapes = '/home/omari/Datasets/Baxter_Dataset_final/features/shapes/cluster_images/'
 colors = '/home/omari/Datasets/Baxter_Dataset_final/features/colours/'
 locations = '/home/omari/Datasets/Baxter_Dataset_final/features/locations/cluster_images/'
+distances = '/home/omari/Datasets/Baxter_Dataset_final/features/distances/cluster_images/'
 #colors = '/home/omari/Datasets/ECAI_dataset/colours/'
 #actions = '/home/omari/Datasets/ECAI_dataset/actions/'
 #objects = '/home/omari/Datasets/ECAI_dataset/objects/'
@@ -12,11 +13,10 @@ image_dir = "/home/omari/Dropbox/Thesis/writing/Chapter7/Chapter7Figs/PNG/LUCAS-
 shape_im = ['6_cluster', '24_cluster']
 color_im = ['4_cluster', '0_cluster']
 location_im = ['2_cluster', '5_cluster']
-#action_im = ['3_cluster', '6_cluster', '11_cluster']
-#object_im = ['0_cluster', '1_cluster', '2_cluster']
-all_images = [shape_im, color_im, location_im]#, action_im, object_im]
-all_dir = [shapes, colors, locations]#, actions, objects]
-text = ["shape", "colour", "location"]#, "action", "object"]
+distance_im = ['0_cluster', '2_cluster']
+all_images = [shape_im, color_im, location_im, distance_im]
+all_dir = [shapes, colors, locations, distances]#, actions, objects]
+text = ["shape", "colour", "location", "distance"]#, "action", "object"]
 
 im_len = 60
 th = 20

@@ -9,6 +9,8 @@ from sklearn.metrics.cluster import v_measure_score
 from sklearn import metrics
 from sklearn import svm
 import matplotlib.pyplot as plt
+import math
+import matplotlib.mlab as mlab
 
 from scipy.interpolate import griddata
 import numpy.ma as ma
@@ -35,63 +37,75 @@ class distances():
         f_x, f_y = 1212.9-700, 1129.0-700
         c_x, c_y = 187.3-700, 439.6-700
         for video in range(1,205):
-            print 'processing video: ',video
-            dir1 = self.dir+str(video)+"/features/shapes/"
-            img = cv2.imread(self.dir+str(video)+"/kinect_rgb/Kinect_0001.png")
-            height, width = img.shape[:2]
-            unique_objects = sorted(glob.glob(dir1+"fpfh*.pcd"))
-            for obj in range(len(unique_objects)):
-                print obj
-                dir2 = self.dir+str(video)+"/clusters/cloud_cluster_"+str(obj)
-                tracks = sorted(glob.glob(dir2+".pcd"))
-                for f1 in tracks:
-                    X = []
-                    Y = []
-                    f = open(f1,"r")
-                    for count,line in enumerate(f):
-                        line = line.split("\n")[0]
-                        if count == 6:      # get width
-                            num = int(line.split(" ")[1])
-                        if count > 10:
-                            xyz = map(float,line.split(" "))
-                            x,y,z = xyz[:-1]
-                            # X.append(z)
-                            # Y.append(y)
-                            # Z.append(x)
-                        # for z,y,x in zip(X,Y,Z):
-                            x_2d = int((x/z)*f_x + c_x)
-                            y_2d = int((y/z)*f_y + c_y)
-                            if x_2d < 0:
-                                x_2d += width
-                            if y_2d < 0:
-                                y_2d += height
-                            X.append(x_2d)
-                            Y.append(y_2d)
-                    x1,x2 = np.min(X)-20,np.max(X)+20
-                    y1,y2 = np.min(Y)-20,np.max(Y)+20
-                    a = y2-y1
-                    b = x2-x1
-                    xo = (x2+x1)/2.0
-                    yo = (y2+y1)/2.0
-                    A = np.max([a,b])
-                    x1,x2 = int(xo-A/2), int(xo+A/2)
-                    y1,y2 = int(yo-A/2), int(yo+A/2)
-                    canvas = img.copy()
-                    # for i in range(x1,x2+1):
-                    #     A = np.abs((i-(x2+x1)/2.0)/((x1+x2)/2.0-x1))
-                    #     im[y1:y2,i:i+1,:] = [int(A*255),0,0]
-                        # print i
-                    # canvas = np.add(np.multiply(im,0.5,casting="unsafe"),np.multiply(img,0.5,casting="unsafe"),casting="unsafe")
-                    canvas[y1:y2,x1-10:x1,:] = [0,0,0]
-                    canvas[y1:y2,x2:x2+10,:] = [0,0,0]
-                    canvas[y1-10:y1,x1:x2,:] = [0,0,0]
-                    canvas[y2:y2+10,x1:x2,:] = [0,0,0]
-                    cv2.line(canvas,(x1,y1),(x2,y2),(0,0,0),3)
-                    cv2.line(canvas,(x1,y2),(x2,y1),(0,0,0),3)
-                    canvas = canvas[:-60,120:-250,:]
-                    cv2.imwrite(self.dir+str(video)+"/clusters/location_obj_"+str(obj)+".png",canvas)
-                    canvas = cv2.resize(canvas, (60,60), interpolation = cv2.INTER_AREA)
-                    self.images.append(canvas)
+            dir1 = self.dir+str(video)+"/tracking/"
+            files = sorted(glob.glob(dir1+"obj*_0001.txt"))
+            if len(files)>1:
+                img = cv2.imread(self.dir+str(video)+"/kinect_rgb/Kinect_0001.png")
+                print 'processing video: ',video
+                dir1 = self.dir+str(video)+"/features/shapes/"
+                height, width = img.shape[:2]
+                unique_objects = sorted(glob.glob(dir1+"fpfh*.pcd"))
+                image_locations = {}
+                for obj in range(len(unique_objects)):
+                    print obj
+                    dir2 = self.dir+str(video)+"/clusters/cloud_cluster_"+str(obj)
+                    tracks = sorted(glob.glob(dir2+".pcd"))
+                    for f1 in tracks:
+                        X = []
+                        Y = []
+                        f = open(f1,"r")
+                        for count,line in enumerate(f):
+                            line = line.split("\n")[0]
+                            if count == 6:      # get width
+                                num = int(line.split(" ")[1])
+                            if count > 10:
+                                xyz = map(float,line.split(" "))
+                                x,y,z = xyz[:-1]
+                                # X.append(z)
+                                # Y.append(y)
+                                # Z.append(x)
+                            # for z,y,x in zip(X,Y,Z):
+                                x_2d = int((x/z)*f_x + c_x)
+                                y_2d = int((y/z)*f_y + c_y)
+                                if x_2d < 0:
+                                    x_2d += width
+                                if y_2d < 0:
+                                    y_2d += height
+                                X.append(x_2d)
+                                Y.append(y_2d)
+
+                        x1,x2 = np.min(X)-20,np.max(X)+20
+                        y1,y2 = np.min(Y)-20,np.max(Y)+20
+                        a = y2-y1
+                        b = x2-x1
+                        xo = (x2+x1)/2.0
+                        yo = (y2+y1)/2.0
+                        A = np.max([a,b])
+                        x1,x2 = int(xo-A/2), int(xo+A/2)
+                        y1,y2 = int(yo-A/2), int(yo+A/2)
+                        image_locations[obj] = [x1,x2,y1,y2]
+                for i in range(len(files)-1):
+                    canvas1 = img.copy()
+                    x1,x2,y1,y2 = image_locations[i]
+                    canvas1[y1:y2,x1-10:x1,:] = [0,0,0]
+                    canvas1[y1:y2,x2:x2+10,:] = [0,0,0]
+                    canvas1[y1-10:y1,x1:x2,:] = [0,0,0]
+                    canvas1[y2:y2+10,x1:x2,:] = [0,0,0]
+                    cv2.line(canvas1,(x1,y1),(x2,y2),(0,0,0),3)
+                    cv2.line(canvas1,(x1,y2),(x2,y1),(0,0,0),3)
+                    for j in range(i+1,len(files)):
+                        canvas2 = canvas1.copy()
+                        x1,x2,y1,y2 = image_locations[j]
+                        canvas2[y1:y2,x1-10:x1,:] = [0,0,0]
+                        canvas2[y1:y2,x2:x2+10,:] = [0,0,0]
+                        canvas2[y1-10:y1,x1:x2,:] = [0,0,0]
+                        canvas2[y2:y2+10,x1:x2,:] = [0,0,0]
+                        cv2.line(canvas2,(x1,y1),(x2,y2),(0,0,0),3)
+                        cv2.line(canvas2,(x1,y2),(x2,y1),(0,0,0),3)
+                        canvas2 = canvas2[:-60,120:-250,:]
+                        cv2.imwrite(self.dir+str(video)+"/clusters/distance_"+str(i)+"_"+str(j)+".png",canvas2)
+                        canvas2 = cv2.resize(canvas2, (60,60), interpolation = cv2.INTER_AREA)
+                        self.images.append(canvas2)
 
     def _read_distances(self):
         # min_X = 0.607891
@@ -108,6 +122,7 @@ class distances():
             if len(files)>1:
                 for i in range(len(files)-1):
                     for j in range(i+1,len(files)):
+                        self.images.append(cv2.imread(self.dir+str(video)+"/clusters/distance_"+str(i)+"_"+str(j)+".png"))
                         o1 = open(files[i],'r')
                         o2 = open(files[j],'r')
                         xyz1, xyz2 = [], []
@@ -252,25 +267,25 @@ class distances():
         self.Y_ = self.final_clf.predict(self.X)
 
     def _plot_clusters(self):
-        self.clusters = {}
-        for x,val in zip(self.XY,self.Y_):
-            if val not in self.clusters:
-                self.clusters[val] = np.zeros((200,200,3),dtype=np.uint8)
-            a,b = x
-            for i in range(10):
-                self.clusters[val][a-i:a+i,b-i:b+i,:]+=1
         self.avg_images = {}
-        for c in self.clusters:
-            plt.matshow(self.clusters[c][:,:,0])
-            plt.axis("off")
+        sigma = np.sqrt(self.final_clf.covariances_[0])
+        for c,i in enumerate(self.final_clf.means_):
+            mu = i[0]
+
+            x = np.linspace(0, .5, 500)
+            y = mlab.normpdf(x, mu, sigma)
+            x = list(x)
+            y = list(y)
+            x.append(0.5); y.append(0)
+            x.append(0); y.append(0)
+            fig, ax = plt.subplots()
+
+            ax.fill(x, y, zorder=10)
+            ax.grid(True, zorder=5)
             plt.savefig(self.dir_save+'avg_'+str(c)+".png")
             self.avg_images[c] = cv2.imread(self.dir_save+'avg_'+str(c)+".png")
 
     def _pretty_plot(self):
-
-        # Data to plot.
-        self._plot_clusters()
-
         self.cluster_images = {}
         for img,val in zip(self.images,self.Y_):
             if val not in self.cluster_images:
@@ -308,23 +323,13 @@ class distances():
                     image[i*self.im_len:(i+1)*self.im_len,  j*self.im_len:j*self.im_len+1,  :] = 0
                     image[i*self.im_len:(i+1)*self.im_len,  (j+1)*self.im_len:(j+1)*self.im_len+1,  :] = 0
                     count+=1
-            # cv2.imshow('test',image)
-            # cv2.waitKey(2000)
             cv2.imwrite(self.dir_save+"cluster_"+str(p)+'.png',image)
-
-        # self.cluster_images = {}
-        # for img,val in zip(self.images,self.Y_):
-        #     if val not in self.cluster_images:
-        #         self.cluster_images[val] = []
-        #     self.cluster_images[val].append(img)
 
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
         paper_img = np.zeros((self.im_len*5*2,self.im_len*5*4,3),dtype=np.uint8)+255
-        # print len(self.cluster_images)
-        # print iii
         count3 = 0
         for count2,p in enumerate(self.cluster_images):
-            image_avg = self.avg_images[p][80:545,90:555,:]#np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
+            image_avg = self.avg_images[p][85:1000,90:725,:]#np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
             MAX_NUMBER_OF_IMAGES_SHOWN = 14
             maxi = np.min([len(self.cluster_images[p]),MAX_NUMBER_OF_IMAGES_SHOWN])
             image_cluster = np.zeros((self.im_len*5,self.im_len*5,3),dtype=np.uint8)+255
@@ -351,6 +356,10 @@ class distances():
             x2 = int(x1+1.8*self.im_len)
             # image_avg = cv2.imread(self.dir_save+"feature_"+str(p)+".png")
             image_avg = cv2.resize(image_avg, (int(self.im_len*1.8),int(self.im_len*1.8)), interpolation = cv2.INTER_AREA)
+            image_avg[0:2,:,:]=0
+            image_avg[-2:,:,:]=0
+            image_avg[:,0:2,:]=0
+            image_avg[:,-2:,:]=0
             image_cluster[x1:x2,x1:x2,:] = image_avg
             if count2<35:
                 i1x = np.mod(count2,7)*self.im_len*5
@@ -367,7 +376,7 @@ class distances():
                 i1y = 0
                 i2y = self.im_len*5
                 paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
-                cv2.imwrite(self.dir_save+'shapes_clusters_ex.jpg',paper_img)
+                cv2.imwrite(self.dir_save+'distances_clusters_ex.jpg',paper_img)
 
             # cv2.imwrite(self.dir_save+str(p)+'_cluster.jpg',image_cluster)
             cv2.imwrite(self.dir_save+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
@@ -386,12 +395,11 @@ class distances():
 def main():
     d = distances()
     d._read_distances()
-    # L._extract_object_images()
-    # # # S._read_shapes_images()
+    # d._extract_object_images()
     # d._cluster_distances()
     d._read_clusters()
-    # # # S._plot_fpfh_values()
-    # L._pretty_plot()
+    d._plot_clusters()
+    d._pretty_plot()
     d._print_results()
 
 if __name__=="__main__":
