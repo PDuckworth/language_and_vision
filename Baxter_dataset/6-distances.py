@@ -23,6 +23,7 @@ class distances():
         self.th = 10
         self.sp = 2
         self.X = []     # fpfh vales
+        self.x = []
         self.XY = []
         self.eX = []    # esf vales
         self.GT = []
@@ -101,7 +102,9 @@ class distances():
         ## make distances
         for video in range(1,205):
             dir1 = self.dir+str(video)+"/tracking/"
+            dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
+            types = sorted(glob.glob(dir2+"GT_obj*.txt"))
             if len(files)>1:
                 for i in range(len(files)-1):
                     for j in range(i+1,len(files)):
@@ -115,93 +118,57 @@ class distances():
                             a2,val2 = line2.split(":")
                             xyz1.append(float(val1))
                             xyz2.append(float(val2))
+
+                        f = open(types[i],"r")
+                        for line in f:
+                            line = line.split('\n')[0]
+                            if line == "cup":
+                                xyz1[2] += .1
+
+                        f = open(types[j],"r")
+                        for line in f:
+                            line = line.split('\n')[0]
+                            if line == "cup":
+                                xyz2[2] += .1
+
                         d = np.sqrt( (xyz1[0]-xyz2[0])**2 + (xyz1[1]-xyz2[1])**2 + (xyz1[2]-xyz2[2])**2)
                         if self.X == []:
                             self.X = d
                         else:
                             self.X = np.vstack((self.X,d))
-        print self.X
+                        self.x.append(d)
+                        # print i,j,xyz1,xyz2
+
+                        # ## save the ground_truth
+                        # if d<0.084:
+                        #     val1 = "touch"
+                        # elif d<0.215:
+                        #     val1 = "near"
+                        # elif d<0.33:
+                        #     val1 = "far"
+                        # else:
+                        #     val1 = "very_far"
+                        # f1 = open(self.dir+str(video)+"/ground_truth/GT_distance_"+str(i)+"_"+str(j)+".txt","w")
+                        # f1.write(val1)
+                        # f1.close()
+
+                        f1 = open(self.dir+str(video)+"/ground_truth/GT_distance_"+str(i)+"_"+str(j)+".txt","r")
+                        for line in f1:
+                            self.GT.append(line)
+                        f1.close()
+                        # print self.GT
 
 
-        #     dir2 = self.dir+str(video)+"/ground_truth/"
-        #     #print files
-        #     types = sorted(glob.glob(dir2+"GT_obj*.txt"))
-        #     ground = sorted(glob.glob(dir2+"GT_location_*.txt"))
-        #     # print ground
-        #     obj = 0
-        #     for f1,f2,f3 in zip(files,types,ground):
-        #         img = np.zeros((200,200,3),dtype=np.uint8)+255
-        #         f = open(f1,"r")
-        #         xyz = []
-        #         for line in f:
-        #             line = line.split("\n")[0]
-        #             a,val = line.split(":")
-        #             xyz.append(float(val))
-        #         xyz = xyz[:-1]
-        #
-        #         # plot the location
-        #         x = 200-int((xyz[0]-min_X)/(max_X-min_X)*180+10)
-        #         y = 200-int((xyz[1]-min_Y)/(max_Y-min_Y)*180+10)
-        #         # check type
-        #         f = open(f2,"r")
-        #         for line in f:
-        #             line = line.split('\n')[0]
-        #             if line == "cup":
-        #                 x += 35
-        #         # print x,y
-        #         th = 12
-        #         l = 2
-        #         img[x-th:x+th, y-l:y+l, :] = [0,0,255]
-        #         img[x-l:x+l, y-th:y+th, :] = [0,0,255]
-        #         img_all[x-th:x+th, y-l:y+l, :] = [0,0,255]
-        #         img_all[x-l:x+l, y-th:y+th, :] = [0,0,255]
-        #
-        #         # ## save the ground_truth
-        #         # if x<100:
-        #         #     val1 = "top_"
-        #         # else:
-        #         #     val1 = "centre_"
-        #         #
-        #         # if y < 200/3:
-        #         #     val2 = "left"
-        #         # elif y<200/3*2:
-        #         #     val2 = ""
-        #         # else:
-        #         #     val2 = "right"
-        #         # # print val1+val2
-        #         # f1 = open(self.dir+str(video)+"/ground_truth/GT_location_"+str(obj)+".txt","w")
-        #         # f1.write(val1+val2)
-        #         # f1.close()
-        #
-        #
-        #         if self.XY == []:
-        #             self.XY = [x,y]
-        #         else:
-        #             self.XY = np.vstack((self.XY,[x,y]))
-        #
-        #         if self.X == []:
-        #             self.X = xyz
-        #         else:
-        #             self.X = np.vstack((self.X,xyz))
-        #         # print self.X
-        #         f.close()
-        #
-        #         f = open(f3,"r")
-        #         for line in f:
-        #             line = line.split('\n')[0]
-        #             # if line == "orange":
-        #             #     print video,line
-        #             self.GT.append(line)
-        #             if line not in self.shapes:
-        #                 self.shapes[line] = [xyz]
-        #             else:
-        #                 self.shapes[line].append(xyz)
-        #         f.close()
-        #
-        #         # self.images.append(img)
-        #         cv2.imwrite(self.dir+str(video)+"/clusters/loc_"+str(obj)+".png",img)
-        #         obj+=1
-        # cv2.imwrite(self.dir_save+"all_locations.png",img_all)
+        # Fixing random state for reproducibility
+        # the histogram of the data
+        # n, bins, patches = plt.hist(self.x, 100, normed=1, facecolor='g', alpha=0.75)
+        # plt.xlabel('Smarts')
+        # plt.ylabel('Probability')
+        # plt.title('Histogram of IQ')
+        # plt.text(60, .025, r'$\mu=100,\ \sigma=15$')
+        # plt.axis([40, 160, 0, 0.03])
+        # plt.grid(True)
+        # plt.show()
 
     def _read_shapes_images(self):
         for video in range(1,205):
@@ -249,14 +216,14 @@ class distances():
                 cv2.imshow("img",img)
                 cv2.imwrite(self.dir_save+"feature_"+str(T)+".png",img)
 
-    def _cluster_locations(self):
+    def _cluster_distances(self):
         final_clf = 0
         best_v = 0
         X = self.X
         for i in range(10):
             print '#####',i
             ## 18 components did well!! 0.45
-            n_components_range = range(3, 10)
+            n_components_range = range(2, 8)
             cv_types = ['spherical', 'tied', 'diag', 'full']
             lowest_bic = np.infty
             for cv_type in cv_types:
@@ -274,33 +241,13 @@ class distances():
                         final_clf = gmm
                         print best_v
                         print "clusters: ",len(final_clf.means_)
-            # clf = best_gmm
-            # Y_ = clf.predict(X)
-            # v_meas = v_measure_score(self.GT, Y_)
-            # if v_meas > best_v:
-            #     best_v = v_meas
-            #     final_clf = clf
-            #     print best_v
-        # print best_gmm
         self.best_v = best_v
         Y_ = final_clf.predict(X)
-        # self.predictions = {}
-        # for obj in self.GT:
-        #     self.predictions[obj] = np.zeros(len(final_clf.means_))
-        #     for i in self.faces[obj]:
-        #         self.predictions[obj][final_clf.predict([i])[0]]+=1
-        #
-        # self.cost_matrix = np.zeros((len(self.faces),len(final_clf.means_)))
-        #
-        # for count,obj in enumerate(self.predictions):
-        #     self.predictions[obj]/=np.sum(self.predictions[obj])
-        #     self.cost_matrix[count] = self.predictions[obj]
-        #
 
-        pickle.dump( [final_clf,self.best_v], open( self.dir_save+'locations_clusters.p', "wb" ) )
+        pickle.dump( [final_clf,self.best_v], open( self.dir_save+'distances_clusters.p', "wb" ) )
 
     def _read_clusters(self):
-        self.final_clf,self.best_v = pickle.load(open( self.dir_save+'locations_clusters.p', "rb" ) )
+        self.final_clf,self.best_v = pickle.load(open( self.dir_save+'distances_clusters.p', "rb" ) )
         print "number of clusters",len(self.final_clf.means_)
         self.Y_ = self.final_clf.predict(self.X)
 
@@ -441,11 +388,11 @@ def main():
     d._read_distances()
     # L._extract_object_images()
     # # # S._read_shapes_images()
-    # #L._cluster_locations()
-    # L._read_clusters()
+    # d._cluster_distances()
+    d._read_clusters()
     # # # S._plot_fpfh_values()
     # L._pretty_plot()
-    # L._print_results()
+    d._print_results()
 
 if __name__=="__main__":
     main()
