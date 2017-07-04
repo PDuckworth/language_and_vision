@@ -394,6 +394,19 @@ class distances():
         print("Mutual Information: %.2f" % metrics.mutual_info_score(true_labels, pred_labels))
         print("Adjusted Mutual Information: %0.2f" % metrics.normalized_mutual_info_score(true_labels, pred_labels))
 
+    def _SVM(self):
+        maxi = 0
+        mean = 0
+        for i in range(50):
+            clf = svm.SVC(kernel='linear')
+            l1 = int(-.25*len(self.X))
+            l2 = int(.75*len(self.X))
+            clf.fit(self.X[:l1], self.GT[:l1])
+            A = clf.predict(self.X[l2:])
+            mean += metrics.v_measure_score(self.GT[l2:], A)
+        mean/=50
+        print("supervised V-measure: %0.2f" % mean)
+
 def main():
     d = distances()
     d._read_distances()
@@ -403,6 +416,7 @@ def main():
     d._plot_clusters()
     d._pretty_plot()
     d._print_results()
+    d._SVM()
 
 if __name__=="__main__":
     main()

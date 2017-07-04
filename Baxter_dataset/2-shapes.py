@@ -373,6 +373,19 @@ class shapes():
         print("Mutual Information: %.2f" % metrics.mutual_info_score(true_labels, pred_labels))
         print("Adjusted Mutual Information: %0.2f" % metrics.normalized_mutual_info_score(true_labels, pred_labels))
 
+    def _SVM(self):
+        maxi = 0
+        mean = 0
+        for i in range(50):
+            clf = svm.SVC(kernel='linear')
+            l1 = int(-.25*len(self.X))
+            l2 = int(.75*len(self.X))
+            clf.fit(self.X[:l1], self.GT[:l1])
+            A = clf.predict(self.X[l2:])
+            mean += metrics.v_measure_score(self.GT[l2:], A)
+        mean/=50
+        print("supervised V-measure: %0.2f" % mean)
+
 def main():
     S = shapes()
     # S._extract_object_images()
@@ -383,6 +396,7 @@ def main():
     S._read_clusters()
     S._plot_fpfh_values()
     S._pretty_plot()
+    S._SVM()
     S._print_results()
 
 if __name__=="__main__":

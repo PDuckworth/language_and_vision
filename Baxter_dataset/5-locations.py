@@ -34,13 +34,13 @@ class locations():
         f_x, f_y = 1212.9-700, 1129.0-700
         c_x, c_y = 187.3-700, 439.6-700
         for video in range(1,205):
-            print 'processing video: ',video
+            # print 'processing video: ',video
             dir1 = self.dir+str(video)+"/features/shapes/"
             img = cv2.imread(self.dir+str(video)+"/kinect_rgb/Kinect_0001.png")
             height, width = img.shape[:2]
             unique_objects = sorted(glob.glob(dir1+"fpfh*.pcd"))
             for obj in range(len(unique_objects)):
-                print obj
+                # print obj
                 dir2 = self.dir+str(video)+"/clusters/cloud_cluster_"+str(obj)
                 tracks = sorted(glob.glob(dir2+".pcd"))
                 for f1 in tracks:
@@ -403,6 +403,19 @@ class locations():
             # cv2.imwrite(self.dir_save+str(p)+'_cluster.jpg',image_cluster)
             cv2.imwrite(self.dir_save+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
+    def _SVM(self):
+        maxi = 0
+        mean = 0
+        for i in range(50):
+            clf = svm.SVC(kernel='linear')
+            l1 = int(-.25*len(self.X))
+            l2 = int(.75*len(self.X))
+            clf.fit(self.XY[:l1], self.GT[:l1])
+            A = clf.predict(self.XY[l2:])
+            mean += metrics.v_measure_score(self.GT[l2:], A)
+        mean/=50
+        print("supervised V-measure: %0.2f" % mean)
+
     def _print_results(self):
         #print v_measure_score(self.GT, self.Y_)
         true_labels = self.GT
@@ -424,6 +437,7 @@ def main():
     L._read_clusters()
     # # S._plot_fpfh_values()
     L._pretty_plot()
+    L._SVM()
     L._print_results()
 
 if __name__=="__main__":

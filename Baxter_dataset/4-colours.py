@@ -293,6 +293,19 @@ class colours():
             cv2.imwrite(self.dir_save+str(p)+'_cluster.jpg',image_cluster)
             cv2.imwrite(self.dir_save+str(p)+'_cluster_avg.jpg',image_avg)
 
+    def _SVM(self):
+        maxi = 0
+        mean = 0
+        for i in range(50):
+            clf = svm.SVC(kernel='linear')
+            l1 = int(-.25*len(self.X))
+            l2 = int(.75*len(self.X))
+            clf.fit(self.X[:l1], self.GT[:l1])
+            A = clf.predict(self.X[l2:])
+            mean += metrics.v_measure_score(self.GT[l2:], A)
+        mean/=50
+        print("supervised V-measure: %0.2f" % mean)
+
     def _print_results(self):
         #print v_measure_score(self.GT, self.Y_)
         true_labels = self.GT
@@ -314,6 +327,7 @@ def main():
     C._read_clusters()
     # S._plot_fpfh_values()
     C._pretty_plot()
+    C._SVM()
     C._print_results()
 
 if __name__=="__main__":
