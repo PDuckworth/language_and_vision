@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 shapes = '/home/omari/Datasets/jivko_dataset/features/shapes/cluster_images/'
-# colors = '/home/omari/Datasets/jivko_dataset/features/colours/'
+colors = '/home/omari/Datasets/jivko_dataset/features/colours/'
 # locations = '/home/omari/Datasets/jivko_dataset/features/locations/cluster_images/'
 # distances = '/home/omari/Datasets/Baxter_Dataset_final/features/distances/cluster_images/'
 #colors = '/home/omari/Datasets/ECAI_dataset/colours/'
@@ -11,18 +11,18 @@ shapes = '/home/omari/Datasets/jivko_dataset/features/shapes/cluster_images/'
 image_dir = "/home/omari/Dropbox/Thesis/writing/Chapter7/Chapter7Figs/PNG/sinapov-visual-concepts.jpg"
 
 shape_im = ['9_cluster', '3_cluster']
-# color_im = ['4_cluster', '0_cluster']
+color_im = ['2_cluster', '3_cluster']
 # location_im = ['2_cluster', '5_cluster']
 # distance_im = ['0_cluster', '2_cluster']
-all_images = [shape_im] #, color_im, location_im, distance_im]
-all_dir = [shapes] #, colors, locations, distances]#, actions, objects]
-text = ["shape"] #, "colour", "location", "distance"]#, "action", "object"]
+all_images = [shape_im, color_im] #, location_im, distance_im]
+all_dir = [shapes, colors] #, locations, distances]#, actions, objects]
+text = ["shape", "colour"] #, "location", "distance"]#, "action", "object"]
 
 im_len = 60
 th = 40
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-image = np.zeros((im_len*5*2+th*2,im_len*5*4+th*3,3),dtype=np.uint8)+255
+image = np.zeros((im_len*5*2+th*2,im_len*5*3+th*2,3),dtype=np.uint8)+255
 
 for c1,i in enumerate(all_images):
     dir_ = all_dir[c1]
