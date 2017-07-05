@@ -16,7 +16,8 @@ class gui():
     """docstring for gui"""
     def __init__(self):
         self.username = getpass.getuser()
-        self.t = 1
+        self.t = 4
+        self.folder = 0
         self.dir_saving = "/home/omari/Datasets/jivko_dataset/objects/"
         self.dir1 = '/home/omari/Datasets/jivko_dataset/t'+str(self.t)
         #self.dir_saving = '/home/'+self.username+'/Datasets/ECAI_dataset/annotation'
@@ -43,10 +44,10 @@ class gui():
         self.button4.grid(row=3, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
         self.button5 = tk.Button(self.root, text="pineapple", command=self.pineapple)
         self.button5.grid(row=4, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        # self.button6 = tk.Button(self.root, text="Water_Cooler", command=self.Water_Cooler)
-        # self.button6.grid(row=5, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
-        # self.button7 = tk.Button(self.root, text="Waste_Bin", command=self.Waste_Bin)
-        # self.button7.grid(row=6, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
+        self.button6 = tk.Button(self.root, text="medicine", command=self.medicine)
+        self.button6.grid(row=5, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
+        self.button7 = tk.Button(self.root, text="block", command=self.block)
+        self.button7.grid(row=6, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
         # self.button8 = tk.Button(self.root, text="Sink", command=self.Sink)
         # self.button8.grid(row=7, column=0, columnspan=1, pady=5, padx=2, sticky="ew")
         # self.button9 = tk.Button(self.root, text="Fridge", command=self.Fridge)
@@ -72,7 +73,6 @@ class gui():
         self.lmain.grid(row=0, column=1, columnspan=1, rowspan=11, pady=10, padx=2, sticky="ew")
         self.lmain.bind("<Button-1>", self.mouse_callback)
 
-        self.folder = 0
         self.NextVideo()
         # self.dir2 = self.dir1+'/vid'+str(self.folder)+'/images/'
         # self.onlyfiles = sorted([f for f in listdir(self.dir2) if '.jpg' in f])
@@ -117,10 +117,10 @@ class gui():
         self.object = 'ball'; self.read_mouse=2; print 'ball';self.color = self._colors[2]
     def pineapple(self):
         self.object = 'pineapple'; self.read_mouse=2; print 'pineapple';self.color = self._colors[4]
-    # def Water_Cooler(self):
-    #     self.object = 'Water cooler'; self.read_mouse=2; print 'Water cooler';self.color = self._colors[5]
-    # def Waste_Bin(self):
-    #     self.object = 'Trash bin'; self.read_mouse=2; print 'Trash bin';self.color = self._colors[6]
+    def medicine(self):
+        self.object = 'medicine'; self.read_mouse=2; print 'medicine';self.color = self._colors[5]
+    def block(self):
+        self.object = 'block'; self.read_mouse=2; print 'block';self.color = self._colors[6]
     # def Sink(self):
     #     self.object = 'Sink'; self.read_mouse=2; print 'Sink';self.color = self._colors[7]
     # def Fridge(self):
