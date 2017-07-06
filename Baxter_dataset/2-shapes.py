@@ -23,6 +23,7 @@ class shapes():
         self.shapes = {}
         self.images = []
         self.im_len = 60
+        self.shapes_per_video = {}
 
     def _extract_object_images(self):
         f_x, f_y = 1212.9-700, 1129.0-700
@@ -48,10 +49,6 @@ class shapes():
                         if count > 10:
                             xyz = map(float,line.split(" "))
                             x,y,z = xyz[:-1]
-                            # X.append(z)
-                            # Y.append(y)
-                            # Z.append(x)
-                        # for z,y,x in zip(X,Y,Z):
                             x_2d = int((x/z)*f_x + c_x)
                             y_2d = int((y/z)*f_y + c_y)
                             if x_2d < 0:
@@ -73,6 +70,7 @@ class shapes():
 
     def _read_shapes(self):
         for video in range(1,205):
+            self.shapes_per_video[video] = []
             dir1 = self.dir+str(video)+"/features/shapes/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"fpfh*.pcd"))
@@ -113,6 +111,14 @@ class shapes():
                 else:
                     self.gX = np.vstack((self.gX,gfpfh))
                 f.close()
+
+
+                X = list(fpfh)+list(gfpfh)
+                if self.shapes_per_video[video] == []:
+                    self.shapes_per_video[video] = X
+                    self.shapes_per_video[video] = np.vstack((self.shapes_per_video[video],X))
+                else:
+                    self.shapes_per_video[video] = np.vstack((self.shapes_per_video[video],X))
 
                 # f = open(f4,"r")
                 # for count,line in enumerate(f):
@@ -255,6 +261,17 @@ class shapes():
                 X = np.vstack((X,list(i)+list(j)))
         self.X = X
         self.Y_ = final_clf.predict(self.X)
+
+        ## get the clusters in each video
+        self.Y_per_video = {}
+        for i in self.shapes_per_video:
+            Y_ = []
+            X = final_clf.predict(self.shapes_per_video[i])
+            for x in X:
+                if x not in Y_:
+                    Y_.append(x)
+            self.Y_per_video[i] = Y_
+        pickle.dump( [len(final_clf.means_),self.Y_per_video] , open( self.dir_save+'clusters_per_video.p', "wb" ) )
 
     def _pretty_plot(self):
 

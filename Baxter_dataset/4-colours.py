@@ -22,6 +22,7 @@ class colours():
         self.shapes = {}
         self.images = []
         self.im_len = 60
+        self.colours_per_video = {}
 
     def _extract_object_images(self):
         f_x, f_y = 1212.9-700, 1129.0-700
@@ -72,6 +73,7 @@ class colours():
 
     def _read_colours(self):
         for video in range(1,205):
+            self.colours_per_video[video] = []
             dir1 = self.dir+str(video)+"/clusters/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*.png"))
@@ -99,6 +101,12 @@ class colours():
                     self.X = bgr
                 else:
                     self.X = np.vstack((self.X,bgr))
+
+                if self.colours_per_video[video] == []:
+                    self.colours_per_video[video] = bgr
+                    self.colours_per_video[video] = np.vstack((self.colours_per_video[video],bgr))
+                else:
+                    self.colours_per_video[video] = np.vstack((self.colours_per_video[video],bgr))
                 # print self.X
                 # f.close()
 
@@ -113,6 +121,8 @@ class colours():
                     else:
                         self.shapes[line].append(rgb)
                 f.close()
+        # for i in self.colours_per_video:
+        #     print i,self.colours_per_video[i]
         # for i in self.shapes:
         #     print i
         #     print self.shapes[i]
@@ -218,6 +228,16 @@ class colours():
         final_clf,self.best_v = pickle.load(open( self.dir_save+'colours_clusters.p', "rb" ) )
         print "number of clusters",len(final_clf.means_)
         self.Y_ = final_clf.predict(self.X)
+        ## get the clusters in each video
+        self.Y_per_video = {}
+        for i in self.colours_per_video:
+            Y_ = []
+            X = final_clf.predict(self.colours_per_video[i])
+            for x in X:
+                if x not in Y_:
+                    Y_.append(x)
+            self.Y_per_video[i] = Y_
+        pickle.dump( [len(final_clf.means_),self.Y_per_video] , open( self.dir_save+'clusters_per_video.p', "wb" ) )
 
     def _pretty_plot(self):
         self.cluster_images = {}
@@ -319,16 +339,12 @@ class colours():
 
 def main():
     C = colours()
-    # # S._extract_object_images()
-    # # S._read_shapes()
     C._read_colours()
-    # S._read_shapes_images()
     # C._cluster_colours()
     C._read_clusters()
-    # S._plot_fpfh_values()
-    C._pretty_plot()
-    C._SVM()
-    C._print_results()
+    # C._pretty_plot()
+    # C._SVM()
+    # C._print_results()
 
 if __name__=="__main__":
     main()
