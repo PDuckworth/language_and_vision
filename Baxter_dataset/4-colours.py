@@ -121,8 +121,6 @@ class colours():
                     else:
                         self.shapes[line].append(rgb)
                 f.close()
-        # for i in self.colours_per_video:
-        #     print i,self.colours_per_video[i]
         # for i in self.shapes:
         #     print i
         #     print self.shapes[i]

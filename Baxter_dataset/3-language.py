@@ -48,7 +48,8 @@ class language():
                     if word not in self.unique_words:
                         self.unique_words.append(word)
                         self.ngram_count[self.unique_words.index(word)] = 0
-                    if word not in self.n_per_video[video]:
+                    # if word not in self.n_per_video[video]:
+                    if self.unique_words.index(word) not in self.n_per_video[video]:
                         self.n_per_video[video].append(self.unique_words.index(word))
         # print self.n_per_video
         for video in range(1,205):
@@ -70,6 +71,7 @@ class language():
         self.bad_clusters = []
         for f in self.features:
             self.cluster_num[f], self.c_per_video[f] = pickle.load(open(self.dir_cluster+f+"/clusters_per_video.p", "rb" ))
+            # print self.c_per_video[f]
             self.total_c_num += self.cluster_num[f]
             for i in range(self.cluster_num[f]):
                 self.unique_clusters.append(f+"_"+str(i))
@@ -78,6 +80,7 @@ class language():
             for v in range(1,205):
                 for i in self.c_per_video[f][v]:
                     self.cluster_count[f+"_"+str(i)]+=1
+        print self.cluster_count
         keys = self.cluster_count.keys()
         for k in keys:
             if self.cluster_count[k]<3:
@@ -89,13 +92,13 @@ class language():
         if "colours" in self.features:
             self.GT_dict['colours_0'] =  ["red"]
             self.GT_dict['colours_1'] =  []
-            self.GT_dict['colours_2'] =  ["brown"]
+            self.GT_dict['colours_2'] =  ["brown","black","coffee"]
             self.GT_dict['colours_3'] =  []
-            self.GT_dict['colours_4'] =  ["blue"]
+            self.GT_dict['colours_4'] =  ["blue","light"]
             self.GT_dict['colours_5'] =  ["white"]
             self.GT_dict['colours_6'] =  ["green"]
             self.GT_dict['colours_7'] =  ["orange","red"]
-            self.GT_dict['colours_8'] =  ["yellow"]
+            self.GT_dict['colours_8'] =  ["yellow","lemon"]
             self.GT_dict['colours_9'] =  ["red"]
             self.GT_dict['colours_10'] = ["yellow"]
             self.GT_dict['colours_11'] = ["green"]
@@ -105,8 +108,8 @@ class language():
             self.GT_dict['colours_15'] = ["blue"]
 
         if "shapes" in self.features:
-            self.GT_dict['shapes_0'] =  ["coffee"]
-            self.GT_dict['shapes_1'] =  ["cup","block"]
+            self.GT_dict['shapes_0'] =  ["coffee","cup"]
+            self.GT_dict['shapes_1'] =  ["cup","cups"]
             self.GT_dict['shapes_2'] =  ["mug"]
             self.GT_dict['shapes_3'] =  ["block"]
             self.GT_dict['shapes_4'] =  ["block","bowl"]
@@ -119,12 +122,12 @@ class language():
             self.GT_dict['shapes_11'] = ["block","mug"]
             self.GT_dict['shapes_12'] = ["block","mug"]
             self.GT_dict['shapes_13'] = ["bowl"]
-            self.GT_dict['shapes_14'] = ["block"]
+            self.GT_dict['shapes_14'] = ["block","lemon"]
             self.GT_dict['shapes_15'] = ["mug"]
-            self.GT_dict['shapes_16'] = ["octopus","dolphin","lemon"]
+            self.GT_dict['shapes_16'] = ['apple','banana','carrot','dolphin','whale','duck','bird','octopus','egg','lemon']
             self.GT_dict['shapes_17'] = ["cup","stapler"]
-            self.GT_dict['shapes_18'] = ["bowl"]
-            self.GT_dict['shapes_19'] = ["mug"]
+            self.GT_dict['shapes_18'] = ["bowl","plate"]
+            self.GT_dict['shapes_19'] = ["mug","cup"]
             self.GT_dict['shapes_20'] = ["plate"]
             self.GT_dict['shapes_21'] = ["mug"]
             self.GT_dict['shapes_22'] = ["mug"]
@@ -144,6 +147,7 @@ class language():
                     cluster = f+"_"+str(r)
                     row = self.unique_clusters.index(cluster)
                     for col in self.n_per_video[v]:
+                        # print v,row,col
                         self.K[row,col]+=1
                 # print '-----------'
         for i in self.bad_clusters:
@@ -153,7 +157,8 @@ class language():
             # print i,self.unique_words[i]
             self.K[:,i] = 0
         # print self.K[-1,:]
-        # print self.unique_words.index("mug")
+        # A = self.unique_words.index("far")
+        # print A,self.K[-1,A]
 
     def _LP_assign(self,max_assignments,option):
         Precision = 0
@@ -256,17 +261,17 @@ def main():
     L._read_clusters()
     L._get_GT()
 
-    ## inital testing
+    # inital testing
     # L._build_K(1.0)
     # L._LP_assign(0.07,0)
 
-    ## colour 0.035
-    ## shape 0.07
-    ## incremental analysis
+    ## colour 0.07
+    ## shape 0.04
+    # incremental analysis
     for data in range(1,6):
         L._build_K(2*data/10.0)
         L.x_axis_data.append(2*data/10.0)
-        L._LP_assign(0.035,2)
+        L._LP_assign(0.07,2)
     L._plot_f_score(0)
 
     # ## sensitivity analysis

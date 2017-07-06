@@ -32,6 +32,7 @@ class distances():
         self.shapes = {}
         self.images = []
         self.im_len = 60
+        self.distances_per_video = {}
 
     def _extract_object_images(self):
         f_x, f_y = 1212.9-700, 1129.0-700
@@ -115,6 +116,7 @@ class distances():
         # img_all = np.zeros((200,200,3),dtype=np.uint8)+255
         ## make distances
         for video in range(1,205):
+            self.distances_per_video[video] = []
             dir1 = self.dir+str(video)+"/tracking/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
@@ -151,6 +153,12 @@ class distances():
                             self.X = d
                         else:
                             self.X = np.vstack((self.X,d))
+                        if self.distances_per_video[video] == []:
+                            self.distances_per_video[video] = d
+                            self.distances_per_video[video] = np.vstack((self.distances_per_video[video],d))
+                        else:
+                            self.distances_per_video[video] = np.vstack((self.distances_per_video[video],d))
+
                         self.x.append(d)
                         # print i,j,xyz1,xyz2
 
@@ -265,6 +273,17 @@ class distances():
         self.final_clf,self.best_v = pickle.load(open( self.dir_save+'distances_clusters.p', "rb" ) )
         print "number of clusters",len(self.final_clf.means_)
         self.Y_ = self.final_clf.predict(self.X)
+        ## get the clusters in each video
+        self.Y_per_video = {}
+        for i in self.distances_per_video:
+            Y_ = []
+            if not self.distances_per_video[i] == []:
+                X = self.final_clf.predict(self.distances_per_video[i])
+                for x in X:
+                    if x not in Y_:
+                        Y_.append(x)
+            self.Y_per_video[i] = Y_
+        pickle.dump( [len(self.final_clf.means_),self.Y_per_video] , open( self.dir_save+'clusters_per_video.p', "wb" ) )
 
     def _plot_clusters(self):
         self.avg_images = {}
