@@ -17,7 +17,7 @@ class language():
         self.dir = "/home/omari/Datasets/Baxter_Dataset/scene"
         self.dir_save = "/home/omari/Datasets/Baxter_Dataset_final/features/language/"
         self.dir_cluster = "/home/omari/Datasets/Baxter_Dataset_final/features/"
-        self.features = ["colours"]
+        self.features = ["distances"]
         self.unique_words = []
         self.n_per_video = {}
         self.cluster_count = {}
@@ -133,6 +133,12 @@ class language():
             self.GT_dict['shapes_22'] = ["mug"]
             self.GT_dict['shapes_23'] = ["mug","coffee"]
             self.GT_dict['shapes_24'] = ["mug"]
+
+        if "distances" in self.features:
+            self.GT_dict['distances_0'] =  ["furthest","far"]
+            self.GT_dict['distances_1'] =  ["top","of"]
+            self.GT_dict['distances_2'] =  ["inside"]
+            self.GT_dict['distances_3'] =  []
 
         for i in self.GT_dict:
             for j in self.GT_dict[i]:
@@ -267,6 +273,7 @@ def main():
 
     ## colour 0.07
     ## shape 0.04
+    ## distance 0.07
     # incremental analysis
     for data in range(1,6):
         L._build_K(2*data/10.0)

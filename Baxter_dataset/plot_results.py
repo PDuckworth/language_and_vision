@@ -19,7 +19,7 @@ markers = ["o","^","*","s"]
 markers_size = [11,11,15,11]
 fig, ax = plt.subplots()
 
-for c,i in enumerate(["shapes","colours"]):
+for c,i in enumerate(["shapes","colours","distances"]):
 # for c,i in enumerate(["faces","colours","objects"]):
     dir2 = "/home/omari/Datasets/Baxter_Dataset_final/features/language/"
     f_score = []
