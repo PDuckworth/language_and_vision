@@ -26,6 +26,7 @@ for c,i in enumerate(["faces","colours","objects","actions"]):
     f = pickle.load(open(dir2+i+'_incremental.p',"rb"))
     for f1 in f:
         f_score.append(f1)
+    print i,f_score
 
     x = np.arange(len(f_score))/float(5)*499
     print x
