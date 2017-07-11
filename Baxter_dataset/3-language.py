@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 class language():
     """docstring for shapes."""
     def __init__(self):
+        self.dir_sensitivity = '/home/omari/Datasets/sensitivity/'
         self.dir = "/home/omari/Datasets/Baxter_Dataset/scene"
         self.dir_save = "/home/omari/Datasets/Baxter_Dataset_final/features/language/"
         self.dir_cluster = "/home/omari/Datasets/Baxter_Dataset_final/features/"
@@ -25,7 +26,7 @@ class language():
         self.K = []
         self.GT_dict = {}
         self.f_score = []
-        self.x_axis_data = []
+        self.x_axis = []
         self.toggle = 1
 
     def _read_sentences(self):
@@ -59,7 +60,7 @@ class language():
         self.bad_ngrams.append(self.unique_words.index("the"))
         keys = self.ngram_count.keys()
         for k in keys:
-            if self.ngram_count[k]<3:
+            if self.ngram_count[k]<4:
                 self.bad_ngrams.append(k)
         self.total_n_num = len(self.unique_words)
 
@@ -154,17 +155,24 @@ class language():
                     row = self.unique_clusters.index(cluster)
                     for col in self.n_per_video[v]:
                         # print v,row,col
+                        # self.K[:,col]-=1
+                        # self.K[row+1:,col]-=1
                         self.K[row,col]+=1
                 # print '-----------'
+        # for i in range(self.total_n_num):
+        #     self.K[:,i] += np.abs(np.min(self.K[:,i]))
+            # print self.K[:,i]
         for i in self.bad_clusters:
             row = self.unique_clusters.index(i)
             self.K[row,:] = 0
         for i in self.bad_ngrams:
             # print i,self.unique_words[i]
             self.K[:,i] = 0
-        # print self.K[-1,:]
-        # A = self.unique_words.index("far")
-        # print A,self.K[-1,A]
+        # print self.unique_words[0]
+        # print self.K[:,0]
+        # A = self.unique_words.index("front")
+        # print self.K[:,A]
+        # print self.ngram_count[self.unique_words.index("front")]
 
     def _LP_assign(self,max_assignments,option):
         Precision = 0
@@ -246,7 +254,7 @@ class language():
             self.f_score = pickle.load(open(self.dir_save+'_'.join(self.features)+'_sensitivity.p',"rb"))
         else:
             self.f_score = pickle.load(open(self.dir_save+'_'.join(self.features)+'_incremental.p',"rb"))
-        x = self.x_axis_data
+        x = self.x_axis
         maxi = 0
         for i in range(len(self.f_score)):
             # x.append(i/float(self.total_c_num*self.total_n_num))
@@ -261,6 +269,15 @@ class language():
         ax.grid(True, zorder=5)
         plt.show()
 
+    def _plot_sensitivity(self):
+        x = self.x_axis
+        y = self.f_score
+        fig, ax = plt.subplots()
+        ax.plot(x, y, zorder=10)
+        ax.grid(True, zorder=5)
+        pickle.dump( [x,y], open( self.dir_sensitivity+'Baxter_'+'_'.join(self.features)+'_sensitivity.p', "wb" ) )
+        plt.show()
+
 def main():
     L = language()
     L._read_sentences()
@@ -271,21 +288,23 @@ def main():
     # L._build_K(1.0)
     # L._LP_assign(0.07,0)
 
-    ## colour 0.07
-    ## shape 0.04
-    ## distance 0.07
-    # incremental analysis
-    for data in range(1,6):
-        L._build_K(2*data/10.0)
-        L.x_axis_data.append(2*data/10.0)
-        L._LP_assign(0.07,2)
-    L._plot_f_score(0)
+    ## incremental analysis
+    # L.values = {}
+    # L.values["colours"] = 0.07
+    # L.values["shapes"] = 0.04
+    # L.values["distances"] = 0.07
+    # for data in range(1,6):
+    #     L._build_K(2*data/10.0)
+    #     L.x_axis.append(2*data/10.0)
+    #     L._LP_assign(L.values[L.features[0]],2)
+    # L._plot_f_score(0)
 
-    # ## sensitivity analysis
-    # for data in range(1,20):
-    #     L._build_K(1.0)#(data)
-    #     L.x_axis_data.append(data/100.0)
-    #     L._LP_assign(data/100.0,1)
+    # # ## sensitivity analysis
+    for data in range(1,30):
+        L._build_K(1.0)#(data)
+        L.x_axis.append(data/100.0)
+        L._LP_assign(data/100.0,1)
+    L._plot_sensitivity()
     # L._plot_f_score(1)
 
 if __name__=="__main__":
