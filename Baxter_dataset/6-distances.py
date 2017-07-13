@@ -22,6 +22,7 @@ class distances():
     def __init__(self):
         self.dir = "/home/omari/Datasets/Baxter_Dataset_final/scene"
         self.dir_save = "/home/omari/Datasets/Baxter_Dataset_final/features/distances/"
+        self.dir_scale = "/home/omari/Datasets/scalibility/Baxter/"
         self.th = 10
         self.sp = 2
         self.X = []     # fpfh vales
@@ -284,6 +285,16 @@ class distances():
                         Y_.append(x)
             self.Y_per_video[i] = Y_
         pickle.dump( [len(self.final_clf.means_),self.Y_per_video] , open( self.dir_save+'clusters_per_video.p', "wb" ) )
+
+        unique_clusters = []
+        video = []
+        for i in self.Y_per_video:
+            for j in self.Y_per_video[i]:
+                if j not in unique_clusters:
+                    unique_clusters.append(j)
+            video.append(len(unique_clusters))
+        pickle.dump( video , open( self.dir_scale+'distances_per_video.p', "wb" ) )
+        print video
 
     def _plot_clusters(self):
         self.avg_images = {}

@@ -20,6 +20,7 @@ class locations():
     def __init__(self):
         self.dir = "/home/omari/Datasets/Baxter_Dataset_final/scene"
         self.dir_save = "/home/omari/Datasets/Baxter_Dataset_final/features/locations/"
+        self.dir_scale = "/home/omari/Datasets/scalibility/Baxter/"
         self.th = 10
         self.sp = 2
         self.X = []     # fpfh vales
@@ -29,6 +30,7 @@ class locations():
         self.shapes = {}
         self.images = []
         self.im_len = 60
+        self.location_per_video = {}
 
     def _extract_object_images(self):
         f_x, f_y = 1212.9-700, 1129.0-700
@@ -99,6 +101,7 @@ class locations():
         max_Y =  0.22944
         img_all = np.zeros((200,200,3),dtype=np.uint8)+255
         for video in range(1,205):
+            self.location_per_video[video] = []
             dir1 = self.dir+str(video)+"/tracking/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
@@ -156,6 +159,12 @@ class locations():
                     self.XY = [x,y]
                 else:
                     self.XY = np.vstack((self.XY,[x,y]))
+
+                if self.location_per_video[video] == []:
+                    self.location_per_video[video] = xyz
+                    self.location_per_video[video] = np.vstack((self.location_per_video[video],xyz))
+                else:
+                    self.location_per_video[video] = np.vstack((self.location_per_video[video],xyz))
 
                 if self.X == []:
                     self.X = xyz
@@ -281,6 +290,29 @@ class locations():
         self.final_clf,self.best_v = pickle.load(open( self.dir_save+'locations_clusters.p', "rb" ) )
         print "number of clusters",len(self.final_clf.means_)
         self.Y_ = self.final_clf.predict(self.X)
+
+        ## get the clusters in each video
+        self.Y_per_video = {}
+        for i in self.location_per_video:
+            Y_ = []
+            if not self.location_per_video[i] == []:
+                X = self.final_clf.predict(self.location_per_video[i])
+                for x in X:
+                    if x not in Y_:
+                        Y_.append(x)
+                print i,Y_
+            self.Y_per_video[i] = Y_
+        pickle.dump( [len(self.final_clf.means_),self.Y_per_video] , open( self.dir_save+'clusters_per_video.p', "wb" ) )
+
+        unique_clusters = []
+        video = []
+        for i in self.Y_per_video:
+            for j in self.Y_per_video[i]:
+                if j not in unique_clusters:
+                    unique_clusters.append(j)
+            video.append(len(unique_clusters))
+        pickle.dump( video , open( self.dir_scale+'locations_per_video.p', "wb" ) )
+        print video
 
     def _plot_clusters(self):
         self.clusters = {}

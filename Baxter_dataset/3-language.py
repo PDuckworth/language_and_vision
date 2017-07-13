@@ -18,8 +18,10 @@ class language():
         self.dir = "/home/omari/Datasets/Baxter_Dataset/scene"
         self.dir_save = "/home/omari/Datasets/Baxter_Dataset_final/features/language/"
         self.dir_cluster = "/home/omari/Datasets/Baxter_Dataset_final/features/"
+        self.dir_scale = "/home/omari/Datasets/scalibility/Baxter/"
         self.features = ["distances"]
         self.unique_words = []
+        self.unique_words_incremental = []
         self.n_per_video = {}
         self.cluster_count = {}
         self.ngram_count = {}
@@ -52,6 +54,9 @@ class language():
                     # if word not in self.n_per_video[video]:
                     if self.unique_words.index(word) not in self.n_per_video[video]:
                         self.n_per_video[video].append(self.unique_words.index(word))
+            self.unique_words_incremental.append(len(self.unique_words))
+        # print self.unique_words_incremental
+        pickle.dump( self.unique_words_incremental , open( self.dir_scale+'ngrams_per_video.p', "wb" ) )
         # print self.n_per_video
         for video in range(1,205):
             for word in self.n_per_video[video]:

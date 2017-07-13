@@ -23,6 +23,7 @@ class directions():
     def __init__(self):
         self.dir = "/home/omari/Datasets/Baxter_Dataset_final/scene"
         self.dir_save = "/home/omari/Datasets/Baxter_Dataset_final/features/directions/"
+        self.dir_scale = "/home/omari/Datasets/scalibility/Baxter/"
         self.th = 10
         self.sp = 2
         self.X = []     # fpfh vales
@@ -33,6 +34,7 @@ class directions():
         self.shapes = {}
         self.images = []
         self.im_len = 60
+        self.directions_per_video = {}
 
     def _extract_object_images(self):
         f_x, f_y = 1212.9-700, 1129.0-700
@@ -116,6 +118,7 @@ class directions():
         # img_all = np.zeros((200,200,3),dtype=np.uint8)+255
         ## make distances
         for video in range(1,205):
+            self.directions_per_video[video] = []
             dir1 = self.dir+str(video)+"/tracking/"
             dir2 = self.dir+str(video)+"/ground_truth/"
             files = sorted(glob.glob(dir1+"obj*_0001.txt"))
@@ -162,6 +165,13 @@ class directions():
                             else:
                                 self.X = np.vstack((self.X,A))
 
+
+                            if self.directions_per_video[video] == []:
+                                self.directions_per_video[video] = A
+                                self.directions_per_video[video] = np.vstack((self.directions_per_video[video],A))
+                            else:
+                                self.directions_per_video[video] = np.vstack((self.directions_per_video[video],A))
+
                             # ## save the ground_truth
                             # max_index, max_value = max(enumerate(np.abs(A)), key=operator.itemgetter(1))
                             # if max_index == 0:
@@ -191,6 +201,57 @@ class directions():
                             for line in f1:
                                 self.GT.append(line)
                             f1.close()
+
+                files2 = sorted(glob.glob(dir1+"obj0_*.txt"))
+                a = len(files2)
+                if a<10:
+                    b = "000"+str(a)
+                elif a<100:
+                    b = "00"+str(a)
+                else:
+                    b = "0"+str(a)
+                files = sorted(glob.glob(dir1+"obj*_"+b+".txt"))
+                # print files
+                # print video,len(files2)
+                for i in range(len(files)):
+                    for j in range(len(files)):
+                        if i != j:
+                            o1 = open(files[i],'r')
+                            o2 = open(files[j],'r')
+                            xyz1, xyz2 = [], []
+                            for line1,line2 in zip(o1,o2):
+                                line1 = line1.split("\n")[0]
+                                line2 = line2.split("\n")[0]
+                                a1,val1 = line1.split(":")
+                                a2,val2 = line2.split(":")
+                                xyz1.append(float(val1))
+                                xyz2.append(float(val2))
+
+                            f = open(types[i],"r")
+                            for line in f:
+                                line = line.split('\n')[0]
+                                if line == "cup":
+                                    xyz1[2] += .1
+
+                            f = open(types[j],"r")
+                            for line in f:
+                                line = line.split('\n')[0]
+                                if line == "cup":
+                                    xyz2[2] += .1
+
+                            A = [i1-j1 for i1,j1 in zip(xyz2,xyz1)]
+                            B = np.sqrt( A[0]**2 + A[1]**2 + A[2]**2 )
+                            A = A/B
+                            A[1]*=-1
+                            # print i,j,A
+
+                        if self.directions_per_video[video] == []:
+                            self.directions_per_video[video] = A
+                            self.directions_per_video[video] = np.vstack((self.directions_per_video[video],A))
+                        else:
+                            self.directions_per_video[video] = np.vstack((self.directions_per_video[video],A))
+                # print self.directions_per_video[video]
+
 
         # fig = plt.figure()
         # ax = fig.add_subplot(111, projection='3d')
@@ -287,6 +348,28 @@ class directions():
         self.final_clf,self.best_v = pickle.load(open( self.dir_save+'directions_clusters.p', "rb" ) )
         print "number of clusters",len(self.final_clf.means_)
         self.Y_ = self.final_clf.predict(self.X)
+        ## get the clusters in each video
+        self.Y_per_video = {}
+        for i in self.directions_per_video:
+            Y_ = []
+            if not self.directions_per_video[i] == []:
+                X = self.final_clf.predict(self.directions_per_video[i])
+                for x in X:
+                    if x not in Y_:
+                        Y_.append(x)
+                print i,Y_
+            self.Y_per_video[i] = Y_
+        pickle.dump( [len(self.final_clf.means_),self.Y_per_video] , open( self.dir_save+'clusters_per_video.p', "wb" ) )
+
+        unique_clusters = []
+        video = []
+        for i in self.Y_per_video:
+            for j in self.Y_per_video[i]:
+                if j not in unique_clusters:
+                    unique_clusters.append(j)
+            video.append(len(unique_clusters))
+        pickle.dump( video , open( self.dir_scale+'directions_per_video.p', "wb" ) )
+        print video
 
     def _plot_clusters(self):
         self.avg_images = {}
@@ -435,8 +518,8 @@ def main():
     D._read_clusters()
     # d._plot_clusters()
     # d._pretty_plot()
-    D._print_results()
-    D._SVM()
+    # D._print_results()
+    # D._SVM()
 
 if __name__=="__main__":
     main()
