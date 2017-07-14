@@ -9,7 +9,7 @@ import operator
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_pickle(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
@@ -37,7 +37,7 @@ idf = {}
 n_doc = 0.0
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_linguistic_features.p'
     sentences = _read_pickle(scene)
     for id in sentences:
     # if len(sentences.keys())>0:
@@ -65,5 +65,5 @@ for word in idf:
         FW.append(word)
 
 
-pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
+pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/idf_FW_linguistic_features.p'
 pickle.dump(FW, open(pkl_file, 'wb'))

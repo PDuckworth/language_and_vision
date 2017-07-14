@@ -7,7 +7,7 @@ import pickle
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_pickle(scene):
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_layout.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/scenes/'+str(scene)+'_layout.p'
     data = open(pkl_file, 'rb')
     positions = pickle.load(data)
     return positions
@@ -236,7 +236,7 @@ def _get_temporal(v):
 
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     VF = {}
     positions = _read_pickle(scene)
     VF['actions'] = _get_actions(positions)
@@ -249,5 +249,5 @@ for scene in range(1,1001):
     trees = _get_trees(VF['actions'],positions)
     pickle.dump([VF,trees], open(pkl_file, 'wb'))
 
-    # tree_file = '/home/omari/Datasets_old/Dukes_modified/learning/'+str(scene)+'_video_tree.p'
+    # tree_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_video_tree.p'
     # print trees

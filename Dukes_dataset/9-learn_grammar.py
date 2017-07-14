@@ -13,63 +13,63 @@ from nltk.tree import ParentedTree
 
 #---------------------------------------------------------------------------#
 def _read_stop_wrods():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/idf_FW_linguistic_features.p'
     data = open(pkl_file, 'rb')
     stop = pickle.load(data)
     return stop
 
 #---------------------------------------------------------------------------#
 def _read_RCL_tree(id):
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/RCL-trees/'+str(id)+'_tree.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/RCL-trees/'+str(id)+'_tree.p'
     data = open(pkl_file, 'rb')
     RCL_tree = pickle.load(data)
     return RCL_tree
 
 #---------------------------------------------------------------------------#
 def _read_tags():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/tags.p'
     data = open(pkl_file, 'rb')
     hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
     return [hypotheses_tags, VF_dict, LF_dict]
 
 #---------------------------------------------------------------------------#
 def _read_sentences(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
 
 #---------------------------------------------------------------------------#
 def _read_vf(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     data = open(pkl_file, 'rb')
     vf,tree = pickle.load(data)
     return vf,tree
 
 #---------------------------------------------------------------------------#
 def _read_semantic_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
 
 #---------------------------------------------------------------------------#
 def _read_layout(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_layout.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_layout.p'
     data = open(pkl_file, 'rb')
     layout = pickle.load(data)
     return layout
 
 #---------------------------------------------------------------------------#
 def _read_grammar_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
 
 #---------------------------------------------------------------------------#
 def _read_passed_tags():
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags1.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/matching/Passed_tags1.p'
     data = open(pkl_file, 'rb')
     Matching,Matching_VF,passed_scenes,passed_sentences = pickle.load(data)
     # print Matching,Matching_VF,passed_scenes,passed_ids
@@ -86,7 +86,7 @@ def _is_yuk(sentence):
     return yuk
 
 def _read_tree(id):
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/'+str(id)+'.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/matching/'+str(id)+'.p'
     data = open(pkl_file, 'rb')
     results = pickle.load(data)
     return results
@@ -103,7 +103,7 @@ def _get_entity(results):
     struct = results['tree_structure']
     grammar = results['grammar']
     entity = results['entity']
-    print entity
+    # print entity
     if len(entity[0])==1:
         Ent = _create_simple_entity(entity[1],grammar[struct['E']])
     if len(entity[0])==3:
@@ -143,6 +143,8 @@ Matching,Matching_VF,passed_scenes,passed_sentences = _read_passed_tags()
 sentences_to_test = {}
 counter = 0
 counter2= 0
+counter_results = 0
+matched_trees = []
 bad_trees = [14588,23958,10646,25409,25625,14427,23982,16360,22369,23928,16792,18058,25013,9323,26997,25565,14412,16159,26955,4028,9207,18582,25100,25058,23428,23985,12027,25653,14624,14423, 25682,12515,13775,4073,10186,13046,25622,26283,23217,12453,23955,23970,23756,23898,14789,25477,9418,2541,23738,24170]
 scenes = []
 for scene in range(1,1001):
@@ -157,10 +159,11 @@ for scene in range(1,1001):
                 counter+=1
                 if id in passed_sentences:
                     RCL_tree = _read_RCL_tree(id)
-                    print RCL_tree
+                    # print RCL_tree
                     # print 'sentence:',sentences[id]['text']
                     results = _read_tree(id)
                     struct = results['tree_structure']
+                    # print struct
                     A=Tree('action:', _get_action(results))
                     E=Tree('entity:', _get_entity(results))
                     if len(struct)==2:
@@ -168,14 +171,16 @@ for scene in range(1,1001):
                     if len(struct)==3:
                         D=Tree('destination:', _get_destination(results))
                         tree = Tree('event:', [A, E, D])
-                    # print tree
+                    # print '****',tree
                     if tree==RCL_tree:
-                        # counter+=1
+                        counter_results+=1
+                        matched_trees.append(tree)
                         pass
                     else:
-                        print tree
-                        print RCL_tree
+                        # print tree
+                        # print RCL_tree
                         counter2+=1
 print counter
+print counter_results
 print counter2
-print len(scenes)
+# print matched_trees
