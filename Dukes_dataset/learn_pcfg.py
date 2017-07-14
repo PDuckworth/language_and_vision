@@ -76,9 +76,9 @@ def prob_parse(grammar, sentence, n=1):
     words = sentence.split()
     if n == 1:
         parses = [dynamic_pcfg.best_parse(grammar, sentence, trace=5)]
-    else:
-        parser = InsideChartParser(grammar, trace=2)
-        parses = parser.nbest_parse(words, n)
+    # else:
+        # parser = InsideChartParser(grammar, trace=15)
+        # parses = parser.nbest_parse(words, n)
     for parse in parses: un_chomsky_normal_form(parse)
     return parses
 
