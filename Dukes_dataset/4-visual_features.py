@@ -4,6 +4,13 @@ from xml_functions import *
 from nltk.tree import *
 from nltk.tree import ParentedTree
 import pickle
+
+from sklearn import mixture
+# import itertools
+from sklearn.metrics.cluster import v_measure_score
+from sklearn import metrics
+from sklearn import svm
+import matplotlib.pyplot as plt
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_pickle(scene):
@@ -109,6 +116,20 @@ def _get_locations(positions):
             locations.append([7,7])
         if x[1]>1 and x[1]<5 and y[1]>1 and y[1]<5:
             locations.append([3.5,3.5])
+
+    return locations
+
+def _get_locations2(positions):
+    locations = []
+    mov_obj = None
+    for obj in positions:
+        if obj != 'gripper':
+            x = positions[obj]['x'][1]
+            y = positions[obj]['y'][1]
+
+            if [x,y] not in locations:
+                locations.append([x,y])
+    # print locations
 
     return locations
 
@@ -234,6 +255,89 @@ def _get_temporal(v):
         temporal = ['meets']
     return temporal
 
+def _cluster_data(X, GT):
+    best_v = 0
+    lowest_bic = 10000000000
+    for i in range(5):
+        print '#####',i
+        n_components_range = range(5, 10)
+        cv_types = ['spherical', 'tied', 'diag', 'full']
+        lowest_bic = np.infty
+        for cv_type in cv_types:
+            for n_components in n_components_range:
+                gmm = mixture.GaussianMixture(n_components=n_components,covariance_type=cv_type)
+                gmm.fit(X)
+                Y_ = gmm.predict(X)
+                ######################################
+                bic = gmm.bic(X)
+                if bic < lowest_bic:
+                    lowest_bic = bic
+                    best_gmm = gmm
+                    final_Y_ = Y_
+                ######################################
+                # Y_ = gmm.predict(X)
+                # # print GT
+                # # print Y_
+                # v_meas = v_measure_score(GT, Y_)
+                # if v_meas > best_v:
+                #     best_v = v_meas
+                #     final_clf = gmm
+                #     print best_v
+                #     final_Y_ = Y_
+
+    _print_results(GT,final_Y_,best_gmm)
+
+def _append_data(data, X_, unique_, GT_, mean, sigma):
+    for i in data:
+        if i not in unique_:
+            unique_.append(i)
+        # print i,len(i)
+        d = unique_.index(i)+ np.random.normal(mean, sigma, 1)
+        if X_ == []:
+            X_ = [d]
+        else:
+            X_ = np.vstack((X_,d))
+        GT_.append(i)
+    return X_, unique_, GT_
+
+def _append_data2(data, X_, unique_, GT_, mean, sigma):
+    for i in data:
+        if i not in unique_:
+            unique_.append(i)
+        # print i,len(i)
+        d = i + np.random.multivariate_normal(mean, sigma, 1)[0]
+        # X.append(d[0])
+        # Y.append(d[1])
+        if X_ == []:
+            X_ = [d]
+        else:
+            X_ = np.vstack((X_,d))
+        GT_.append(unique_.index(i))
+    return X_, unique_, GT_
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    lists = []
+    for i in range(n):
+        list1 = np.arange( i*l/n+1 , (i+1)*l/n+1 )
+        lists.append(list1)
+    return lists
+
+def _print_results(GT,Y_,best_gmm):
+    #print v_measure_score(self.GT, self.Y_)
+    true_labels = GT
+    pred_labels = Y_
+    print "\n dataset unique labels:", len(set(true_labels))
+    print "number of clusters:", len(best_gmm.means_)
+    print("Mutual Information: %.2f" % metrics.mutual_info_score(true_labels, pred_labels))
+    print("Adjusted Mutual Information: %0.2f" % metrics.normalized_mutual_info_score(true_labels, pred_labels))
+    print("Homogeneity: %0.2f" % metrics.homogeneity_score(true_labels, pred_labels))
+    print("Completeness: %0.2f" % metrics.completeness_score(true_labels, pred_labels))
+    print("V-measure: %0.2f" % metrics.v_measure_score(true_labels, pred_labels))
+
+##########################################################################
+# save values for furhter analysis
+##########################################################################
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
     pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
@@ -249,5 +353,42 @@ for scene in range(1,1001):
     trees = _get_trees(VF['actions'],positions)
     pickle.dump([VF,trees], open(pkl_file, 'wb'))
 
-    # tree_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_video_tree.p'
-    # print trees
+    # print positions
+
+
+##########################################################################
+# Clustering analysis
+##########################################################################
+four_folds = chunks(1000,4)
+
+X_colours = []
+GT_colours = []
+unique_colours = []
+
+X_shapes = []
+GT_shapes = []
+unique_shapes = []
+
+X_locations = []
+GT_locations = []
+unique_locations = []
+
+for test in range(1):
+    for c,data in enumerate(four_folds):
+        if c != test:
+            for scene in data:
+                pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+                positions = _read_pickle(scene)
+                X_colours, unique_colours, GT_colours           = _append_data(_get_colors(positions), X_colours, unique_colours, GT_colours, 0, .3)
+                X_shapes, unique_shapes, GT_shapes              = _append_data(_get_shapes(positions), X_shapes, unique_shapes, GT_shapes, 0, .3)
+                X_locations, unique_locations, GT_locations     = _append_data2(_get_locations2(positions), X_locations, unique_locations, GT_locations, [0,0], [[.3, 0], [0, .3]])
+    # print X_locations
+    # print unique_locations
+    # print GT_locations
+    _cluster_data(X_colours, GT_colours)
+    _cluster_data(X_shapes, GT_shapes)
+    _cluster_data(X_locations, GT_locations)
+    # for i,j in zip(X_colours, GT_colours):
+    #     print i,j
+    # plt.plot(X, Y, 'rx')
+    # plt.show()
