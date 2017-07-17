@@ -383,7 +383,7 @@ def chunks(l, n):
     return lists
 
 def _print_results(GT,Y_,best_gmm):
-    #print v_measure_score(self.GT, self.Y_)
+    #print v_measure_score(GT, Y_)
     true_labels = GT
     pred_labels = Y_
     print "\n dataset unique labels:", len(set(true_labels))
@@ -463,6 +463,97 @@ def _pretty_plot_directions():
         fig.savefig('/home/omari/Datasets/Dukes_modified/results/directions/'+str(cluster)+'_cluster.png')
         # plt.show()
 
+def _pretty_plot_locations():
+    clusters = {}
+    XY = X_locations*180/9+10
+    # print GT_locations
+    Y_, best_gmm = pickle.load(open( '/home/omari/Datasets/Dukes_modified/results/locations_clusters.p', "rb" ) )
+    print XY
+    for x,val in zip(XY,Y_):
+        if val not in clusters:
+            clusters[val] = np.zeros((200,200,3),dtype=np.uint8)
+        a,b = x
+        a = int(a)
+        b = int(b)
+        for i in range(10):
+            clusters[val][a-i:a+i,b-i:b+i,:]+=1
+        if np.max(clusters[val]) == 255:
+            clusters[val]*=244/255
+    avg_images = {}
+    for c in clusters:
+        plt.matshow(clusters[c][:,:,0])
+        plt.axis("off")
+        plt.savefig('/home/omari/Datasets/Dukes_modified/results/locations/'+str(c)+'_cluster.png')
+        # avg_images[c] = cv2.imread(dir_save+'avg_'+str(c)+".png")
+
+def _pretty_plot_colours():
+    cluster_images = {}
+    # print '-------------------------------------',len(Y_),len(X)
+    for rgb,val in zip(X,Y_):
+        if val not in cluster_images:
+            cluster_images[val] = []
+        rgb = [rgb[0]+rgb[1]+rgb[2],int(rgb[2]),int(rgb[1]),int(rgb[0])]
+        cluster_images[val].append(rgb)
+
+    for val in cluster_images:
+        cluster_images[val] = sorted(cluster_images[val])
+        if len(cluster_images[val])>20:
+            selected = []
+            count = 0
+            for i in range(0,len(cluster_images[val]),len(cluster_images[val])/19):
+                if count < 20:
+                    selected.append(cluster_images[val][i])
+                    count+=1
+            cluster_images[val] = selected
+    image_cluster_total = np.zeros((im_len*5*7,im_len*5*5,3),dtype=np.uint8)+255
+    paper_img = np.zeros((im_len*5,im_len*5*3,3),dtype=np.uint8)+255
+    count3 = 0
+    for count2,p in enumerate(cluster_images):
+        maxi = len(cluster_images[p])
+        image_avg = np.zeros((im_len,im_len,3),dtype=np.uint8)
+        image_cluster = np.zeros((im_len*5,im_len*5,3),dtype=np.uint8)+255
+        # print maxi
+        for count,rgb in enumerate(cluster_images[p]):
+            img = np.zeros((im_len,im_len,3),dtype=np.uint8)
+            img[:,:,0]+=rgb[3]
+            img[:,:,1]+=rgb[2]
+            img[:,:,2]+=rgb[1]
+            image_avg += img/(len(cluster_images[p])+1)
+            ang = count/float(maxi)*2*np.pi
+            xc = int(1.95*im_len*np.cos(ang))
+            yc = int(1.95*im_len*np.sin(ang))
+            # print xc,yc
+            C = int(2.5*im_len)
+            x1 = int(xc-im_len/2.0+2.5*im_len)
+            x2 = x1+im_len
+            y1 = int(yc-im_len/2.0+2.5*im_len)
+            y2 = y1+im_len
+            cv2.line(image_cluster,(int(y1+y2)/2,int(x1+x2)/2),(C,C),(20,20,20),2)
+            # print x1,x2,y1,y2
+            image_cluster[x1:x2,y1:y2,:] = img
+        image_avg = cv2.resize(image_avg, (int(im_len*1.4),int(im_len*1.4)), interpolation = cv2.INTER_AREA)
+        x1 = int((2.5-.7)*im_len)
+        x2 = int(x1+1.4*im_len)
+        image_cluster[x1:x2,x1:x2,:] = image_avg
+        if count2<35:
+            i1x = np.mod(count2,7)*im_len*5
+            i2x = (np.mod(count2,7)+1)*im_len*5
+            i1y = int(count2/7)*im_len*5
+            i2y = (int(count2/7)+1)*im_len*5
+            image_cluster_total[i1x:i2x,i1y:i2y,:] = image_cluster
+            cv2.imwrite(dir_save+'all_clusters.jpg',image_cluster_total)
+
+        cv2.imwrite(dir_save+str(p)+'_cluster.jpg',image_cluster)
+        cv2.imwrite(dir_save+str(p)+'_cluster_avg.jpg',image_avg)
+
+def _svm(x,y,x_test,y_test):
+    clf = svm.SVC(kernel='linear')
+    clf.fit(x, y)
+    A = clf.predict(x_test)
+    mean = metrics.v_measure_score(y_test, A)
+    # mean/=50
+    print("supervised V-measure: %0.2f" % mean)
+
 ##########################################################################
 # save values for furhter analysis
 ##########################################################################
@@ -481,7 +572,6 @@ for scene in range(1,1001):
     trees = _get_trees(VF['actions'],positions)
     pickle.dump([VF,trees], open(pkl_file, 'wb'))
 
-    # print positions
 
 
 ##########################################################################
@@ -489,38 +579,61 @@ for scene in range(1,1001):
 ##########################################################################
 four_folds = chunks(1000,4)
 
-X_colours = []
-GT_colours = []
-unique_colours = []
-
-X_shapes = []
-GT_shapes = []
-unique_shapes = []
-
-X_locations = []
-GT_locations = []
-unique_locations = []
-
-X_directions = []
-GT_directions = []
-unique_directions = []
-
 for test in range(1):
+    X_colours = []
+    X_colours_t = []
+    GT_colours = []
+    GT_colours_t = []
+    unique_colours = []
+
+    X_shapes = []
+    GT_shapes = []
+    X_shapes_t = []
+    GT_shapes_t = []
+    unique_shapes = []
+
+    X_locations = []
+    GT_locations = []
+    X_locations_t = []
+    GT_locations_t = []
+    unique_locations = []
+
+    X_directions = []
+    GT_directions = []
+    X_directions_t = []
+    GT_directions_t = []
+    unique_directions = []
     for c,data in enumerate(four_folds):
         if c != test:
             for scene in data:
-                print scene
+                # print scene
                 pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
                 positions = _read_pickle(scene)
                 X_colours, unique_colours, GT_colours           = _append_data(_get_colors(positions), X_colours, unique_colours, GT_colours, 0, .3)
                 X_shapes, unique_shapes, GT_shapes              = _append_data(_get_shapes(positions), X_shapes, unique_shapes, GT_shapes, 0, .3)
                 X_locations, unique_locations, GT_locations     = _append_data2(_get_locations2(positions), X_locations, unique_locations, GT_locations, [0,0], [[.3, 0], [0, .3]])
                 X_directions, unique_directions, GT_directions  = _append_data3(_get_directions2(positions), X_directions, unique_directions, GT_directions, [0,0], [[0, 0], [0, 0]])
-    # print X_directions
+        if c == test:
+            for scene in data:
+                # print scene
+                pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+                positions = _read_pickle(scene)
+                X_colours_t, unique_colours, GT_colours_t           = _append_data(_get_colors(positions), X_colours_t, unique_colours, GT_colours_t, 0, .3)
+                X_shapes_t, unique_shapes, GT_shapes_t              = _append_data(_get_shapes(positions), X_shapes_t, unique_shapes, GT_shapes_t, 0, .3)
+                X_locations_t, unique_locations, GT_locations_t     = _append_data2(_get_locations2(positions), X_locations_t, unique_locations, GT_locations_t, [0,0], [[.3, 0], [0, .3]])
+                X_directions_t, unique_directions, GT_directions_t  = _append_data3(_get_directions2(positions), X_directions_t, unique_directions, GT_directions_t, [0,0], [[0, 0], [0, 0]])
+    # print X_colours_t
     # print unique_directions
-    # print GT_directions
+    # print GT_colours_t
     # _cluster_data(X_colours, GT_colours, "colours", 9)
     # _cluster_data(X_shapes, GT_shapes, "shapes", 9)
     # _cluster_data(X_locations, GT_locations, "locations", 9)
     # _cluster_data(X_directions, GT_directions, "directions", 15)
-_pretty_plot_directions()
+    # _svm(X_colours, GT_colours, X_colours_t, GT_colours_t)
+    # _svm(X_shapes, GT_shapes, X_shapes_t, GT_shapes_t)
+    # _svm(X_locations, GT_locations, X_locations_t, GT_locations_t)
+    # _svm(X_directions, GT_directions, X_directions_t, GT_directions_t)
+    # print '-------------------'
+# _pretty_plot_directions()
+# _pretty_plot_locations()
+# _pretty_plot_colours() ## not yet working

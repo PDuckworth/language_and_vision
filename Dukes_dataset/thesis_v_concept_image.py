@@ -1,21 +1,20 @@
 import cv2
 import numpy as np
 
+colours = '/home/omari/Datasets/Dukes_modified/results/colours/'
 shapes = '/home/omari/Datasets/Dukes_modified/results/shapes/'
 directions = '/home/omari/Datasets/Dukes_modified/results/directions/'
-# colors = '/home/omari/Datasets/Dukes_dataset/features/colours/'
-# locations = '/home/omari/Datasets/Dukes_dataset/features/locations/cluster_images/'
-# distances = '/home/omari/Datasets/Dukes_dataset/features/distances/cluster_images/'
+locations = '/home/omari/Datasets/Dukes_modified/results/locations/'
 image_dir = "/home/omari/Dropbox/Thesis/writing/Chapter7/Chapter7Figs/PNG/Dukes-visual-concepts.jpg"
 
+color_im = ['13_cluster', '14_cluster']
 shape_im = ['0_cluster', '1_cluster']
 direction_im = ['7_cluster', '3_cluster']
-color_im = ['4_cluster', '0_cluster']
-location_im = ['2_cluster', '5_cluster']
+location_im = ['1_cluster', '7_cluster']
 distance_im = ['0_cluster', '2_cluster']
-all_images = [shape_im, direction_im]#, color_im, location_im, distance_im]
-all_dir = [shapes, directions]#, colors, locations, distances]#, actions, objects]
-text = ["shape", "direction"]#, "colour", "location", "distance"]#, "action", "object"]
+all_images = [color_im, shape_im, direction_im, location_im]#, color_im, location_im, distance_im]
+all_dir = [colours, shapes, directions, locations]#, colors, locations, distances]#, actions, objects]
+text = ["colour", "shape", "direction", "location"]#, "colour", "location", "distance"]#, "action", "object"]
 
 im_len = 60
 th = 40
