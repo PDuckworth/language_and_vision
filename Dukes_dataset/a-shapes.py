@@ -12,8 +12,8 @@ from sklearn import svm
 class shapes():
     """docstring for shapes."""
     def __init__(self):
-        self.dir = "/home/omari/Datasets/Dukes_dataset/"
-        self.dir_save = "/home/omari/Datasets/Dukes_dataset/features/shapes/"
+        self.dir = "/home/omari/Datasets/Dukes_modified/"
+        self.dir_save = "/home/omari/Datasets/Dukes_modified/results/shapes/"
         self.dir_scale = "/home/omari/Datasets/scalibility/Dukes/"
         self.th = 10
         self.sp = 2

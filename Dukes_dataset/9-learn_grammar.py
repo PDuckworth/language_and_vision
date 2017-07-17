@@ -202,6 +202,9 @@ for test in range(4):
                 # print '###',scene
                 sentences = _read_sentences(scene)
                 for id in sentences:
+                    if scene in [8,14,121]:
+                        sentences[id]['text']
+                        print scene,">>>>>>>>>>>>>>>", s
                     if id not in bad_trees:
                         if not _is_yuk(sentences[id]['text']):
                             RCL_trees.append(_read_RCL_tree(id))
@@ -254,16 +257,16 @@ for test in range(4):
     # s = Tree('pick up', ['pick', 'up'])
     # matched_trees.append(s)
 
-    ################################################################
-    # Evaluates my system
-    ################################################################
-    grammar = learn_trees(matched_trees)
-    _evaluate(four_folds, test, data, grammar, fw)
-    # print grammar
-
     # ################################################################
-    # # Evaluates supervised system
+    # # Evaluates my system
     # ################################################################
-    grammar = learn_trees(RCL_trees)
-    _evaluate(four_folds, test, data, grammar, fw)
+    # grammar = learn_trees(matched_trees)
+    # _evaluate(four_folds, test, data, grammar, fw)
     # # print grammar
+    #
+    # # ################################################################
+    # # # Evaluates supervised system
+    # # ################################################################
+    # grammar = learn_trees(RCL_trees)
+    # _evaluate(four_folds, test, data, grammar, fw)
+    # # # print grammar

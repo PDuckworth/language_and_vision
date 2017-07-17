@@ -11,6 +11,10 @@ from sklearn.metrics.cluster import v_measure_score
 from sklearn import metrics
 from sklearn import svm
 import matplotlib.pyplot as plt
+
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_pickle(scene):
@@ -249,18 +253,55 @@ def _get_directions(positions):
                     directions.append(d)
     return directions
 
+def _get_directions2(positions):
+    directions = []
+    mov_obj = None
+    for obj in positions:
+        if obj != 'gripper':
+            if positions[obj]['moving']:
+                mov_obj = obj
+                break
+    for obj1 in positions:
+        if obj1 != mov_obj:
+            continue
+        x1 = positions[obj1]['x']
+        y1 = positions[obj1]['y']
+        z1 = positions[obj1]['z']
+        for obj2 in positions:
+            if obj2 != 'gripper' and obj2 != obj1:
+                x2 = positions[obj2]['x']
+                y2 = positions[obj2]['y']
+                z2 = positions[obj2]['z']
+                # d = cart2sph(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
+                d = [x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0]]
+                dx = float(d[0])
+                dy = float(d[1])
+                dz = float(d[2])
+                max = np.max(np.abs([dx,dy,dz]))
+                if max != 0:
+                    d = [d[0]/max, d[1]/max, d[2]/max]
+                # print "---",d
+                # d = _func_directions(x1[0]-x2[0],y1[0]-y2[0],z1[0]-z2[0])
+                # if d not in directions:
+                directions.append(d)
+                # # d = cart2sph(x1[1]-x2[1],y1[1]-y2[1],z1[1]-z2[1])
+                # d = _func_directions(x1[1]-x2[1],y1[1]-y2[1],z1[1]-z2[1])
+                # if d not in directions:
+                #     directions.append(d)
+    return directions
+
 def _get_temporal(v):
     temporal = []
     if len(v)>1:
         temporal = ['meets']
     return temporal
 
-def _cluster_data(X, GT):
+def _cluster_data(X, GT, name, n):
     best_v = 0
     lowest_bic = 10000000000
     for i in range(5):
         print '#####',i
-        n_components_range = range(5, 10)
+        n_components_range = range(5, n)
         cv_types = ['spherical', 'tied', 'diag', 'full']
         lowest_bic = np.infty
         for cv_type in cv_types:
@@ -284,6 +325,7 @@ def _cluster_data(X, GT):
                 #     final_clf = gmm
                 #     print best_v
                 #     final_Y_ = Y_
+    pickle.dump( [final_Y_, best_gmm], open( '/home/omari/Datasets/Dukes_modified/results/'+name+'_clusters.p', "wb" ) )
 
     _print_results(GT,final_Y_,best_gmm)
 
@@ -315,6 +357,23 @@ def _append_data2(data, X_, unique_, GT_, mean, sigma):
         GT_.append(unique_.index(i))
     return X_, unique_, GT_
 
+def _append_data3(data, X_, unique_, GT_, mean, sigma):
+    for i in data:
+        # print i
+        du = _func_directions(i[0], i[1], i[2])
+        if du not in unique_:
+            unique_.append(du)
+        # print i,len(i)
+        # d = i # + np.random.multivariate_normal(mean, sigma, 1)[0]
+        # X.append(d[0])
+        # Y.append(d[1])
+        if X_ == []:
+            X_ = [i]
+        else:
+            X_ = np.vstack((X_,i))
+        GT_.append(unique_.index(du))
+    return X_, unique_, GT_
+
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     lists = []
@@ -334,6 +393,75 @@ def _print_results(GT,Y_,best_gmm):
     print("Homogeneity: %0.2f" % metrics.homogeneity_score(true_labels, pred_labels))
     print("Completeness: %0.2f" % metrics.completeness_score(true_labels, pred_labels))
     print("V-measure: %0.2f" % metrics.v_measure_score(true_labels, pred_labels))
+
+def _pretty_plot_directions():
+    final_Y_, best_gmm = pickle.load( open( '/home/omari/Datasets/Dukes_modified/results/directions_clusters.p', "rb" ) )
+    print best_gmm.means_
+    mpl.rcParams['legend.fontsize'] = 10
+
+    for cluster in range(9):
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        counter = 0
+        ax.plot([0,1],[0,0], [0,0], 'r', linewidth=3)
+        ax.plot([0,0],[0,1], [0,0], 'g', linewidth=3)
+        ax.plot([0,0],[0,0], [0,1], 'b', linewidth=3)
+        for i,j in zip(X_directions, final_Y_):
+            if counter == 110:
+                break
+            if j == cluster: #0:
+                # print i
+                counter += 1
+                # theta = np.linspace(-4 * np.pi, 4 * np.pi, 100)
+                # r = z**2 + 1
+                d = np.sqrt(i[0]**2 + i[1]**2 + i[2]**2)
+                # print i,d
+                if d != 0:
+                    x = [0,i[0]/d]
+                    y = [0,i[1]/d]
+                    z = [0,i[2]/d]
+                    ax.plot(x, y, z, 'y')
+
+                # if i[0]>0:
+                #     if i[1]>0:
+                #         X, Y = np.mgrid[0:i[0]:3j, 0:i[1]:3j]
+                #     if i[1]<0:
+                #         X, Y = np.mgrid[0:i[0]:3j, i[1]:0:3j]
+                #     if i[1]==0:
+                #         X, Y = np.mgrid[0:i[0]:3j, 0:0.1:3j]
+                # if i[0]<0:
+                #     if i[1]>0:
+                #         X, Y = np.mgrid[i[0]:0:3j, 0:i[1]:3j]
+                #     if i[1]<0:
+                #         X, Y = np.mgrid[i[0]:0:3j, i[1]:0:3j]
+                #     if i[1]==0:
+                #         X, Y = np.mgrid[i[0]:0:3j, 0:0.1:3j]
+                # if i[0]==0:
+                #     X, Y = np.mgrid[0:.01:3j, 0:1:3j]
+                # Z = X
+                # # print i
+                # # print X
+                # Y2=Y
+                # if i[0]>0:
+                #     Y2*=X
+                # if i[0]<0:
+                #     Y2*=-X
+                #
+                # # print Z
+                # # print '-------------'
+                # # print ttttt
+                #
+                # cset = ax.contour(X,Y2,Z, zdir='Y', offset=-1)#, cmap=cm.coolwarm)
+                # ax.plot(x, y, zdir='z', offset=-1)#, cmap=cm.coolwarm)
+                # ax.legend()
+        ax.set_xlim([-1,1])
+        ax.set_ylim([-1,1])
+        ax.set_zlim([-1,1])
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_zlabel("z")
+        fig.savefig('/home/omari/Datasets/Dukes_modified/results/directions/'+str(cluster)+'_cluster.png')
+        # plt.show()
 
 ##########################################################################
 # save values for furhter analysis
@@ -373,22 +501,26 @@ X_locations = []
 GT_locations = []
 unique_locations = []
 
+X_directions = []
+GT_directions = []
+unique_directions = []
+
 for test in range(1):
     for c,data in enumerate(four_folds):
         if c != test:
             for scene in data:
+                print scene
                 pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
                 positions = _read_pickle(scene)
                 X_colours, unique_colours, GT_colours           = _append_data(_get_colors(positions), X_colours, unique_colours, GT_colours, 0, .3)
                 X_shapes, unique_shapes, GT_shapes              = _append_data(_get_shapes(positions), X_shapes, unique_shapes, GT_shapes, 0, .3)
                 X_locations, unique_locations, GT_locations     = _append_data2(_get_locations2(positions), X_locations, unique_locations, GT_locations, [0,0], [[.3, 0], [0, .3]])
-    # print X_locations
-    # print unique_locations
-    # print GT_locations
-    _cluster_data(X_colours, GT_colours)
-    _cluster_data(X_shapes, GT_shapes)
-    _cluster_data(X_locations, GT_locations)
-    # for i,j in zip(X_colours, GT_colours):
-    #     print i,j
-    # plt.plot(X, Y, 'rx')
-    # plt.show()
+                X_directions, unique_directions, GT_directions  = _append_data3(_get_directions2(positions), X_directions, unique_directions, GT_directions, [0,0], [[0, 0], [0, 0]])
+    # print X_directions
+    # print unique_directions
+    # print GT_directions
+    # _cluster_data(X_colours, GT_colours, "colours", 9)
+    # _cluster_data(X_shapes, GT_shapes, "shapes", 9)
+    # _cluster_data(X_locations, GT_locations, "locations", 9)
+    # _cluster_data(X_directions, GT_directions, "directions", 15)
+_pretty_plot_directions()
