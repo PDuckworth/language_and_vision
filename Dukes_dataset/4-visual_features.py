@@ -297,6 +297,7 @@ def _get_temporal(v):
     return temporal
 
 def _cluster_data(X, GT, name, n):
+    print name
     best_v = 0
     lowest_bic = 10000000000
     for i in range(5):
@@ -552,7 +553,9 @@ def _svm(x,y,x_test,y_test):
     A = clf.predict(x_test)
     mean = metrics.v_measure_score(y_test, A)
     # mean/=50
+    print '-------'
     print("supervised V-measure: %0.2f" % mean)
+    print
 
 ##########################################################################
 # save values for furhter analysis
@@ -609,30 +612,33 @@ for test in range(1):
                 # print scene
                 pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
                 positions = _read_pickle(scene)
-                X_colours, unique_colours, GT_colours           = _append_data(_get_colors(positions), X_colours, unique_colours, GT_colours, 0, .3)
-                X_shapes, unique_shapes, GT_shapes              = _append_data(_get_shapes(positions), X_shapes, unique_shapes, GT_shapes, 0, .3)
-                X_locations, unique_locations, GT_locations     = _append_data2(_get_locations2(positions), X_locations, unique_locations, GT_locations, [0,0], [[.3, 0], [0, .3]])
+                X_colours, unique_colours, GT_colours           = _append_data(_get_colors(positions), X_colours, unique_colours, GT_colours, 0, .4)
+                X_shapes, unique_shapes, GT_shapes              = _append_data(_get_shapes(positions), X_shapes, unique_shapes, GT_shapes, 0, .4)
+                X_locations, unique_locations, GT_locations     = _append_data2(_get_locations2(positions), X_locations, unique_locations, GT_locations, [0,0], [[.4, 0], [0, .4]])
                 X_directions, unique_directions, GT_directions  = _append_data3(_get_directions2(positions), X_directions, unique_directions, GT_directions, [0,0], [[0, 0], [0, 0]])
         if c == test:
             for scene in data:
                 # print scene
                 pkl_file = '/home/omari/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
                 positions = _read_pickle(scene)
-                X_colours_t, unique_colours, GT_colours_t           = _append_data(_get_colors(positions), X_colours_t, unique_colours, GT_colours_t, 0, .3)
+                X_colours_t, unique_colours, GT_colours_t           = _append_data(_get_colors(positions), X_colours_t, unique_colours, GT_colours_t, 0, .35)
                 X_shapes_t, unique_shapes, GT_shapes_t              = _append_data(_get_shapes(positions), X_shapes_t, unique_shapes, GT_shapes_t, 0, .3)
-                X_locations_t, unique_locations, GT_locations_t     = _append_data2(_get_locations2(positions), X_locations_t, unique_locations, GT_locations_t, [0,0], [[.3, 0], [0, .3]])
+                X_locations_t, unique_locations, GT_locations_t     = _append_data2(_get_locations2(positions), X_locations_t, unique_locations, GT_locations_t, [0,0], [[.4, 0], [0, .4]])
                 X_directions_t, unique_directions, GT_directions_t  = _append_data3(_get_directions2(positions), X_directions_t, unique_directions, GT_directions_t, [0,0], [[0, 0], [0, 0]])
     # print X_colours_t
     # print unique_directions
     # print GT_colours_t
-    # _cluster_data(X_colours, GT_colours, "colours", 9)
-    # _cluster_data(X_shapes, GT_shapes, "shapes", 9)
-    # _cluster_data(X_locations, GT_locations, "locations", 9)
-    # _cluster_data(X_directions, GT_directions, "directions", 15)
-    # _svm(X_colours, GT_colours, X_colours_t, GT_colours_t)
-    # _svm(X_shapes, GT_shapes, X_shapes_t, GT_shapes_t)
-    # _svm(X_locations, GT_locations, X_locations_t, GT_locations_t)
-    # _svm(X_directions, GT_directions, X_directions_t, GT_directions_t)
+    _cluster_data(X_colours, GT_colours, "colours", 9)
+    _svm(X_colours, GT_colours, X_colours_t, GT_colours_t)
+
+    _cluster_data(X_shapes, GT_shapes, "shapes", 9)
+    _svm(X_shapes, GT_shapes, X_shapes_t, GT_shapes_t)
+
+    _cluster_data(X_locations, GT_locations, "locations", 9)
+    _svm(X_locations, GT_locations, X_locations_t, GT_locations_t)
+
+    _cluster_data(X_directions, GT_directions, "directions", 15)
+    _svm(X_directions, GT_directions, X_directions_t, GT_directions_t)
     # print '-------------------'
 # _pretty_plot_directions()
 # _pretty_plot_locations()
