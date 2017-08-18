@@ -86,6 +86,18 @@ def _is_yuk(sentence):
             break
     return yuk
 
+#---------------------------------------------------------------------------#
+def _get_GT():
+    GT_total_links = 0
+    GT_dict = {}
+    GT_dict["actions"] = ["move","pick","pick up","drop","put down","place","take","shift","put","remove","stack"]
+    GT_dict["colours"] = ["black","green","blue","yellow","pink","purple","grey","gray","red","magenta","white","cyan","turquoise","sky"]
+    GT_dict["shapes"] = ["sphere","can","ball","cylinder","prism","cube","pyramid","orb","block","square","tower","cylinders","tetrahedron","cans","blocks","cubes"]
+    GT_dict["directions"] = ["on","on top of","over","onto","above","front","right","back","left"]
+    GT_dict["locations"] = ["top left","top right","center","bottom right","bottom left"]
+    return GT_dict
+
+#---------------------------------------------------------------------------#
 def _read_tree(id):
     pkl_file = '/home/omari/Datasets/Dukes_modified/matching/'+str(id)+'.p'
     data = open(pkl_file, 'rb')
@@ -187,86 +199,139 @@ Matching,Matching_VF,passed_scenes,passed_sentences = _read_passed_tags()
 bad_trees = [14588,23958,10646,25409,25625,14427,23982,16360,22369,23928,16792,18058,25013,9323,26997,25565,14412,16159,26955,4028,9207,18582,25100,25058,23428,23985,12027,25653,14624,14423, 25682,12515,13775,4073,10186,13046,25622,26283,23217,12453,23955,23970,23756,23898,14789,25477,9418,2541,23738,24170]
 four_folds = chunks(1000,4)
 
-for test in range(4):
-    counter = 0
-    counter2= 0
-    counter_results = 0
-    matched_trees = []
-    RCL_trees = []
-    scenes = []
+######################################## tags
+# for test in range(4):
+    # counter = 0
+    # counter2= 0
+    # counter_results = 0
+    # matched_trees = []
+    # RCL_trees = []
+    # scenes = []
     # ok_words = []
-    fw = []
-    for c,data in enumerate(four_folds):
-        if c != test:
-            for scene in data:
-                # print '###',scene
-                sentences = _read_sentences(scene)
-                for id in sentences:
-                    if scene in [8,14,121]:
-                        sentences[id]['text']
-                        print scene,">>>>>>>>>>>>>>>", s
-                    if id not in bad_trees:
-                        if not _is_yuk(sentences[id]['text']):
-                            RCL_trees.append(_read_RCL_tree(id))
-                            # sentences_to_test[id] = sentences[id]
-                            if scene not in scenes:
-                                scenes.append(scene)
-                            counter+=1
-                            if id in passed_sentences:
-                                RCL_tree = _read_RCL_tree(id)
-                                # RCL_trees.append(RCL_tree)
-                                # print RCL_tree
-                                # print 'sentence:',sentences[id]['text']
-                                results = _read_tree(id)
-                                struct = results['tree_structure']
-                                # print struct
-                                A=Tree('action:', _get_action(results))
-                                E=Tree('entity:', _get_entity(results))
-                                if len(struct)==2:
-                                    tree = Tree('event:', [A, E])
-                                if len(struct)==3:
-                                    D=Tree('destination:', _get_destination(results))
-                                    tree = Tree('event:', [A, E, D])
-                                if tree==RCL_tree:
-                                    # print RCL_tree
-                                    # print tree.leaves()
-                                    # print '****',tree
-                                    counter_results+=1
-                                    matched_trees.append(tree)
-                                    s = sentences[id]['text']
-                                    words_in_sent = s.split(" ")
-                                    leaves = tree.leaves()
-                                    words_in_tree = []
-                                    for leaf in leaves:
-                                        for l in leaf.split(" "):
-                                            words_in_tree.append(l)
-                                    # print leaves
-                                    for word in words_in_sent:
-                                        if word not in words_in_tree:
-                                            if word not in fw:
-                                                fw.append(word)
-                                    pass
-                                else:
-                                    # print tree
-                                    # print RCL_tree
-                                    counter2+=1
-    # print fw
-    # print counter
-    # print counter_results
-    # print counter2
-    # s = Tree('pick up', ['pick', 'up'])
-    # matched_trees.append(s)
+    # fw = []
+# for c,data in enumerate(four_folds):
+#     # if c != test:
+for ii in [200,400,600,800,1005]:
+    words_in_tree = []
+    for scene in range(1,1001):
+        if scene>ii:
+            continue
+        # print '###',scene
+        sentences = _read_sentences(scene)
+        for id in sentences:
+            if scene in [8,14,121]:
+                sentences[id]['text']
+                # print scene,">>>>>>>>>>>>>>>", s
+            if id not in bad_trees:
+                if not _is_yuk(sentences[id]['text']):
+                    # RCL_trees.append(_read_RCL_tree(id))
+                    # if scene not in scenes:
+                    #     scenes.append(scene)
+                    # counter+=1
+                    if id in passed_sentences:
+                        RCL_tree = _read_RCL_tree(id)
+                        results = _read_tree(id)
+                        struct = results['tree_structure']
+                        # print struct
+                        A=Tree('action:', _get_action(results))
+                        E=Tree('entity:', _get_entity(results))
+                        if len(struct)==2:
+                            tree = Tree('event:', [A, E])
+                        if len(struct)==3:
+                            D=Tree('destination:', _get_destination(results))
+                            tree = Tree('event:', [A, E, D])
+                        if tree==RCL_tree:
+                            s = sentences[id]['text']
+                            words_in_sent = s.split(" ")
+                            leaves = tree.leaves()
+                            for leaf in leaves:
+                                # for l in leaf.split(" "):
+                                if leaf not in words_in_tree:
+                                    words_in_tree.append(leaf)
+    print words_in_tree
 
-    # ################################################################
-    # # Evaluates my system
-    # ################################################################
-    # grammar = learn_trees(matched_trees)
-    # _evaluate(four_folds, test, data, grammar, fw)
-    # # print grammar
-    #
-    # # ################################################################
-    # # # Evaluates supervised system
-    # # ################################################################
-    # grammar = learn_trees(RCL_trees)
-    # _evaluate(four_folds, test, data, grammar, fw)
-    # # # print grammar
+#
+# ######################################## Grammar
+# for test in range(4):
+#     counter = 0
+#     counter2= 0
+#     counter_results = 0
+#     matched_trees = []
+#     RCL_trees = []
+#     scenes = []
+#     # ok_words = []
+#     fw = []
+#     for c,data in enumerate(four_folds):
+#         if c != test:
+#             for scene in data:
+#                 # print '###',scene
+#                 sentences = _read_sentences(scene)
+#                 for id in sentences:
+#                     if scene in [8,14,121]:
+#                         sentences[id]['text']
+#                         print scene,">>>>>>>>>>>>>>>", s
+#                     if id not in bad_trees:
+#                         if not _is_yuk(sentences[id]['text']):
+#                             RCL_trees.append(_read_RCL_tree(id))
+#                             # sentences_to_test[id] = sentences[id]
+#                             if scene not in scenes:
+#                                 scenes.append(scene)
+#                             counter+=1
+#                             if id in passed_sentences:
+#                                 RCL_tree = _read_RCL_tree(id)
+#                                 # RCL_trees.append(RCL_tree)
+#                                 # print RCL_tree
+#                                 # print 'sentence:',sentences[id]['text']
+#                                 results = _read_tree(id)
+#                                 struct = results['tree_structure']
+#                                 # print struct
+#                                 A=Tree('action:', _get_action(results))
+#                                 E=Tree('entity:', _get_entity(results))
+#                                 if len(struct)==2:
+#                                     tree = Tree('event:', [A, E])
+#                                 if len(struct)==3:
+#                                     D=Tree('destination:', _get_destination(results))
+#                                     tree = Tree('event:', [A, E, D])
+#                                 if tree==RCL_tree:
+#                                     # print RCL_tree
+#                                     # print tree.leaves()
+#                                     # print '****',tree
+#                                     counter_results+=1
+#                                     matched_trees.append(tree)
+#                                     s = sentences[id]['text']
+#                                     words_in_sent = s.split(" ")
+#                                     leaves = tree.leaves()
+#                                     words_in_tree = []
+#                                     for leaf in leaves:
+#                                         for l in leaf.split(" "):
+#                                             words_in_tree.append(l)
+#                                     # print leaves
+#                                     for word in words_in_sent:
+#                                         if word not in words_in_tree:
+#                                             if word not in fw:
+#                                                 fw.append(word)
+#                                     pass
+#                                 else:
+#                                     # print tree
+#                                     # print RCL_tree
+#                                     counter2+=1
+#     # print fw
+#     # print counter
+#     # print counter_results
+#     # print counter2
+#     # s = Tree('pick up', ['pick', 'up'])
+#     # matched_trees.append(s)
+#
+#     # ################################################################
+#     # # Evaluates my system
+#     # ################################################################
+#     # grammar = learn_trees(matched_trees)
+#     # _evaluate(four_folds, test, data, grammar, fw)
+#     # # print grammar
+#     #
+#     # # ################################################################
+#     # # # Evaluates supervised system
+#     # # ################################################################
+#     # grammar = learn_trees(RCL_trees)
+#     # _evaluate(four_folds, test, data, grammar, fw)
+#     # # # print grammar
