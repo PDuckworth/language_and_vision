@@ -2,9 +2,28 @@ import nltk.data
 from nltk.grammar import *
 from nltk.tree import ProbabilisticTree
 
+def best_parse_with_n_grams(grammar, sentence, trace=0):
+    n_grams = []
+    for c,prod in enumerate(grammar.productions()):
+        if " " in str(prod.rhs()[0]):
+            n_grams.append(prod.rhs()[0])
+    # print n_grams
+    # print sentence
+    for n in n_grams:
+        if n in sentence:
+            sentence = sentence.replace(n, n.replace(" ","_",10))
+    words = sentence.split()
+    for i,word in enumerate(words):
+        if "_" in word:
+            words[i] = word.replace("_"," ",10)
+    # print words
+    table, splits, pass_rate = parse_table(grammar, words, trace)
+    # print table, splits
+    return make_tree(table, splits, 0, len(words), grammar.start()),pass_rate
+
 def best_parse(grammar, sentence, trace=0):
     words = sentence.split()
-    table, splits = parse_table(grammar, words, trace)
+    table, splits, pass_rate = parse_table(grammar, words, trace)
     return make_tree(table, splits, 0, len(words), grammar.start())
 
 def make_tree(table, splits, left, right, nonterminal):
@@ -33,6 +52,7 @@ def parse_table(grammar, words, trace=5):
     table = {}
     splits = {}
     n = len(words)
+    found = 0
 
     proddict = {}
 
@@ -56,6 +76,8 @@ def parse_table(grammar, words, trace=5):
                         splits[i, i+1, lhs] = (words[i], None, None)
                         if trace > 0:
                             display_prod(i, i+1, n, lhs, rhs, prod.prob())
+                            found += 1
+
 
     # main loop
     total = 0
@@ -88,12 +110,11 @@ def parse_table(grammar, words, trace=5):
                                 display_prod(left, right, n, lhs, rhs, prod.prob())
 
                 table[left, right, lhs] = best
-
-    return table, splits
+    return table, splits, found/float(n)
 
 def display_prod(left, right, n, lhs, rhs, prob):
     wp = ProbabilisticProduction(lhs, rhs, prob=prob)
-    print '|' + '.'*left + '='*(right-left) + '.'*(n-right) + '|', wp
+    # print '|' + '.'*left + '='*(right-left) + '.'*(n-right) + '|', wp
 
 def demo():
     simple_grammar = nltk.data.load('nltk:grammars/toy1.pcfg')

@@ -14,54 +14,54 @@ from learn_pcfg import *
 
 #---------------------------------------------------------------------------#
 def _read_stop_wrods():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/idf_FW_linguistic_features.p'
     data = open(pkl_file, 'rb')
     stop = pickle.load(data)
     return stop
 
 #---------------------------------------------------------------------------#
 def _read_tags():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/tags.p'
     data = open(pkl_file, 'rb')
     hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
     return [hypotheses_tags, VF_dict, LF_dict]
 
 def _read_sentences(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
 
 #---------------------------------------------------------------------------#
 def _read_vf(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     data = open(pkl_file, 'rb')
     vf,tree = pickle.load(data)
     return vf,tree
 
 #---------------------------------------------------------------------------#
 def _read_semantic_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
 
 #---------------------------------------------------------------------------#
 def _read_layout(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_layout.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_layout.p'
     data = open(pkl_file, 'rb')
     layout = pickle.load(data)
     return layout
 
 #---------------------------------------------------------------------------#
 def _read_grammar_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
 
 def _read_passed_tags():
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags1.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/matching/Passed_tags1.p'
     data = open(pkl_file, 'rb')
     Matching,Matching_VF,passed_scenes,passed_sentences = pickle.load(data)
     # print Matching,Matching_VF,passed_scenes,passed_ids
@@ -148,7 +148,7 @@ for scene in range(1,1001):#920!!!
                 print tree
                 print '----'
                 trees.append(tree)
-                pkl_file = '/home/omari/Datasets_old/Dukes_modified/RCL-trees/'+str(id)+'_tree.p'
+                pkl_file = '/home/omari/Datasets/Dukes_modified/RCL-trees/'+str(id)+'_tree.p'
                 pickle.dump(tree, open(pkl_file, 'wb'))
 
 grammar = learn_trees(trees)
@@ -165,10 +165,10 @@ S=S.replace('the ','')
 
 
 
-pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/experiment/sentences.p'
+pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/experiment/sentences.p'
 pickle.dump(sentences_to_test, open(pkl_file, 'wb'))
 
-file1 = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/experiment/sentences.txt'
+file1 = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/experiment/sentences.txt'
 F = open(file1, 'w')
 for id in sentences_to_test:
     F.write(sentences_to_test[id]['text']+'\n')
@@ -178,7 +178,7 @@ F.close()
 
 Data = read_data()
 tokens = [str(i) for i in range(50)]
-f = open('/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/experiment/tags.txt', 'w')
+f = open('/home/'+getpass.getuser()+'/Datasets/Dukes_modified/experiment/tags.txt', 'w')
 for id in sentences_to_test:
     tree = ParentedTree.fromstring(sentences_to_test[id]['RCL'])
     sentence = []

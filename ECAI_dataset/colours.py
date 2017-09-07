@@ -19,6 +19,7 @@ class colours_class():
     def __init__(self):
         # self.username = getpass.getuser()
         # self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset/features/vid'
+        self.dir_sensitivity = '/home/omari/Datasets/sensitivity/'
         self.dir2 = '/home/omari/Datasets/ECAI_dataset/colours/'
         self.dir_colours =  '/home/omari/Datasets/ECAI_dataset/features/vid'
         self.dir_grammar = '/home/omari/Datasets/ECAI_dataset/grammar/'
@@ -31,6 +32,7 @@ class colours_class():
         self.no_of_frames = 1
         self.ok_clusters = []
         self.ok_videos = []
+        self.x_axis = []
 
     def _get_video_per_days(self):
         self.video_per_day = {}
@@ -607,6 +609,14 @@ class colours_class():
         # cv2.imshow("img",image_cluster_total)
         # cv2.waitKey(1000)
 
+    def _plot_sensitivity(self):
+        x = self.x_axis
+        y = self.f_score
+        fig, ax = plt.subplots()
+        ax.plot(x, y, zorder=10)
+        ax.grid(True, zorder=5)
+        pickle.dump( [x,y], open( self.dir_sensitivity+'ECAI_colours_sensitivity.p', "wb" ) )
+        plt.show()
 
 def main():
     f = colours_class()
@@ -625,11 +635,22 @@ def main():
     # f._compute_measures()
     ## remember to change self.no_of_frames to 3
     # f.max = 10
+
+    # #incremental
+    # for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
+    #     f._assignment_matrix(date)
+    #     f._LP_assign(.07)
+    #     f._pretty_plot_incremental()
+    # f._plot_incremental()
+
+    # sensitivity
     for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
         f._assignment_matrix(date)
-        f._LP_assign(.07)
-        f._pretty_plot_incremental()
-    f._plot_incremental()
+    for i in range(1,30):
+        f._LP_assign(i/100.0)
+        f.x_axis.append(i/100.0)
+    f._plot_sensitivity()
+
     # # f._plot_f_score()
     # f._pretty_plot()
 

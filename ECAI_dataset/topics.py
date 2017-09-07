@@ -18,16 +18,21 @@ class actions_class():
     def __init__(self):
         # self.username = getpass.getuser()
         # self.dir1 = '/home/'+self.username+'/Datasets/ECAI_dataset/features/vid'
+        self.dir_sensitivity = '/home/omari/Datasets/sensitivity/'
         self.dir2 = '/home/omari/Datasets/ECAI_dataset/actions/'
         self.dir_actions =  '/home/omari/Datasets/ECAI_dataset/features/vid'
         self.dir_grammar = '/home/omari/Datasets/ECAI_dataset/grammar/'
         self.dir_annotation = '/home/omari/Datasets/ECAI_dataset/ECAI_annotations/vid'
+        self.dir_images = '/home/omari/Datasets/ECAI Data/dataset_segmented_15_12_16/vid' # 1/images
         self.im_len = 60
         self.f_score = []
         self.Pr = []
         self.Re = []
         self.ok_clusters = []
         self.ok_videos = []
+        self.Y_ = []
+        self.images = []
+        self.x_axis = []
 
     def _get_video_per_days(self):
         self.video_per_day = {}
@@ -55,6 +60,12 @@ class actions_class():
             vid = int(vid.split("vid")[1])
             self.video_num.append(i)
             self.actions[vid] = [actions[i-1]]
+            file = self.dir_images+str(vid)+"/images/00005.jpg"
+            image = cv2.imread(file)
+            image = cv2.resize(image, (60,60), interpolation = cv2.INTER_AREA)
+            self.images.append(image)
+            self.Y_.append(actions[i-1])
+            print i
 
     def _read_tags(self):
         self.verbs = {}
@@ -287,39 +298,39 @@ class actions_class():
 
     def _pretty_plot(self):
         self.cluster_images = {}
-        print '-------------------------------------',len(self.Y_),len(self.rgb)
-        for rgb,val in zip(self.rgb,self.Y_):
+        for img,val in zip(self.images,self.Y_):
             if val not in self.cluster_images:
                 self.cluster_images[val] = []
-            rgb = [rgb[0]+rgb[1]+rgb[2],int(rgb[0]*255),int(rgb[1]*255),int(rgb[2]*255)]
-            # if rgb not in self.cluster_images[val]:
-            self.cluster_images[val].append(rgb)
+            self.cluster_images[val].append(img)
 
         for val in self.cluster_images:
-            self.cluster_images[val] = sorted(self.cluster_images[val])
-            if len(self.cluster_images[val])>30:
+            #self.cluster_images[val] = sorted(self.cluster_images[val])
+            print val,len(self.cluster_images[val])
+            if len(self.cluster_images[val])>12:
                 selected = []
                 count = 0
-                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/19):
-                    if count < 30:
+                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/12):
+                    if count < 12:
                         selected.append(self.cluster_images[val][i])
+                        count+=1
                 self.cluster_images[val] = selected
+            print val,len(self.cluster_images[val])
+
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
+        paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
+        # print len(self.cluster_images)
+        # print iii
         count3 = 0
         for count2,p in enumerate(self.cluster_images):
             maxi = len(self.cluster_images[p])
             image_avg = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
             image_cluster = np.zeros((self.im_len*5,self.im_len*5,3),dtype=np.uint8)+255
             # print maxi
-            for count,rgb in enumerate(self.cluster_images[p]):
-                img = np.zeros((self.im_len,self.im_len,3),dtype=np.uint8)
-                img[:,:,0]+=rgb[3]
-                img[:,:,1]+=rgb[2]
-                img[:,:,2]+=rgb[1]
-                # img[0:2,:,:]=0
-                # img[-2:,:,:]=0
-                # img[:,0:2,:]=0
-                # img[:,-2:,:]=0
+            for count,img in enumerate(self.cluster_images[p]):
+                img[0:2,:,:]=0
+                img[-2:,:,:]=0
+                img[:,0:2,:]=0
+                img[:,-2:,:]=0
                 image_avg += img/(len(self.cluster_images[p])+1)
                 ang = count/float(maxi)*2*np.pi
                 xc = int(1.95*self.im_len*np.cos(ang))
@@ -344,18 +355,18 @@ class actions_class():
                 i2y = (int(count2/7)+1)*self.im_len*5
                 image_cluster_total[i1x:i2x,i1y:i2y,:] = image_cluster
                 cv2.imwrite(self.dir2+'all_clusters.jpg',image_cluster_total)
-        #
-        #     if p in [2,3,4]:
-        #         i1x = np.mod(count3,3)*self.im_len*5
-        #         i2x = (np.mod(count3,3)+1)*self.im_len*5
-        #         count3+=1
-        #         i1y = 0
-        #         i2y = self.im_len*5
-        #         paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
-        #         cv2.imwrite(self.dir_faces+'faces_clusters_ex.jpg',paper_img)
-        #
+
+            if p in [3,6,11]:
+                i1x = np.mod(count3,3)*self.im_len*5
+                i2x = (np.mod(count3,3)+1)*self.im_len*5
+                count3+=1
+                i1y = 0
+                i2y = self.im_len*5
+                paper_img[i1y:i2y,i1x:i2x,:] = image_cluster
+                cv2.imwrite(self.dir2+'faces_clusters_ex.jpg',paper_img)
+
             cv2.imwrite(self.dir2+str(p)+'_cluster.jpg',image_cluster)
-        #     cv2.imwrite(self.dir_faces+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
+            cv2.imwrite(self.dir2+'cluster_images/'+str(p)+'_cluster.jpg',image_cluster)
 
     def _LP_assign(self,max_assignments):
         Precision = 0
@@ -447,6 +458,15 @@ class actions_class():
         ax.grid(True, zorder=5)
         plt.show()
 
+    def _plot_sensitivity(self):
+        x = self.x_axis
+        y = self.f_score
+        fig, ax = plt.subplots()
+        ax.plot(x, y, zorder=10)
+        ax.grid(True, zorder=5)
+        pickle.dump( [x,y], open( self.dir_sensitivity+'ECAI_actions_sensitivity.p', "wb" ) )
+        plt.show()
+
 def main():
     f = actions_class()
     f._get_video_per_days()
@@ -458,10 +478,27 @@ def main():
     # f._assignment_matrix("2016-04-05")
     f._get_groundTruth()
 
-    for i,date in enumerate(['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']):
+    # #incremental
+    # for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
+    #     f._assignment_matrix(date)
+    #     f._LP_assign(.07)
+    #     f._pretty_plot_incremental()
+    # f._plot_incremental()
+
+    # sensitivity
+    for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
         f._assignment_matrix(date)
-        f._LP_assign(.07)
-    f._plot_incremental()
+    for i in range(1,30):
+        f._LP_assign(i/100.0)
+        f.x_axis.append(i/100.0)
+    f._plot_sensitivity()
+    
+    # uncomment
+    # for i,date in enumerate(['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']):
+    #     f._assignment_matrix(date)
+    #     f._LP_assign(.07)
+    # f._plot_incremental()
+
     # f._LP_assign(.05)
     # f.max = 10
     # for i in range(1,f.max+1):
@@ -470,7 +507,7 @@ def main():
     #     f._LP_assign(.05)
     # f._plot_incremental()
     # # f._plot_f_score()
-    # f._pretty_plot()
+    f._pretty_plot()
 
 if __name__=="__main__":
     main()

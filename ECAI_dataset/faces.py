@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 class faces_class():
     """docstring for faces"""
     def __init__(self):
+        self.dir_sensitivity = '/home/omari/Datasets/sensitivity/'
         self.dir_faces =  '/home/omari/Datasets/ECAI_dataset/faces/'
         self.dir_grammar = '/home/omari/Datasets/ECAI_dataset/grammar/'
         self.dir_annotation = '/home/omari/Datasets/ECAI_dataset/ECAI_annotations/vid'
@@ -24,6 +25,7 @@ class faces_class():
         self.Re = []
         self.ok_videos = []
         self.ok_clusters = []
+        self.x_axis = []
 
     def _get_video_per_days(self):
         self.video_per_day = {}
@@ -41,6 +43,8 @@ class faces_class():
 
     def _read_faces(self):
         f = open(self.dir_faces+'faces3_projections.csv','rb')
+        f = open(self.dir_faces+'projections_day1.csv','rb')
+
         self.faces = {}
         self.X = []
         self.persons = []
@@ -302,6 +306,19 @@ class faces_class():
                 self.cluster_images[val] = []
             self.cluster_images[val].append(img)
 
+        for val in self.cluster_images:
+            #self.cluster_images[val] = sorted(self.cluster_images[val])
+            print val,len(self.cluster_images[val])
+            if len(self.cluster_images[val])>12:
+                selected = []
+                count = 0
+                for i in range(0,len(self.cluster_images[val]),len(self.cluster_images[val])/12):
+                    if count < 12:
+                        selected.append(self.cluster_images[val][i])
+                        count+=1
+                self.cluster_images[val] = selected
+            print val,len(self.cluster_images[val])
+
         image_cluster_total = np.zeros((self.im_len*5*7,self.im_len*5*5,3),dtype=np.uint8)+255
         paper_img = np.zeros((self.im_len*5,self.im_len*5*3,3),dtype=np.uint8)+255
         # print len(self.cluster_images)
@@ -446,6 +463,15 @@ class faces_class():
         ax.grid(True, zorder=5)
         plt.show()
 
+    def _plot_sensitivity(self):
+        x = self.x_axis
+        y = self.f_score
+        fig, ax = plt.subplots()
+        ax.plot(x, y, zorder=10)
+        ax.grid(True, zorder=5)
+        pickle.dump( [x,y], open( self.dir_sensitivity+'ECAI_faces_sensitivity.p', "wb" ) )
+        plt.show()
+
     def _compute_measures(self):
         num_clusters = 33
         pred_labels = self.Y_
@@ -464,28 +490,40 @@ def main():
     f._read_faces()
     f._read_faces_images()
     f._read_tags()
-    # # f._cluster_faces()
+    # f._cluster_faces()
     f._read_faces_clusters()
     f._get_groundTruth()
+    #
+    # # f._assignment_matrix(1.0)
+    # # f._LP_assign(.05)
+    f._compute_measures()
 
-    # f._assignment_matrix(1.0)
-    # f._LP_assign(.05)
-    # f._compute_measures()
-    for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
-    # for i in range(1,f.max+1):
-        # print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',i/float(f.max)
-        f._assignment_matrix(date)
-        f._LP_assign(.06)
-    f._plot_incremental()
-    # f.max = 10
-    # for i in range(1,f.max+1):
-    #     f._assignment_matrix(i/float(f.max))
+    # # incremental
+    # for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
+    # # for i in range(1,f.max+1):
+    #     # print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',i/float(f.max)
+    #     f._assignment_matrix(date)
     #     f._LP_assign(.05)
     # f._plot_incremental()
-    # f.min = 0
-    # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
-    # for i in range(f.min,f.max):
-    # f._plot_f_score()
+
+    # sensitivity
+    for date in ['2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-11']:
+        f._assignment_matrix(date)
+    for i in range(1,30):
+        f._LP_assign(i/100.0)
+        f.x_axis.append(i/100.0)
+    f._plot_sensitivity()
+
+
+    # # f.max = 10
+    # # for i in range(1,f.max+1):
+    # #     f._assignment_matrix(i/float(f.max))
+    # #     f._LP_assign(.05)
+    # # f._plot_incremental()
+    # # f.min = 0
+    # # f.max = len(f.cluster_count.keys())*len(f.all_nouns)
+    # # for i in range(f.min,f.max):
+    # # f._plot_f_score()
     # f._pretty_plot()
 
 if __name__=="__main__":

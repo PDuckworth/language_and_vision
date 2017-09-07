@@ -11,32 +11,32 @@ from copy import deepcopy
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_tags():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/tags.p'
     data = open(pkl_file, 'rb')
     hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
     return [hypotheses_tags, VF_dict, LF_dict]
 
 def _read_sentences(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
 
 def _read_vf(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     data = open(pkl_file, 'rb')
     vf,tree = pickle.load(data)
     return vf,tree
 
 def _read_passed_tags():
-    pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags.p'
+    pkl_file = '/home/omari/Datasets/Dukes_modified/matching/Passed_tags.p'
     data = open(pkl_file, 'rb')
     Matching,Matching_VF,passed_scenes,passed_ids = pickle.load(data)
     # print Matching,Matching_VF,passed_scenes,passed_ids
     return [Matching,Matching_VF,passed_scenes,passed_ids]
 
 def _read_grammar_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
@@ -126,5 +126,5 @@ for scene in range(1,1001):
             # print tree
             semantic_trees[id][t] = _get_semantics(tree,hypotheses_tags)
             counter += len(semantic_trees[id][t])
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
     pickle.dump(semantic_trees, open(pkl_file, 'wb'))

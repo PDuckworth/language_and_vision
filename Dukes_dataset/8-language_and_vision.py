@@ -11,41 +11,41 @@ from copy import deepcopy
 
 #---------------------------------------------------------------------------#
 def _read_tags():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/tags.p'
     data = open(pkl_file, 'rb')
     hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
     return [hypotheses_tags, VF_dict, LF_dict]
 
 def _read_sentences(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
 
 #---------------------------------------------------------------------------#
 def _read_vf(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     data = open(pkl_file, 'rb')
     vf,tree = pickle.load(data)
     return vf,tree
 
 #---------------------------------------------------------------------------#
 def _read_semantic_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_semantic_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
 
 #---------------------------------------------------------------------------#
 def _read_layout(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_layout.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_layout.p'
     data = open(pkl_file, 'rb')
     layout = pickle.load(data)
     return layout
 
 #---------------------------------------------------------------------------#
 def _read_grammar_trees(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_grammar.p'
     data = open(pkl_file, 'rb')
     tree = pickle.load(data)
     return tree
@@ -374,13 +374,14 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
         if valid_action:
             if len(scene_tree)==2:
                 valid_entity = _match_Entity_with_scene(Action,Entity,Entities,Relations,VF_dict,layout,scene_tree['E'])
+                print 'there is a problem here!!'
                 if valid_entity:
                     results = {}
                     results['grammar'] = grammar
                     results['semantic'] = tree
                     results['tree_structure'] = tree_structure
                     results['entity'] = [Entity,Entities,Relations]
-                    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(id)+'.p'
+                    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/matching/'+str(id)+'.p'
                     pickle.dump(results, open(pkl_file, 'wb'))
                     pass_flag = 1
             if len(scene_tree)==3:
@@ -394,7 +395,7 @@ def _validate(tree, scene_tree, grammar, scene, id ,g):
                         results['tree_structure'] = tree_structure
                         results['entity'] = [Entity,Entities,Relations]
                         results['destination'] = [Destination,D_Entities,D_Relations]
-                        pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/matching/'+str(id)+'.p'
+                        pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/matching/'+str(id)+'.p'
                         pickle.dump(results, open(pkl_file, 'wb'))
                         pass_flag = 1
     return pass_flag
@@ -414,11 +415,15 @@ for scene in range(1,1001):
     VF,scene_tree = _read_vf(scene)
     grammar_trees = _read_grammar_trees(scene)
     semantic_trees = _read_semantic_trees(scene)
+    # print scene_tree
+    # print grammar_trees
     for id in semantic_trees:
+        # print id
         # if id != 26889: continue
         # if 'and' in sentences[id]['text']:
         # print id,sentences[id]['text']
         for g in semantic_trees[id]:
+            # print g
             # if g != 0: continue
             # print id,g,grammar_trees[id][g]
             # print semantic_trees[id][g]
@@ -426,6 +431,7 @@ for scene in range(1,1001):
                 tree = semantic_trees[id][g][semantic]
                 # print tree
                 pass_flag = _validate(tree, scene_tree['py'], grammar_trees[id][g],scene,id,g)
+                # print pass_flag
                 if pass_flag:
                     grammar = grammar_trees[id][g]
                     for item in range(len(grammar_trees[id][g])):
@@ -473,5 +479,5 @@ for meaning in sorted(Matching_VF.keys()):
 # for word in Words:
 #     print word,Words[word]
 
-pkl_file = '/home/omari/Datasets_old/Dukes_modified/matching/Passed_tags1.p'
+pkl_file = '/home/omari/Datasets/Dukes_modified/matching/Passed_tags1.p'
 pickle.dump([Matching,Matching_VF,passed_scenes,passed_sentences], open(pkl_file, 'wb'))

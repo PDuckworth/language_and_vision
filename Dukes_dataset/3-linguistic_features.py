@@ -8,13 +8,13 @@ import getpass
 #--------------------------------------------------------------------------------------------------------#
 
 def _read_stop_wrods():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/idf_FW_linguistic_features.p'
     data = open(pkl_file, 'rb')
     stop = pickle.load(data)
     return stop
 
 def _read_pickle(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
@@ -47,13 +47,13 @@ def _get_n_grams(sentences,stop):
 stop = _read_stop_wrods()
 for scene in range(1,1001):
     print 'extracting feature from scene : ',scene
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_linguistic_features.p'
     LF = {}
     sentences = _read_pickle(scene)
     LF['n_grams'] = _get_n_grams(sentences,stop)
     # print LF['n_grams']
     pickle.dump(LF, open(pkl_file, 'wb'))
-    file1 = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_linguistic_feature.txt'
+    file1 = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_linguistic_feature.txt'
     F = open(file1, 'w')
     for n in LF['n_grams']:
         F.write(n+'\n')

@@ -9,15 +9,15 @@ counter = 0
 for i in range(1,205):
     folder = str(i)
     # dir_src = "/home/omari/Datasets/Baxter_Dataset_final/scene"+folder
-    dir_dst = "/home/omari/Datasets/Baxter_Dataset_final/scene"+folder
+    dir_dst = "/home/omari/Datasets/ECAI Data/dataset_segmented_15_12_16/vid"+folder
 
-    for d in ["/cam"]:#,"/rgb_kinect","/objects","/rgb_lefthand","/rgb_righthand","/robot_state","/table_pointcloud","/tabletop_pointcloud","/object_tracks"]:
-        files = sorted(glob.glob(dir_dst+d+"/*.png"))
+    for d in ["/images"]:
+        files = sorted(glob.glob(dir_dst+d+"/*.jpg"))
         count = 0
         count2 = 0
         for file in files:
             img = cv2.imread(file)
-            img = img[:,:-140,:]
+            # img = img[:,:-140,:]
             img[:,-10:,:] = 255
             if np.mod(count,len(files)/3)==0:
                 count2+=1
@@ -34,5 +34,5 @@ for i in range(1,205):
     img_final = np.concatenate((img_final, img), axis=1)
 
     img_final = img_final[:,:-10,:]
-    cv2.imwrite("/home/omari/Datasets/Baxter_Dataset_final/all_images/img"+str(counter)+".png",img_final)
+    cv2.imwrite("/home/omari/Datasets/ECAI Data/all_images/img"+str(counter)+".png",img_final)
     counter+=1

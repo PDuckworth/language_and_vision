@@ -12,6 +12,6 @@ python tags.py
 
 python grammar_generation.py
 
-#python semantic_grammar_generation.pt
+#python semantic_grammar_generation.py
 
 python language_and_vision.py

@@ -20,7 +20,7 @@ class Robot():
         # self.draw_scene()
         # self.draw_robot()
         self.Data = read_data()
-        print len(self.Data['RCL'].keys())
+        #print len(self.Data['RCL'].keys())
         self.all_words = []
 
 
@@ -138,7 +138,7 @@ class Robot():
         a1 = randint(0,1)
         a2 = randint(0,1)
         a3 = randint(0,1)
-        print a1,a2,a3
+        #print a1,a2,a3
         # #NOTE remove next 3 lines
         # a1 = 0
         # a2 = 0
@@ -218,14 +218,14 @@ class Robot():
         to_be_poped = []
         for count,i in enumerate(self.Data['commands'][scene]):
             if i not in self.Data['comments']:
-                # print count,'-',self.Data['commands'][scene][i]
+                print count,'-',self.Data['commands'][scene][i]
                 self.all_sentences_count += 1
                 self.sentences[count] = ['GOOD',self.Data['commands'][scene][i]]
-                # for word in self.Data['commands'][scene][i].split(' '):
-                #    if word not in self.all_words:
-                #        self.all_words.append(word)
+                for word in self.Data['commands'][scene][i].split(' '):
+                    if word not in self.all_words:
+                       self.all_words.append(word)
             else:
-                print count,'-','SPAM'
+                #print count,'-','SPAM'
                 to_be_poped.append(i)
                 # print count,'-',self.Data['commands'][scene][i]
                 # self.sentences[count] = ['SPAM',self.Data['commands'][scene][i]]
@@ -233,8 +233,8 @@ class Robot():
             self.Data['commands'][scene].pop(i)
             self.Data['commands_id'].pop(i)
             self.Data['RCL'].pop(i)
-        # print self.all_words
-        # print len(self.all_words)
+        #print self.all_words
+        #print len(self.all_words)
         print '--------------------------'
 
     #-----------------------------------------------------------------------------------------------------#     initilize scene

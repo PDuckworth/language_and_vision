@@ -8,19 +8,19 @@ import getpass
 import operator
 #--------------------------------------------------------------------------------------------------------#
 def _read_sentences(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/scenes/'+str(scene)+'_sentences.p'
     data = open(pkl_file, 'rb')
     sentences = pickle.load(data)
     return sentences
 
 def _read_tfidf_words():
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/idf_FW_linguistic_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/idf_FW_linguistic_features.p'
     data = open(pkl_file, 'rb')
     tfidf = pickle.load(data)
     return tfidf
 
 def _read_vf(scene):
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_visual_features.p'
     data = open(pkl_file, 'rb')
     vf,tree = pickle.load(data)
     return vf,tree
@@ -39,7 +39,7 @@ def _get_grammar_trees(S,tree):
             count+=1
     return grammar_trees
 
-# pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/tags.p'
+# pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/tags.p'
 # data = open(pkl_file, 'rb')
 # hypotheses_tags, VF_dict, LF_dict = pickle.load(data)
 # this is why I can't have nice things
@@ -61,5 +61,5 @@ for scene in range(1,1001):
         for word in tfidf_words:
             S = filter(lambda a: a != word, S)
         grammar_trees[id] = _get_grammar_trees(S,Tree)
-    pkl_file = '/home/'+getpass.getuser()+'/Datasets_old/Dukes_modified/learning/'+str(scene)+'_grammar.p'
+    pkl_file = '/home/'+getpass.getuser()+'/Datasets/Dukes_modified/learning/'+str(scene)+'_grammar.p'
     pickle.dump(grammar_trees, open(pkl_file, 'wb'))
