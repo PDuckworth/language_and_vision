@@ -62,7 +62,7 @@ def get_point_cloud_objects(path):
                 (labs,xyz) = line.replace("\n","").split(":")
                 x,y,z = xyz.split(",")
                 objects["object_%s_%s" % (file_num,file_num)] = (float(x),float(y),float(z)) # hack to keep file_num when object type is passed to QSRLib
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     return objects
 
 def get_sk_info(f1):
@@ -191,7 +191,6 @@ def apply_median_filter(skeleton_data, window_size=11, vis=False):
                 ob_states[joint_id].append(Object_State(name=joint_id, timestamp=cnt, x=x, y=y, z=z))
             except:
                 ob_states[joint_id] = [Object_State(name=joint_id, timestamp=cnt, x=x, y=y, z=z)]
-    sys.exit(1)
     # #Add all the joint IDs into the World Trace
     for joint_id, obj in ob_states.items():
         camera_world.add_object_state_series(obj)
@@ -251,10 +250,10 @@ if __name__ == "__main__":
     # parameters
     # ****************************************************************************************************
     data_subset = False
-    frame_rate_reduce = 1  # drop every other frame - before median filter applies
-    mean_window = 5 # use scipy medfilt with the window_size - after down sampling frame rate
+    frame_rate_reduce = 2  # drop every other frame - before median filter applies
+    mean_window = 3 # use scipy medfilt with the window_size - after down sampling frame rate
     qsr_median_window = 3
-    tpcc = False
+    tpcc = True
     objects_inc_type = True
     using_language = False
 
@@ -335,8 +334,8 @@ if __name__ == "__main__":
 
     dynamic_args = { "qtcbs": {"qsrs_for" : qsrs_for, "no_collapse": True, "quantisation_factor":0.1, "validate":False },
                      "argd" : {"qsrs_for": qsrs_for, "qsr_relations_and_values": {'Touch': 0.25, 'Near': 0.5, 'Away': 1.0, 'Ignore': 10}},
-                    #  "qstag" : {"params" : {"min_rows": 1, "max_rows": 2, "max_eps": 4}, "object_types": object_types},
-                     "qstag" : {"params" : {"min_rows": 1, "max_rows": 1, "max_eps": 4}, "object_types": object_types},
+                    #"qstag" : {"params" : {"min_rows": 1, "max_rows": 2, "max_eps": 4}, "object_types": object_types},
+                     "qstag" : {"params" : {"min_rows": 1, "max_rows": 1, "max_eps": 4, "frames_per_ep": 0, "split_qsrs": True}, "object_types": object_types},
                      "filters" : {"median_filter": {"window": qsr_median_window}}}
 
     # ****************************************************************************************************
@@ -427,6 +426,7 @@ if __name__ == "__main__":
             sk_files = [f for f in sorted(os.listdir(d_sk)) if os.path.isfile(os.path.join(d_sk, f))]
             r_files = [f for f in sorted(os.listdir(d_robot)) if os.path.isfile(os.path.join(d_robot,f))]
 
+
             # ****************************************************************************************************
             # skeleton and robot data
             # ****************************************************************************************************
@@ -449,6 +449,7 @@ if __name__ == "__main__":
             ob_states={}
             map_world = World_Trace()
             map_skeleton_data = {}
+
             for cnt, (frame, sk_data) in enumerate(sorted(skeleton_data.items())):
                 xr, yr, zr = robot_data[frame][0]
                 yawr = robot_data[frame][1][2]
